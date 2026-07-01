@@ -78,6 +78,17 @@
         .nav-btn { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; padding: 16px 20px; text-align: left; border-radius: 0; font-size: 1.05em; border-bottom: 1px solid var(--border-color); }
         .nav-btn:hover { background-color: var(--border-color); color: var(--primary-color); padding-left: 25px;}
 
+        details.nav-group summary { padding: 16px 20px; font-weight: 800; color: var(--primary-color); cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); background: var(--bg-color); font-size: 1.15em; letter-spacing: 1px; transition: 0.2s; user-select: none;}
+        details.nav-group summary:hover { color: var(--primary-hover); background: rgba(0,0,0,0.02); }
+        details.nav-group summary::after { content: '▼'; font-size: 0.8em; transition: transform 0.2s; }
+        details.nav-group[open] summary::after { transform: rotate(180deg); }
+        details.nav-group summary::-webkit-details-marker { display: none; }
+        details.nav-group .nav-group-items { display: flex; flex-direction: column; background: rgba(0,0,0,0.02); }
+        body.dark-mode details.nav-group .nav-group-items { background: rgba(255,255,255,0.02); }
+        details.nav-group .nav-btn { border-bottom: none; border-left: 3px solid transparent; padding-left: 25px; }
+        details.nav-group .nav-btn:hover { border-left-color: var(--primary-color); padding-left: 30px; background: rgba(0,0,0,0.04); }
+        body.dark-mode details.nav-group .nav-btn:hover { background: rgba(255,255,255,0.05); }
+
         .main-content { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 60px 20px; overflow: visible !important; }
         .view-container { width: 100%; max-width: 650px; text-align: left; animation: fadeIn 0.3s ease-out; }
         .centered-view { text-align: center; max-width: 450px; margin: 0 auto; }
@@ -91,7 +102,7 @@
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: var(--text-main); }
         .input-desc { font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
-        input[type="text"], input[type="password"], input[type="number"], select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1em; background-color: var(--card-bg); color: var(--text-main); transition: 0.2s; font-family: inherit; }
+        input[type="text"], input[type="password"], input[type="number"], input[type="email"], select, textarea { width: 100%; padding: 14px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1em; background-color: var(--card-bg); color: var(--text-main); transition: 0.2s; font-family: inherit; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); }
         textarea { resize: vertical; min-height: 120px; }
 
@@ -412,17 +423,43 @@
                 <button class="close-menu-btn" onclick="toggleMenu()">✖</button>
             </div>
             
-            <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
-            <button class="nav-btn" id="installAppBtn" style="display: none; color: #10b981; font-weight: 800;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
-            <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
-            <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">📚 記憶系統</button>
-            <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
-            <button class="nav-btn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
-            <button class="nav-btn" onclick="showView('analyticsView')">📈 學習數據</button>
-            <button class="nav-btn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
-            <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
-            <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
-            <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
+            <button class="nav-btn" id="installAppBtnTop" style="display: none; color: #10b981; font-weight: 800; border-bottom: 4px solid var(--border-color); background: rgba(16,185,129,0.05); font-size: 1.15em;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
+            
+            <details class="nav-group" open>
+                <summary>🎓 核心學習</summary>
+                <div class="nav-group-items">
+                    <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
+                    <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
+                    <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">📚 記憶系統</button>
+                    <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
+                </div>
+            </details>
+
+            <details class="nav-group">
+                <summary>🏆 戰績與社群</summary>
+                <div class="nav-group-items">
+                    <button class="nav-btn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
+                    <button class="nav-btn" onclick="showView('analyticsView')">📈 學習數據</button>
+                    <button class="nav-btn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
+                </div>
+            </details>
+
+            <details class="nav-group">
+                <summary>✨ AI 專業輔助</summary>
+                <div class="nav-group-items">
+                    <button class="nav-btn" id="navAiTutorBtn" onclick="showView('aiTutorView')">🤖 解題家教</button>
+                    <button class="nav-btn" id="navAiEssayBtn" onclick="showView('aiEssayView')">✍️ 作文批改</button>
+                </div>
+            </details>
+
+            <details class="nav-group">
+                <summary>⚙️ 系統與設定</summary>
+                <div class="nav-group-items">
+                    <button class="nav-btn" id="navProfileBtn" onclick="showView('profileView')">👤 個人檔案</button>
+                    <button class="nav-btn" id="installAppBtn" style="display: none; color: #10b981; font-weight: 800;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
+                    <button class="nav-btn" onclick="handleFeedback()">💬 意見回饋 / 勘錯</button>
+                </div>
+            </details>
             
             <div style="height: 1px; background-color: var(--border-color); margin: 5px 0;"></div>
             <div style="padding: 10px 20px 5px 20px; font-size: 0.75em; font-weight: 800; color: var(--text-muted); letter-spacing: 1.5px;">YANG TECHNOLOGY 家族</div>
@@ -442,6 +479,7 @@
             <div class="input-group"><input type="password" id="loginPassword" placeholder="密碼 (Password)" required></div>
             <button class="btn btn-primary" onclick="handleLogin()">安全登入</button>
             <button class="btn btn-secondary" onclick="showView('registerView')">建立新帳號</button>
+            <button class="btn btn-outline" style="border: none; font-size: 0.9em; margin-top: -5px;" onclick="handleForgotPassword()">忘記密碼？點此重置</button>
         </div>
         
         <div id="registerView" class="view-section view-container centered-view">
@@ -459,6 +497,7 @@
                 </select>
                 <p class="input-desc" style="color:#d97706;">系統會自動為您推算學測目標年度與自動升級。</p>
             </div>
+            <div class="input-group"><input type="email" id="regEmail" placeholder="電子郵件 (忘記密碼時用來接收密碼)" required></div>
             <div class="input-group"><input type="text" id="regUsername" placeholder="中英文或數字皆可 (帳號)" required></div>
             <div class="input-group"><input type="password" id="regPassword" placeholder="長度至少 4 碼 (密碼)" required></div>
             <button class="btn btn-primary" onclick="handleRegister()">立即註冊</button>
@@ -796,11 +835,27 @@
         })();
 
         let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; const installBtn = document.getElementById('installAppBtn'); if(installBtn) installBtn.style.display = 'block'; });
+        window.addEventListener('beforeinstallprompt', (e) => { 
+            e.preventDefault(); 
+            deferredPrompt = e; 
+            const btn1 = document.getElementById('installAppBtn'); 
+            if(btn1) btn1.style.display = 'block'; 
+            const btn2 = document.getElementById('installAppBtnTop'); 
+            if(btn2) btn2.style.display = 'block'; 
+        });
 
         async function installPWA() {
-            if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; document.getElementById('installAppBtn').style.display = 'none'; } 
-            else { Swal.fire({ title: '📱 安裝說明', html: '請點擊瀏覽器的 <b>「安裝應用程式」</b> 或分享按鈕的 <b>「加到主畫面」</b>', icon: 'info', confirmButtonText: '了解' }); }
+            if (deferredPrompt) { 
+                deferredPrompt.prompt(); 
+                await deferredPrompt.userChoice; 
+                deferredPrompt = null; 
+                const btn1 = document.getElementById('installAppBtn');
+                if(btn1) btn1.style.display = 'none'; 
+                const btn2 = document.getElementById('installAppBtnTop');
+                if(btn2) btn2.style.display = 'none';
+            } else { 
+                Swal.fire({ title: '📱 安裝說明', html: '請點擊瀏覽器的 <b>「安裝應用程式」</b> 或分享按鈕的 <b>「加到主畫面」</b>', icon: 'info', confirmButtonText: '了解' }); 
+            }
         }
 
         const AppState = {
@@ -863,7 +918,7 @@
 
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed: ', err)); }); }
 
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyXAx1jgdExUKrNHWpd4v8crV0KI4QXVMGr4Kzht8OG314UfxZKlPbLKlDYc_YqTVM2/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyyjXQY6TfvKy8BLp5N3kv328Om9yZav_eQADKHUfxrNl7KOatJP_RmgKzA94DJiogJ/exec';
         const showLoading = (text) => { Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); };
         
         function syncOfflineData() {
@@ -1099,7 +1154,9 @@
             apiCall('createTeam', { username: AppState.auth.user, teamName: tName }).then(res => {
                 if (res.success) {
                     Swal.fire({ title: '戰隊建立成功！', html: `專屬戰隊代碼：<br><br><strong style="font-size:2.5em; color:var(--primary-color); letter-spacing: 5px;">${res.code}</strong>`, icon: 'success' });
-                    document.getElementById('profCreateTeamName').value = ''; refreshProfileData(); showView('teamView'); 
+                    document.getElementById('profCreateTeamName').value = ''; 
+                    if(AppState.profile.cache) { AppState.profile.cache.teamName = res.teamName; AppState.profile.cache.teamCode = res.code; renderGlobalProfile(AppState.profile.cache); }
+                    refreshProfileData(); showView('teamView'); 
                 } else Swal.fire('失敗', res.message, 'error');
             });
         }
@@ -1110,7 +1167,12 @@
             if (!tCode) return Swal.fire('錯誤', '請輸入戰隊代碼', 'warning');
             showLoading('加入戰隊中...');
             apiCall('joinTeam', { username: AppState.auth.user, teamCode: tCode }).then(res => {
-                if (res.success) { Swal.fire('成功', res.message, 'success'); document.getElementById('profJoinTeamCode').value = ''; refreshProfileData(); showView('teamView'); } else Swal.fire('失敗', res.message, 'error');
+                if (res.success) { 
+                    Swal.fire('成功', res.message, 'success'); 
+                    document.getElementById('profJoinTeamCode').value = ''; 
+                    if(AppState.profile.cache) { AppState.profile.cache.teamName = res.teamName; renderGlobalProfile(AppState.profile.cache); }
+                    refreshProfileData(); showView('teamView'); 
+                } else Swal.fire('失敗', res.message, 'error');
             });
         }
 
@@ -1732,7 +1794,7 @@
             }
 
             let filteredData = AppState.sys.leaderboard.filter(p => {
-                if (cohortType === 'peer' && window.userTargetYear) { if (p.targetYear !== window.userTargetYear) return false; }
+                if (cohortType === 'peer' && AppState.profile.targetYear) { if (p.targetYear !== AppState.profile.targetYear) return false; }
                 if (rankType === 'all') return true; 
                 if (rankType === 'king' && p.level >= 26) return true;
                 if (rankType === 'silver' && p.level >= 11 && p.level <= 25) return true;
@@ -1761,17 +1823,19 @@
         // ==========================================
         function handleRegister() { 
             if(!navigator.onLine) return Swal.fire('離線中', '註冊需要網路連線。', 'error');
+            const eMail = document.getElementById('regEmail').value.trim();
             const u = document.getElementById('regUsername').value.trim(); 
             const p = document.getElementById('regPassword').value; 
             const gradeOffset = document.getElementById('regGrade').value; 
             
+            if(!eMail || !eMail.includes('@')) return Swal.fire('錯誤','請輸入有效的電子郵件','warning');
             if(u.length < 3 || p.length < 4) return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); 
             showLoading('安全註冊中...'); 
             let tYear = calculateTargetYear(gradeOffset);
             
-            apiCall('registerUser', { username: u, password: p, targetYear: tYear }).then(res => {
+            apiCall('registerUser', { username: u, password: p, targetYear: tYear, email: eMail }).then(res => {
                 if(res.success){
-                    Swal.fire('成功','請登入','success');
+                    Swal.fire('成功','註冊成功！請登入','success');
                     showView('loginView');
                     document.getElementById('loginUsername').value = u;
                 } else Swal.fire('失敗',res.message,'error');
@@ -1786,7 +1850,33 @@
             
             apiCall('loginUser', { username: u, password: p }).then(res => {
                 if(res.success){
-                    AppState.auth.user = res.user; AppState.auth.token = res.token; localStorage.setItem('user', u); localStorage.setItem('token', res.token); Swal.close(); showView('setupView'); applyTheme(); 
+                    const executeLogin = () => {
+                        AppState.auth.user = res.user; AppState.auth.token = res.token; localStorage.setItem('user', u); localStorage.setItem('token', res.token); Swal.close(); showView('setupView'); applyTheme(); 
+                    };
+
+                    if(res.needsEmail) {
+                        Swal.fire({
+                            title: '系統安全性升級',
+                            text: '偵測到您的舊帳號尚未綁定信箱。為確保日後能找回密碼，請立即綁定 Email：',
+                            input: 'email',
+                            inputPlaceholder: '請輸入您的電子信箱',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            confirmButtonText: '綁定並登入',
+                            background: 'var(--card-bg)',
+                            color: 'var(--text-main)'
+                        }).then(r => {
+                            if(r.isConfirmed && r.value) {
+                                showLoading('綁定中...');
+                                apiCall('bindEmail', { username: u, email: r.value, sessionToken: res.token }).then(bindRes => {
+                                    if(bindRes.success) { Swal.fire('綁定成功', '感謝您的配合！', 'success'); executeLogin(); }
+                                    else { Swal.fire('錯誤', bindRes.message, 'error'); handleLogout(); }
+                                });
+                            }
+                        });
+                    } else {
+                        executeLogin();
+                    }
                 } else { Swal.fire('失敗', res.message, 'error'); }
             }); 
         }
@@ -1965,7 +2055,64 @@
         function toggleFavOnCard(word, meaning) { const btn = document.getElementById('cardFavBtn'); const isFav = AppState.vocab.favorites.has(word); if (isFav) { AppState.vocab.favorites.delete(word); btn.textContent = '🤍'; btn.style.color = '#cbd5e1'; } else { AppState.vocab.favorites.add(word); btn.textContent = '❤️'; btn.style.color = '#ef4444'; } apiCall('toggleFavorite', { username: AppState.auth.user, word: word, meaning: meaning, isAdding: !isFav }); }
         function loadAiForCard(pureWord) { if(!navigator.onLine) return Swal.fire('離線中', 'AI 字典需要網路連線。', 'error'); const btn = document.getElementById(`aiBtn-${pureWord}`); const block = document.getElementById(`aiBlock-${pureWord}`); const spinner = document.getElementById(`aiSpinner-${pureWord}`); const content = document.getElementById(`aiContent-${pureWord}`); if (btn) btn.style.display = 'none'; block.style.display = 'block'; if (content.innerHTML !== '') return; apiCall('aiDictionary', { username: AppState.auth.user, word: pureWord }).then(res => { spinner.style.display = 'none'; if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>📌 意思：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🌱 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 例句：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:var(--text-muted); margin-top:5px;">⚡ 快取秒讀</div>' : ''}`; content.style.display = 'block'; } else { content.innerHTML = `<span style="color:var(--danger-color);">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; } }); }
 
-        function gradeAiEssay() { if(!navigator.onLine) return Swal.fire('離線中', 'AI 批改需要網路連線。', 'error'); const text = document.getElementById('essayInput').value.trim(); const topic = document.getElementById('essayTopicInput').value.trim(); if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); const btn = document.getElementById('btnGradeEssay'); btn.disabled = true; document.getElementById('essayResult').style.display = 'none'; document.getElementById('essayLoading').style.display = 'block'; apiCall('aiEssayGrading', { username: AppState.auth.user, topic: topic, essayText: text }).then(res => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; if (res.success && res.data && res.data.scores) { document.getElementById('resEssayScore').textContent = `${res.data.scores.total} / 20`; document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level}`; document.getElementById('resEssayOverall').textContent = res.data.overallComment; document.getElementById('s-content').textContent = `${res.data.scores.content.score} / 5`; document.getElementById('a-content').textContent = res.data.scores.content.analysis; document.getElementById('s-org').textContent = `${res.data.scores.organization.score} / 5`; document.getElementById('a-org').textContent = res.data.scores.organization.analysis; document.getElementById('s-lang').textContent = `${res.data.scores.language.score} / 4`; document.getElementById('a-lang').textContent = res.data.scores.language.analysis; document.getElementById('s-gram').textContent = `${res.data.scores.grammar.score} / 3`; document.getElementById('a-gram').textContent = res.data.scores.grammar.analysis; document.getElementById('s-spell').textContent = `${res.data.scores.spelling.score} / 3`; document.getElementById('a-spell').textContent = res.data.scores.spelling.analysis; document.getElementById('resEssaySuggestions').textContent = res.data.suggestions; document.getElementById('resEssayKey').innerHTML = (res.data.keyImprovements || "").replace(/\n/g, '<br>'); document.getElementById('essayResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('essayLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
+        function gradeAiEssay() { 
+            if(!navigator.onLine) return Swal.fire('離線中', 'AI 批改需要網路連線。', 'error'); 
+            const text = document.getElementById('essayInput').value.trim(); 
+            const topic = document.getElementById('essayTopicInput').value.trim(); 
+            if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); 
+            
+            const btn = document.getElementById('btnGradeEssay'); 
+            btn.disabled = true; 
+            document.getElementById('essayResult').style.display = 'none'; 
+            document.getElementById('essayLoading').style.display = 'block'; 
+            
+            apiCall('aiEssayGrading', { username: AppState.auth.user, topic: topic, essayText: text })
+            .then(res => { 
+                btn.disabled = false; 
+                document.getElementById('essayLoading').style.display = 'none'; 
+                
+                if (res.success && res.data) { 
+                    // 加入安全防護：即便 AI 漏給某個物件，也不會引發 TypeError
+                    const scores = res.data.scores || {};
+                    const content = scores.content || {};
+                    const org = scores.organization || {};
+                    const lang = scores.language || {};
+                    const gram = scores.grammar || {};
+                    const spell = scores.spelling || {};
+                    
+                    document.getElementById('resEssayScore').textContent = `${scores.total || '--'} / 20`; 
+                    document.getElementById('resEssayLevel').textContent = `整體評定：${res.data.level || '無'}`; 
+                    document.getElementById('resEssayOverall').textContent = res.data.overallComment || '無評語'; 
+                    document.getElementById('s-content').textContent = `${content.score || 0} / 5`; 
+                    document.getElementById('a-content').textContent = content.analysis || ''; 
+                    document.getElementById('s-org').textContent = `${org.score || 0} / 5`; 
+                    document.getElementById('a-org').textContent = org.analysis || ''; 
+                    document.getElementById('s-lang').textContent = `${lang.score || 0} / 4`; 
+                    document.getElementById('a-lang').textContent = lang.analysis || ''; 
+                    document.getElementById('s-gram').textContent = `${gram.score || 0} / 3`; 
+                    document.getElementById('a-gram').textContent = gram.analysis || ''; 
+                    document.getElementById('s-spell').textContent = `${spell.score || 0} / 3`; 
+                    document.getElementById('a-spell').textContent = spell.analysis || ''; 
+                    document.getElementById('resEssaySuggestions').textContent = res.data.suggestions || ''; 
+                    
+                    let keys = res.data.keyImprovements || "";
+                    if (Array.isArray(keys)) keys = keys.join('<br>');
+                    else keys = String(keys).replace(/\n/g, '<br>');
+                    document.getElementById('resEssayKey').innerHTML = keys; 
+                    
+                    document.getElementById('essayResult').style.display = 'block'; 
+                    refreshProfileData(); 
+                } else { 
+                    Swal.fire('批改失敗', res.message || 'AI 產生的格式異常，請再試一次（額度已退還）', 'error'); 
+                } 
+            })
+            .catch(e => { 
+                console.error("AI 處理錯誤:", e);
+                btn.disabled = false; 
+                document.getElementById('essayLoading').style.display = 'none'; 
+                Swal.fire('系統提示', '資料渲染時發生異常，請確認伺服器回應格式或重新提交！', 'error'); 
+            }); 
+        }
         function askAiTutor() { if(!navigator.onLine) return Swal.fire('離線中', 'AI 家教需要網路連線。', 'error'); const context = document.getElementById('tutorContextInput').value.trim(); const doubt = document.getElementById('tutorDoubtInput').value.trim(); if (!context || !doubt) return Swal.fire('請填寫完整', '請貼上題目與你想問的問題', 'warning'); const btn = document.getElementById('btnAskTutor'); btn.disabled = true; document.getElementById('tutorResult').style.display = 'none'; document.getElementById('tutorLoading').style.display = 'block'; apiCall('aiTutor', { username: AppState.auth.user, question: context, doubt: doubt }).then(res => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; if (res.success && res.data) { document.getElementById('resTutorExplanation').innerHTML = res.data.replace(/\n/g, '<br>'); document.getElementById('tutorResult').style.display = 'block'; refreshProfileData(); } else { Swal.fire('呼叫老師失敗', res.message, 'error'); } }).catch(e => { btn.disabled = false; document.getElementById('tutorLoading').style.display = 'none'; Swal.fire('網路錯誤', '無法連線到伺服器', 'error'); }); }
 
         function setupReviewUI() { let dueCount = 0, pendingCount = 0; AppState.review.cards.forEach(q => q.isDue ? dueCount++ : pendingCount++); document.getElementById('dueCountLabel').textContent = dueCount; document.getElementById('pendingCountLabel').textContent = pendingCount; if(dueCount > 0) document.getElementById('startReviewBtn').style.display = 'block'; else document.getElementById('startReviewBtn').style.display = 'none'; AppState.review.currentIndex = 0; renderReviewUI(); }
@@ -2062,6 +2209,55 @@
         function renderExamPaper() { const container = document.getElementById('examPaperContent'); let html = ''; if(AppState.exam.data && AppState.exam.data.examData) { AppState.exam.data.examData.forEach(part => { html += `<h2 class="exam-section-title">${part.section}</h2>`; if(part.questions && !part.topics && !part.article) { part.questions.forEach(q => { html += buildExamQuestionHtml(q); }); } if(part.topics) { part.topics.forEach(topic => { let groupId = 'topic_' + (topic.id ? topic.id.replace(/\W/g, '_') : Math.floor(Math.random()*1000)); html += buildPassageSection(topic, groupId); }); } if(part.article && !part.topics) { let groupId = 'part_' + Math.floor(Math.random()*1000); html += buildPassageSection(part, groupId); } if(part.translation) { html += `<div class="exam-topic-split"><div class="exam-topic-left" style="border:none;"><h3 style="margin-bottom:15px;">中譯英</h3>`; part.translation.forEach(t => { html += `<p style="font-weight:bold; margin-bottom:10px;">${t.id}. ${t.chinese}</p><textarea class="exam-text-input" id="exam_ans_${t.id}" onchange="AppState.exam.answers['${t.id}'] = this.value" placeholder="請在此輸入英文翻譯..."></textarea>`; }); html += `</div></div>`; } if(part.essay) { html += `<div class="exam-topic-split" style="flex-direction:column;"><h3 style="margin-bottom:10px;">英文作文: ${part.essay.topic}</h3><p style="margin-bottom:15px; color:var(--text-muted);">${part.essay.description}</p>`; if(part.essay.imageUrls) { html += `<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">`; part.essay.imageUrls.forEach(img => html += `<img src="${img}" style="max-width:30%; border-radius:8px;">`); html += `</div>`; } html += `<textarea class="exam-text-input" id="exam_ans_essay" style="min-height:250px;" onchange="AppState.exam.answers['essay'] = this.value" placeholder="請在此撰寫您的英文作文..."></textarea></div>`; } }); } container.innerHTML = html; }
         function buildExamQuestionHtml(q, sharedOptions, groupId) { let qTitleText = q.question ? q.question.replace(/\/n|\n/g, '<br>') : '請依據左文選出 / 填寫最適當的答案：'; let qHtml = `<div class="exam-q-block"><div class="exam-q-title">${q.id}. ${qTitleText}</div>`; if(q.questionImageUrl) qHtml += `<img src="${q.questionImageUrl}" style="max-width:100%; border-radius:8px; margin-bottom:10px;">`; if (q.answers) { Object.keys(q.answers).forEach(k => { qHtml += `<div style="margin-bottom: 10px; display:flex; align-items:center; gap: 10px;"><strong style="font-size: 1.1em; color:var(--primary-color);">${k}.</strong> <input type="text" class="exam-text-input" style="margin-bottom: 0;" placeholder="輸入第 ${k} 格答案" onchange="AppState.exam.answers['${k}'] = this.value"></div>`; }); } else if (q.options) { q.options.forEach((opt, idx) => { let optContent = opt; if(q.optionImageUrls && q.optionImageUrls[idx]) { optContent = `<span>${opt}</span><br><img src="${q.optionImageUrls[idx]}" style="max-width:150px; margin-top:5px; border-radius:5px;">`; } let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt; qHtml += `<label class="exam-radio-label"><input type="radio" name="exam_q_${q.id}" value="${val}" onchange="AppState.exam.answers['${q.id}'] = this.value"> <span>${optContent}</span></label>`; }); } else if (sharedOptions && sharedOptions.length > 0) { qHtml += `<select class="exam-text-input shared-dropdown-${groupId}" onchange="handleSharedDropdownChange('${groupId}', '${q.id}', this)" style="cursor:pointer; background-color: var(--card-bg);"><option value="">請選擇...</option>`; sharedOptions.forEach(opt => { let val = opt.match(/\(([A-Z])\)/) ? opt.match(/\(([A-Z])\)/)[1] : opt.split(' ')[0]; qHtml += `<option value="${val}">${opt}</option>`; }); qHtml += `</select>`; } else { qHtml += `<input type="text" class="exam-text-input" placeholder="輸入答案 (如 ADE 或單字)" onchange="AppState.exam.answers['${q.id}'] = this.value">`; } return qHtml + `</div>`; }
         function handleSharedDropdownChange(groupId, qId, selectElem) { AppState.exam.answers[qId] = selectElem.value; let selects = document.querySelectorAll(`.shared-dropdown-${groupId}`); let selectedValues = []; selects.forEach(s => { if(s.value) selectedValues.push(s.value); }); selects.forEach(s => { let options = s.querySelectorAll('option'); options.forEach(opt => { if (opt.value === "") return; if (selectedValues.includes(opt.value) && s.value !== opt.value) { opt.disabled = true; opt.style.color = '#94a3b8'; } else { opt.disabled = false; opt.style.color = ''; } }); }); }
+        function handleForgotPassword() {
+            if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
+            Swal.fire({
+                title: '忘記密碼',
+                html: '<input id="swal-fp-user" class="swal2-input" placeholder="請輸入您的帳號">',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: '寄送新密碼至綁定信箱',
+                cancelButtonText: '取消',
+                background: 'var(--card-bg)',
+                color: 'var(--text-main)',
+                preConfirm: () => {
+                    const u = document.getElementById('swal-fp-user').value.trim();
+                    if (!u) Swal.showValidationMessage('請輸入帳號！');
+                    return u;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoading('正在產生新密碼並寄送信件...');
+                    apiCall('forgotPassword', { username: result.value }).then(res => {
+                        if(res.success) Swal.fire('寄送成功！', res.message, 'success');
+                        else Swal.fire('失敗', res.message, 'error');
+                    });
+                }
+            });
+        }
+
+        function handleFeedback() {
+            if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線。', 'error');
+            Swal.fire({
+                title: '意見回饋 / 勘錯',
+                input: 'textarea',
+                inputPlaceholder: '請描述您遇到的問題、錯誤或想給我們的建議...',
+                showCancelButton: true,
+                confirmButtonText: '送出回饋',
+                cancelButtonText: '取消',
+                background: 'var(--card-bg)',
+                color: 'var(--text-main)',
+                inputValidator: (value) => { if (!value) return '內容不能為空喔！'; }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    showLoading('傳送中...');
+                    apiCall('submitFeedback', { username: AppState.auth.user, message: result.value }).then(res => {
+                        if (res.success) Swal.fire('感謝您的回饋！', res.message, 'success');
+                        else Swal.fire('傳送失敗', res.message, 'error');
+                    });
+                }
+            });
+        }
 
     </script>
 </body>
