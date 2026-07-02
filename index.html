@@ -608,6 +608,9 @@
             <button id="btnGradeEssay" class="btn btn-primary" onclick="gradeAiEssay()">📝 繳交作文給 AI 批改</button>
             <div id="essayLoading" class="loading-box" style="display:none;"><div class="spinner"></div><p style="margin-top:15px;">老師仔細閱卷中，請稍候...</p></div>
             <div id="essayResult" class="ai-result-box"><div class="ai-score" id="resEssayScore">-- / 20</div><div style="text-align:center; font-weight:bold; color:var(--text-muted); margin-bottom:20px;" id="resEssayLevel"></div><div class="ai-title">整體評語</div><div class="ai-field"><p id="resEssayOverall"></p></div><div class="ai-title">評分細項分析</div><table class="data-table" style="margin-bottom: 20px; background: var(--card-bg);"><tr><th>項目</th><th>分數</th><th>評分分析</th></tr><tr><td>內容</td><td id="s-content" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-content"></td></tr><tr><td>組織</td><td id="s-org" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-org"></td></tr><tr><td>語言使用</td><td id="s-lang" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-lang"></td></tr><tr><td>字彙文法</td><td id="s-gram" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-gram"></td></tr><tr><td>拼字</td><td id="s-spell" style="font-weight:bold; color:var(--primary-color);"></td><td id="a-spell"></td></tr></table><div class="ai-title">修改建議</div><div class="ai-field"><strong>💡 主要建議：</strong><p id="resEssaySuggestions"></p></div><div class="ai-field"><strong>🎯 改寫重點說明：</strong><div id="resEssayKey" style="line-height:1.6; color:var(--text-muted);"></div></div></div>
+            <button id="btnResubmitEssay" class="btn btn-secondary" style="margin-top: 25px; border-color: #d97706; color: #d97706;" onclick="handleResubmitEssay()">
+                🔄 修正後重新提交 (此功能暫時鎖定)
+            </button>
         </div>
 
         <div id="aiTutorView" class="view-section view-container">
@@ -870,9 +873,30 @@
         };
 
         function applyTheme() {
-            if (AppState.sys.isDarkMode) { document.body.classList.add('dark-mode'); document.getElementById('themeToggleBtn').textContent = '☀️'; } 
-            else { document.body.classList.remove('dark-mode'); document.getElementById('themeToggleBtn').textContent = '🌙'; }
+            let isDark = AppState.sys.isDarkMode;
+    
+            // 🚀 若使用者從未設定過偏好，則自動偵測系統環境
+            if (localStorage.getItem('darkMode') === null) {
+                isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                AppState.sys.isDarkMode = isDark;
+            }
+    
+            if (isDark) { 
+                document.body.classList.add('dark-mode'); 
+                document.getElementById('themeToggleBtn').textContent = '☀️'; 
+            } else { 
+                document.body.classList.remove('dark-mode'); 
+                document.getElementById('themeToggleBtn').textContent = '🌙'; 
+            }
         }
+
+        // 自動監聽系統深淺色變化 (如果使用者未手動固定主題)
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (localStorage.getItem('darkMode') === null) {
+                AppState.sys.isDarkMode = event.matches;
+                applyTheme();
+            }
+        });
         function toggleTheme() { AppState.sys.isDarkMode = !AppState.sys.isDarkMode; localStorage.setItem('darkMode', AppState.sys.isDarkMode); applyTheme(); }
         
         function showView(viewId, isInit = false) {
