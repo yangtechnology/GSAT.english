@@ -2182,17 +2182,12 @@
             });
         }
 
-        // 在 processExamSubmission 上方宣告全域錯題陣列
-        window.currentExamWrongQs = [];
-
         function processExamSubmission() {
-
             showLoading('選擇題自動批改中...');
     
             let rawScore = 0;
             let totalQuestions = 0;
             let detailHtml = '<div style="margin-bottom: 20px;">';
-            window.currentExamWrongQs = []; // 每次交卷前清空之前的錯題
 
             if (AppState.exam.data && AppState.exam.data.examData) {
                 AppState.exam.data.examData.forEach(part => {
@@ -2210,18 +2205,6 @@
                         if (isCorrect) rawScore++;
                 
                         let expText = q.analyze || q.detail || q.explanation || '';
-                        // 🚀 SM-2 錯題捕捉邏輯：只要答錯且有題目，就抓進記憶陣列
-                        if (!isCorrect && q.question) {
-                            let shortQ = q.question.replace(/\/n|\n/g, ' ').substring(0, 40) + '...';
-                            let answerContext = `正解: ${correctAns}` + (expText ? ` | 解析: ${expText.substring(0, 20)}...` : '');
-                    
-                            window.currentExamWrongQs.push({
-                                correctWord: shortQ, 
-                                userAnswer: userAns || '未作答',
-                                correctMeaning: answerContext,
-                                isCorrect: false
-                            });
-                        }
 
                         detailHtml += `
                             <div style="padding: 15px; border-bottom: 2px dashed var(--border-color); margin-bottom: 10px;">
@@ -2232,22 +2215,13 @@
                             </div>
                         `;
                     };
-                    
+
                     if (part.questions) part.questions.forEach(processQ);
                     if (part.topics) part.topics.forEach(t => { if(t.questions) t.questions.forEach(processQ); });
                     if (part.article && part.questions) part.questions.forEach(processQ);
                 });
             }
             detailHtml += '</div>';
-
-            // 🚀 動態生成「匯入 SM-2」按鈕
-            if (window.currentExamWrongQs.length > 0) {
-                detailHtml += `
-                    <button id="importSm2Btn" class="btn btn-success" style="width: 100%; font-size: 1.1em; margin-bottom: 10px;" onclick="importExamToSM2()">
-                        🧠 將 ${window.currentExamWrongQs.length} 題錯題匯入記憶引擎 (SM-2)
-                    </button>
-                `;
-            }
 
             let finalLevel = 0;
             if (totalQuestions > 0) {
@@ -2264,30 +2238,6 @@
                 document.getElementById('examDetailResults').innerHTML = detailHtml;
             }, 800);
         }
-
-        // 🚀 負責打 API 將錯題存進試算表的實作函式
-        window.importExamToSM2 = function() {
-            if(!navigator.onLine) return Swal.fire('離線中', '需要網路連線才能匯入。', 'error');
-            if(!AppState.auth.user || AppState.auth.user === '訪客') return Swal.fire('提示', '請先登入帳號才能使用記憶引擎。', 'info');
-    
-            showLoading('匯入錯題中...');
-            apiCall('saveQuizResult', {
-                username: AppState.auth.user,
-                quizSubmissionData: window.currentExamWrongQs,
-                isReviewMode: false
-            }).then(res => {
-                if (res.success) {
-                    Swal.fire('匯入成功！', '錯題已全數排入間隔重複(SRS)循環，請到「記憶系統」查看！', 'success');
-                    window.currentExamWrongQs = []; // 清空陣列避免重複匯入
-            
-                    // 匯入成功後，把按鈕隱藏起來
-                    const btn = document.getElementById('importSm2Btn');
-                    if (btn) btn.style.display = 'none';
-                } else {
-                    Swal.fire('匯入失敗', res.message, 'error');
-                }
-            });
-        };
 
         function startFullExam() { if (!AppState.exam.data) return Swal.fire('錯誤', '沒有考卷資料！', 'error'); AppState.quiz.isSubmitting = false; document.getElementById('inExamTitleDisplay').textContent = AppState.exam.data.title; AppState.exam.answers = {}; AppState.exam.endTime = Date.now() + 100 * 60 * 1000; renderExamPaper(); showView('examTakingView'); clearInterval(AppState.exam.timer); updateTimerDisplay(); AppState.exam.timer = setInterval(() => { let timeLeft = Math.round((AppState.exam.endTime - Date.now()) / 1000); if (timeLeft <= 0) { timeLeft = 0; clearInterval(AppState.exam.timer); Swal.fire('時間到！', '考試結束，系統將自動交卷', 'warning').then(() => { processExamSubmission(); }); } updateTimerDisplay(timeLeft); }, 1000); }
         function updateTimerDisplay(timeLeft) { if(timeLeft === undefined) timeLeft = Math.max(0, Math.round((AppState.exam.endTime - Date.now()) / 1000)); let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; document.getElementById('examCountdownText').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; if(timeLeft < 600) document.getElementById('examCountdownText').style.color = '#991b1b'; else document.getElementById('examCountdownText').style.color = 'var(--danger-color)'; }
