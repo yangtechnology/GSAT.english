@@ -579,7 +579,7 @@
                 
                 <!-- 🟢 基本會員 -->
                 <div style="border: 2px solid var(--border-color); border-radius: 16px; padding: 25px; background: var(--card-bg);">
-                    <h3 style="color: var(--text-muted); margin-bottom: 10px;">🟢 基本會員 (Basic)</h3>
+                    <h3 style="color: var(--text-muted); margin-bottom: 10px;">🌱 基本會員 Basic</h3>
                     <div style="font-size: 2em; font-weight: 800; margin-bottom: 20px;">免費</div>
                     <ul style="list-style: none; padding: 0; margin-bottom: 20px; font-size: 0.95em; line-height: 1.8;">
                         <li>✅ 每日測驗限 50 題</li>
@@ -588,7 +588,7 @@
                         <li>✅ AI 輔助 (1題問答+1篇作文/日)</li>
                         <li style="color: var(--text-muted);">⚠️ 包含廣告</li>
                     </ul>
-                    <button class="btn btn-secondary" onclick="showView('registerView')">免費註冊</button>
+                    <button id="basicPlanBtn" class="btn btn-secondary" onclick="if(localStorage.getItem('currentUser')) { showView('setupView'); } else { showView('registerView'); }">免費註冊</button>
                 </div>
 
                 <!-- 🔵 專業版 -->
@@ -629,7 +629,7 @@
                 <p style="margin-bottom: 0; color: var(--text-muted);">客服專線 Phone: <strong style="color: var(--text-main);">0906071298</strong></p>
             </div>
             
-            <button class="btn btn-outline" style="margin-top: 25px; width: auto; padding: 10px 30px; margin-left: auto; margin-right: auto;" onclick="showView('loginView')">返回登入頁</button>
+            <button class="btn btn-outline" style="margin-top: 25px; width: auto; padding: 10px 30px; margin-left: auto; margin-right: auto;" onclick="if(localStorage.getItem('currentUser')) { showView('setupView'); } else { showView('loginView'); }">返回</button>
         </div>
         
         <div id="registerView" class="view-section view-container centered-view">
@@ -1052,6 +1052,13 @@
         function showView(viewId, isInit = false) {
             document.querySelectorAll('.view-section').forEach(view => { view.classList.remove('active'); });
             const targetView = document.getElementById(viewId); if (targetView) { targetView.classList.add('active'); }
+            
+            if (viewId === 'pricingView') {
+                const bBtn = document.getElementById('basicPlanBtn');
+                if (bBtn) {
+                    bBtn.innerText = localStorage.getItem('currentUser') ? '您目前的方案' : '免費註冊';
+                }
+            }
             
             const navbar = document.getElementById('topNavbar');
             const seasonGrp = document.getElementById('navSeasonGroup');
