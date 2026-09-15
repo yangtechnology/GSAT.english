@@ -472,68 +472,6 @@
     </nav>
 
     <main class="main-content">
-        <!-- 公開首頁與定價方案 (綠界審核用) -->
-        <div id="landingView" class="view-section active view-container centered-view" style="max-width: 950px; text-align: center;">
-            <div style="font-size: 4em; margin-bottom: 10px;">🚀</div>
-            <h1 style="font-weight: 900; color: var(--primary-color); margin-bottom: 15px;">VocabMaster 專業版</h1>
-            <p class="subtitle" style="font-size: 1.1em; margin-bottom: 40px;">學測英文必備神器，AI 輔助讓你衝刺滿級分！</p>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-bottom: 40px; text-align: left;">
-                
-                <!-- 方案 1: Basic -->
-                <div style="flex: 1; min-width: 260px; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 16px; padding: 25px; display: flex; flex-direction: column;">
-                    <h3 style="color: var(--text-main); font-size: 1.4em; margin-bottom: 10px;">🟢 基本會員 (Basic)</h3>
-                    <div style="font-size: 2em; font-weight: 800; color: var(--text-main); margin-bottom: 15px;">免費</div>
-                    <ul style="list-style: none; padding: 0; margin-bottom: 25px; color: var(--text-muted); line-height: 1.8; flex: 1; font-size: 0.95em;">
-                        <li>✔️ 每日測驗最多 50 題</li>
-                        <li>✔️ 經典選擇與聽力模式</li>
-                        <li>✔️ 基本單字書瀏覽</li>
-                        <li>✔️ AI 輔助 (1題解題 + 1篇作文/日)</li>
-                        <li>⚠️ 含有廣告</li>
-                    </ul>
-                    <button class="btn btn-secondary" onclick="showView('loginView')">免費註冊體驗</button>
-                </div>
-
-                <!-- 方案 2: Pro -->
-                <div style="flex: 1; min-width: 260px; background: var(--card-bg); border: 2px solid var(--primary-color); border-radius: 16px; padding: 25px; position: relative; display: flex; flex-direction: column; transform: scale(1.05); box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15); z-index: 1;">
-                    <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold;">主力推薦</div>
-                    <h3 style="color: var(--primary-color); font-size: 1.4em; margin-bottom: 10px;">🔵 專業版 (Pro)</h3>
-                    <div style="font-size: 2em; font-weight: 800; color: var(--primary-color); margin-bottom: 5px;">NT$ 150 <span style="font-size: 0.5em; color: var(--text-muted);">/ 月</span></div>
-                    <div style="font-size: 0.85em; color: #10b981; font-weight: bold; margin-bottom: 15px;">🎁 買 11 個月送 1 個月</div>
-                    <ul style="list-style: none; padding: 0; margin-bottom: 25px; color: var(--text-muted); line-height: 1.8; flex: 1; font-size: 0.95em;">
-                        <li>✔️ <b>無限刷題</b> (無每日限制)</li>
-                        <li>✔️ 解鎖「魔王挑戰」拼寫模式</li>
-                        <li>✔️ 解鎖「記憶系統」錯題本</li>
-                        <li>✔️ 每月 AI 輔助 (50題 + 5篇作文)</li>
-                        <li>✔️ 詳細學習數據與排行榜</li>
-                        <li>✔️ <b>無廣告</b></li>
-                    </ul>
-                    <button class="btn btn-primary" onclick="showView('loginView')">立即升級 Pro</button>
-                </div>
-
-                <!-- 方案 3: Elite -->
-                <div style="flex: 1; min-width: 260px; background: var(--card-bg); border: 2px solid #f59e0b; border-radius: 16px; padding: 25px; display: flex; flex-direction: column;">
-                    <h3 style="color: #f59e0b; font-size: 1.4em; margin-bottom: 10px;">👑 旗艦版 (Elite)</h3>
-                    <div style="font-size: 2em; font-weight: 800; color: #f59e0b; margin-bottom: 5px;">NT$ 299 <span style="font-size: 0.5em; color: var(--text-muted);">/ 月</span></div>
-                    <div style="font-size: 0.85em; color: #10b981; font-weight: bold; margin-bottom: 15px;">🎁 買 10 個月送 2 個月</div>
-                    <ul style="list-style: none; padding: 0; margin-bottom: 25px; color: var(--text-muted); line-height: 1.8; flex: 1; font-size: 0.95em;">
-                        <li>✔️ 包含 Pro 版所有功能</li>
-                        <li>✔️ <b>無限次</b>使用所有 AI 功能</li>
-                        <li>✔️ 專屬 VIP 戰隊頭像外框與標示</li>
-                        <li>✔️ <b>無廣告</b></li>
-                    </ul>
-                    <button class="btn" style="background-color: #f59e0b; color: white;" onclick="showView('loginView')">成為 Elite VIP</button>
-                </div>
-            </div>
-            
-            <!-- 綠界必備：聯絡資訊 -->
-            <div style="border-top: 1px solid var(--border-color); padding-top: 30px; margin-top: 20px; font-size: 0.95em; color: var(--text-muted); text-align: center;">
-                <p style="font-weight: bold; margin-bottom: 10px; color: var(--text-main);">聯絡與客服資訊</p>
-                <p style="margin-bottom: 5px;">📞 聯絡電話：0906-071-298</p>
-                <p style="margin-bottom: 5px;">✉️ 客服信箱：yangtechnology01@gmail.com</p>
-                <button class="btn btn-outline" style="margin: 20px auto 0 auto; max-width: 200px;" onclick="showView('loginView')">會員登入</button>
-            </div>
-        </div>
         <div id="loginView" class="view-section active view-container centered-view">
             <div style="font-size: 3.5em; margin-bottom: 10px;">🎓</div>
             <h2>登入您的帳號</h2>
