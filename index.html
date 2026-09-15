@@ -404,6 +404,7 @@
         </div>
 
         <div class="nav-right-group" id="navToolsGroup">
+            <button class="btn btn-outline" style="border-color: #f59e0b; color: #f59e0b; padding: 4px 12px; margin-right: 10px; margin-bottom: 0;" onclick="showView('pricingView')">💎 升級 VIP</button>
             <div class="nav-quick-info" id="navQuickInfo">
                 <span id="quickName" class="quick-item desktop-only"></span>
                 <span id="quickLevel" class="quick-item desktop-only" style="color: var(--secondary-color);"></span>
@@ -573,10 +574,7 @@
         </div>
 
         <div id="setupView" class="view-section view-container">
-            <div class="title-badge-wrapper" style="justify-content: space-between;">
-                <h2 style="margin-bottom: 0;">準備開始挑戰</h2>
-                <button class="btn btn-outline" style="border-color: #f59e0b; color: #f59e0b; padding: 8px 15px; width: auto; margin-bottom: 0;" onclick="showView('pricingView')">💎 升級 VIP 方案</button>
-            </div>
+            <div class="title-badge-wrapper"><h2>準備開始挑戰</h2></div>
             <p class="subtitle">模式越高階，混合的題型越豐富！</p>
             <div class="input-group"><label>測驗模式 🎮</label><select id="quizModeSelect"><option value="1">1. 經典選擇 (英中互譯混出)</option><option value="2">2. 進階聽力 (+ 純聽力題混出)</option><option value="3">3. 魔王挑戰 (+ 拼寫輸入混出)</option></select></div>
             <div class="flex-row"><div class="input-group" style="flex: 1;"><label>題數</label><input type="number" id="numQuestionsInput" value="10" min="1" max="100"></div><div class="input-group" style="flex: 2;"><label>難度級別</label><select id="difficultySelect"><option value="mixed" selected>🔥 綜合學測比例</option><option value="3">⭐ Level 3</option><option value="4">⭐⭐ Level 4</option><option value="5">⭐⭐⭐ Level 5</option><option value="6">👑 Level 6</option></select></div></div>
@@ -1048,7 +1046,8 @@
         window.onload = async () => { 
             applyTheme(); 
             if (!navigator.onLine) document.getElementById('offlineBanner').style.display = 'block';
-            if (localStorage.getItem('user')) document.getElementById('loginUsername').value = localStorage.getItem('user');
+            let savedUser = localStorage.getItem('user');
+            if (savedUser && savedUser !== 'null') document.getElementById('loginUsername').value = savedUser;
 
             const promises = []; 
             // 🚀 動畫完整播完再隱藏
@@ -2405,6 +2404,8 @@
                     lockFeature('navAnalyticsBtn', '學習數據');
                     lockFeature('navTeamBtn', '戰隊大廳');
                     lockFeature('navProfileBtn', '個人檔案');
+                    lockFeature('navAiTutorBtn', '解題家教');
+                    lockFeature('navAiEssayBtn', '作文批改');
                 }
             });
         }
