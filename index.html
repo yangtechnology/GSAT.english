@@ -465,10 +465,66 @@
         .ultra-avatar-border {
             border: 4px solid #f59e0b;
             border-radius: 50%;
-            animation: ultraGlow 2s infinite;
+            animation: ultraGlow 2.5s infinite alternate;
             padding: 2px;
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            background: linear-gradient(135deg, #fffbeb, #fde68a);
         }
+        
+        .virtual-card {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            height: 250px;
+            margin: 0 auto 30px auto;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: left;
+        }
+        .virtual-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+        .vc-pattern {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.05; pointer-events: none;
+            background-image: repeating-linear-gradient(45deg, #000 0, #000 2px, transparent 2px, transparent 8px);
+            z-index: 1;
+        }
+        .vc-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .virtual-card.vc-basic { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); color: #334155; }
+        .virtual-card.vc-pro { background: linear-gradient(135deg, #3b82f6, #60a5fa); color: #fff; }
+        .virtual-card.vc-ultra { 
+            background: linear-gradient(135deg, #f59e0b, #fbbf24, #fcd34d); 
+            color: #78350f; 
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+        }
+        .virtual-card.vc-ultra .vc-pattern { opacity: 0.15; background-image: repeating-linear-gradient(45deg, #fff 0, #fff 2px, transparent 2px, transparent 15px); }
+        .vc-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .vc-logo { font-size: 1.2em; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .vc-tier { font-size: 1.1em; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+        .vc-chip { width: 45px; height: 35px; background: rgba(255,255,255,0.3); border-radius: 6px; border: 1px solid rgba(255,255,255,0.5); position: relative; overflow: hidden; margin-top: 15px; }
+        .vc-chip::before { content: ''; position: absolute; top: 10px; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.4); }
+        .vc-chip::after { content: ''; position: absolute; top: 22px; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.4); }
+        .vc-body { display: flex; align-items: center; gap: 15px; margin-top: 20px; }
+        .vc-avatar { width: 60px; height: 60px; border-radius: 50%; background: #fff; display: flex; justify-content: center; align-items: center; font-size: 2em; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden; border: 3px solid rgba(255,255,255,0.8); }
+        .vc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .vc-info { flex: 1; }
+        .vc-name { font-size: 1.5em; font-weight: 800; margin-bottom: 5px; }
+        .vc-id { font-size: 0.9em; opacity: 0.8; font-family: monospace; letter-spacing: 1px; }
+        .vc-footer { display: flex; justify-content: space-between; align-items: flex-end; font-size: 0.9em; font-weight: 600; opacity: 0.9; margin-top: auto; }
     </style>
 </head>
 <body>
@@ -936,18 +992,37 @@
 
         <div id="profileView" class="view-section view-container">
             <h2>👤 個人檔案與設定</h2>
+            
+            <div class="virtual-card vc-basic" id="virtualMembershipCard">
+                <div class="vc-pattern"></div>
+                <div class="vc-content">
+                    <div class="vc-header">
+                        <div class="vc-logo">📖 VocabMaster</div>
+                        <div class="vc-tier" id="vcTierDisplay">BASIC</div>
+                    </div>
+                    <div class="vc-chip"></div>
+                    <div class="vc-body">
+                        <div class="vc-avatar" id="vcAvatarPreview">😀</div>
+                        <div class="vc-info">
+                            <div class="vc-name" id="vcUsernameDisplay">使用者</div>
+                            <div class="vc-id" id="vcIdDisplay">ID: 0000 0000 0000 0000</div>
+                        </div>
+                    </div>
+                    <div class="vc-footer">
+                        <span>Level <span id="vcLevelDisplay">1</span></span>
+                        <span>MEMBER</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="profile-card" style="text-align: center;">
-                <div class="avatar-preview" id="profileAvatarPreview">😀</div>
-                <h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800; font-size: 1.8em; margin-bottom: 20px;"></h3>
-                <div id="profileLevelDisplay" style="margin-bottom: 20px;"></div>
-                
-                <div style="margin: 20px 0; padding: 15px; background: var(--bg-color); border-radius: 12px; border: 1px dashed var(--primary-color);">
+                <div style="margin: 0 0 20px 0; padding: 15px; background: var(--bg-color); border-radius: 12px; border: 1px dashed var(--primary-color);">
                     <div style="font-size: 1em; margin-bottom: 10px;">目前方案：<strong id="profileCurrentPlan" style="color: var(--primary-color);">Basic</strong></div>
                     <button class="btn btn-outline" style="width: 100%; border-color: var(--primary-color); color: var(--primary-color);" onclick="showView('pricingView')">管理方案 / 變更</button>
                     <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 10px;">(測試期間，可在此隨時降級回 Basic 或升級其他方案)</div>
                 </div>
 
-                <div class="input-group" style="text-align: left; margin-top:20px;"><label>更換大頭貼</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">上傳您專屬大頭貼。</p></div>
+                <div class="input-group" style="text-align: left;"><label>更換大頭貼</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">上傳您專屬大頭貼，這將顯示在您的虛擬會員卡上。</p></div>
             </div>
             
             <div class="profile-card">
@@ -1201,11 +1276,30 @@
             if (quickLevel) {
                 quickLevel.style.border = 'none'; // Reverted user complaint
             }
-            let profileAvatar = document.getElementById('profileAvatarPreview');
+            let profileAvatar = document.getElementById('vcAvatarPreview');
             if (profileAvatar) {
                 if (plan === 'Ultra') profileAvatar.classList.add('ultra-avatar-border');
                 else profileAvatar.classList.remove('ultra-avatar-border');
             }
+
+            // Update Virtual Card Design
+            let virtualCard = document.getElementById('virtualMembershipCard');
+            let vcTierDisplay = document.getElementById('vcTierDisplay');
+            if (virtualCard && vcTierDisplay) {
+                virtualCard.className = 'virtual-card';
+                if (plan === 'Ultra') {
+                    virtualCard.classList.add('vc-ultra');
+                    vcTierDisplay.textContent = 'ULTRA GOLD';
+                } else if (plan === 'Pro' || plan === '專業版') {
+                    virtualCard.classList.add('vc-pro');
+                    vcTierDisplay.textContent = 'PRO MEMBER';
+                } else {
+                    virtualCard.classList.add('vc-basic');
+                    vcTierDisplay.textContent = 'BASIC';
+                }
+            }
+
+            // Update Profile Plan Text
         }
 
         function applyTheme() {
@@ -1504,13 +1598,29 @@
             AppState.profile.level = level; AppState.profile.targetYear = resProf.targetYear;
 
             document.getElementById('quickLevel').textContent = `Lv. ${level}`; document.getElementById('quickXP').textContent = `${xp} XP`;
-            document.getElementById('profileUsernameDisplay').textContent = AppState.auth.user; 
-
-            const av = resProf.avatar || '👤'; const avDiv = document.getElementById('profileAvatarPreview'); 
-            if(avDiv) { if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; } else { avDiv.innerHTML = av; } }
             
+            // Virtual Card Data
+            const vcUsername = document.getElementById('vcUsernameDisplay');
+            if(vcUsername) vcUsername.textContent = AppState.auth.user; 
+            
+            const vcId = document.getElementById('vcIdDisplay');
+            if(vcId) {
+                // Generate a stable fake ID based on username if real ID doesn't exist
+                let hash = 0;
+                for (let i = 0; i < AppState.auth.user.length; i++) hash = AppState.auth.user.charCodeAt(i) + ((hash << 5) - hash);
+                const fakeId = Math.abs(hash).toString().padStart(12, '0').replace(/(\d{4})(?=\d)/g, '$1 ');
+                vcId.textContent = `ID: ${fakeId}`;
+            }
+
+            const av = resProf.avatar || '😀'; const avDiv = document.getElementById('vcAvatarPreview'); 
+            if(avDiv) { if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}">`; } else { avDiv.innerHTML = av; } }
+            
+            const vcLevel = document.getElementById('vcLevelDisplay');
+            if(vcLevel) vcLevel.textContent = level;
+
             const currentLevelBaseXP = Math.pow(level - 1, 2) * 10; const nextLevelXP = Math.pow(level, 2) * 10; const xpProgress = ((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100; 
 
+            // Update traditional profile level display if still exists
             const profileLevelDisplay = document.getElementById('profileLevelDisplay');
             if(profileLevelDisplay) { profileLevelDisplay.innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`; }
             
@@ -2057,7 +2167,7 @@
                         <div class="chat-row ${alignClass}" data-id="${m.id}" data-sender="${m.sender}">
                             ${!isMe ? `
                                 <div class="chat-avatar-container">
-                                    ${!isConsecutive ? (m.avatar && m.avatar.includes('http') ? `<img src="${m.avatar}" class="chat-avatar">` : `<div class="chat-avatar">${m.avatar || '👤'}</div>`) : ''}
+                                    ${!isConsecutive ? (m.avatar && m.avatar.includes('http') ? `<img src="${m.avatar}" class="chat-avatar ${(m.plan==='Ultra' || m.level>=20) ? 'ultra-avatar-border' : ''}">` : `<div class="chat-avatar ${(m.plan==='Ultra' || m.level>=20) ? 'ultra-avatar-border' : ''}">${m.avatar || '😀'}</div>`) : ''}
                                 </div>
                             ` : ''}
                             
@@ -2218,7 +2328,18 @@
                     let badgeHtml = d.badges ? `<span style="font-size:0.8em; margin-left:5px;" title="歷史成就">${d.badges}</span>` : '';
                     let teamHtml = d.teamName ? `<div style="font-size:0.7em; color:var(--text-muted);">[${d.teamName}]</div>` : '';
                     const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>${badgeHtml}${teamHtml}` : `${d.username}${badgeHtml}${teamHtml}`; 
-                    html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap;">${d.avatar} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`; 
+                    
+                    const isUltra = (isMe && QuotaManager.getPlan() === 'Ultra') || (!isMe && (d.plan === 'Ultra' || d.level >= 20));
+                    let avatarDisplay = d.avatar;
+                    if (isUltra) {
+                        if (d.avatar.includes('<img')) {
+                            avatarDisplay = d.avatar.replace('<img ', '<img class="ultra-avatar-border" ');
+                        } else {
+                            avatarDisplay = `<span class="ultra-avatar-border" style="display:inline-block; width:32px; height:32px; text-align:center; line-height:28px; border-width:2px; padding:1px;">${d.avatar}</span>`;
+                        }
+                    }
+
+                    html += `<tr class="${isMe?'me-row':''}" style="background-color: ${bgColor}; ${borderStyle}"><td style="font-weight:700; text-align:center;">${rank}</td><td style="text-align:left; font-weight:600; white-space:nowrap; vertical-align:middle;">${avatarDisplay} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`;  
                 }); 
                 container.innerHTML = html + '</table>'; 
             } else { container.innerHTML = '<p style="text-align:center; padding:20px; font-weight:bold; color:var(--text-muted);">此階級/屆別尚無玩家資料，趕快去刷題搶佔第一！</p>'; } 
@@ -2562,7 +2683,7 @@
         function changeFlashcard(delta) { const newIdx = AppState.review.currentIndex + delta; if (newIdx >= 0 && newIdx < AppState.review.cards.length) { AppState.review.currentIndex = newIdx; const wrapper = document.getElementById('slideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleFlashcard(); } }
         function renderListMode() { let html = ''; AppState.review.cards.forEach((q, i) => { const stageText = q.stage === 0 ? '🔴 待複習' : q.stage === 1 ? '🟠 1天後' : q.stage === 2 ? '🟡 3天後' : '🟢 7天後'; const hasChinese = /[\u4E00-\u9FFF]/.test(String(q.question || '')); const chWord = hasChinese ? q.question : q.correctAnswer; const enWord = hasChinese ? q.correctAnswer : q.question; const cleanWord = getPureWord(enWord); const safeEnWord = cleanWord.replace(/'/g, "\\'"); html += `<div class="review-list-item" style="opacity: ${q.isDue ? '1' : '0.6'};"><div style="flex: 1;"><strong style="font-size: 1.1em;">${chWord}</strong> <span style="font-size:0.8em; margin-left:10px; color:var(--text-muted);">${stageText}</span><br><span style="color:var(--secondary-color); font-weight: 600; display: inline-block; margin-top: 5px;">✅ ${cleanWord}</span></div><button class="list-speak-btn" onclick="speakWord('${safeEnWord}')">🔊</button></div>`; }); document.getElementById('listModeContainer').innerHTML = html; }
 
-        function handleAvatarFile(event) { if(!navigator.onLine) return Swal.fire('離線中', '上傳頭像需要網路連線。', 'error'); const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); const MAX_SIZE = 400; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height); const base64Data = canvas.toDataURL('image/jpeg', 0.9); document.getElementById('profileAvatarPreview').innerHTML = `<img src="${base64Data}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`; showLoading('上傳至雲端空間中...'); apiCall('uploadAvatarToDrive', { username: AppState.auth.user, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) { Swal.fire('成功', '大頭貼已上傳並產生網址！', 'success'); if(AppState.profile.cache) AppState.profile.cache.avatar = r.url; } else Swal.fire('失敗', r.message, 'error'); }); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
+        function handleAvatarFile(event) { if(!navigator.onLine) return Swal.fire('離線', '上傳需要連線。', 'error'); const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); const MAX_SIZE = 400; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height); const base64Data = canvas.toDataURL('image/jpeg', 0.9); document.getElementById('vcAvatarPreview').innerHTML = `<img src="${base64Data}">`; showLoading('上傳至雲端空間...'); apiCall('uploadAvatarToDrive', { username: AppState.auth.user, base64Img: base64Data }).then(r => { Swal.close(); if(r.success) { Swal.fire('成功', '大頭貼已上傳並儲存！', 'success'); if(AppState.profile.cache) AppState.profile.cache.avatar = r.url; } else Swal.fire('錯誤', r.message, 'error'); }); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
         function handleApiKeyUpdate() { if(!navigator.onLine) return Swal.fire('離線中', '綁定金鑰需要網路連線。', 'error'); const k = document.getElementById('profApiKey').value.trim(); if (!k || !k.startsWith('AIza')) return Swal.fire('格式錯誤', '請輸入有效的 API Key (以 AIza 開頭)', 'warning'); showLoading('綁定中...'); apiCall('updateApiKey', { username: AppState.auth.user, apiKey: k }).then(res => { if(res.success) { Swal.fire('成功', res.message, 'success'); refreshProfileData(); document.getElementById('profApiKey').value=''; } else Swal.fire('失敗', '綁定失敗', 'error'); }); }
 
         async function fetchExamData(year) { if(!navigator.onLine) return Swal.fire('離線中', '歷屆試題需要網路連線才能下載喔！', 'warning'); document.getElementById('examLobby').style.display = 'none'; document.getElementById('examPreRoom').style.display = 'none'; document.getElementById('examLoading').style.display = 'block'; try { const url = `https://yangbrian01.github.io/GSAT-english.exam/assets/exams/${year}.json?t=${new Date().getTime()}`; const response = await fetch(url); if (!response.ok) throw new Error(`考卷 (${year}.json) 還沒準備好喔！`); AppState.exam.data = await response.json(); document.getElementById('examLoading').style.display = 'none'; document.getElementById('examTitle').textContent = AppState.exam.data.title || `${year} 學年度 英文考科`; document.getElementById('examPreRoom').style.display = 'block'; } catch (e) { document.getElementById('examLoading').style.display = 'none'; document.getElementById('examLobby').style.display = 'grid'; Swal.fire('讀取失敗', e.message, 'error'); } }
