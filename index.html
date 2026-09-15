@@ -605,7 +605,7 @@
                         <li>✅ 查看詳細學習數據與排行榜</li>
                         <li>✅ <b>無廣告</b>純淨體驗</li>
                     </ul>
-                    <button class="btn" style="background: linear-gradient(135deg, #3b82f6, #06b6d4); color: white; border: none; border-radius: 50px; font-weight: 800; font-size: 1.1em; padding: 12px 24px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);" onclick="alert('即將導向綠界付款，敬請期待！')">升級專業版</button>
+                    <button id="proPlanBtn" class="btn" style="background: linear-gradient(135deg, #3b82f6, #06b6d4); color: white; border: none; border-radius: 50px; font-weight: 800; font-size: 1.1em; padding: 12px 24px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);" onclick="alert('即將導向綠界付款，敬請期待！')">升級專業版</button>
                 </div>
 
                 <!-- 👑 旗艦版 -->
@@ -619,7 +619,7 @@
                         <li>✅ <b>專屬 VIP 戰隊頭像外框</b></li>
                         <li>✅ <b>無廣告</b>，極致衝刺體驗</li>
                     </ul>
-                    <button class="btn" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; border: none; border-radius: 50px; font-weight: 800; font-size: 1.1em; padding: 12px 24px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);" onclick="alert('即將導向綠界付款，敬請期待！')">升級旗艦版</button>
+                    <button id="ultraPlanBtn" class="btn" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; border: none; border-radius: 50px; font-weight: 800; font-size: 1.1em; padding: 12px 24px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);" onclick="alert('即將導向綠界付款，敬請期待！')">升級旗艦版</button>
                 </div>
             </div>
 
@@ -629,7 +629,7 @@
                 <p style="margin-bottom: 0; color: var(--text-muted);">客服專線 Phone: <strong style="color: var(--text-main);">0906071298</strong></p>
             </div>
             
-            <button class="btn btn-outline" style="margin-top: 25px; width: auto; padding: 10px 30px; margin-left: auto; margin-right: auto;" onclick="if(localStorage.getItem('currentUser')) { showView('setupView'); } else { showView('loginView'); }">返回</button>
+            <button class="btn btn-outline" style="margin-top: 25px; width: auto; padding: 10px 30px; margin-left: auto; margin-right: auto;" onclick="showView(previousView || 'loginView')">返回</button>
         </div>
         
         <div id="registerView" class="view-section view-container centered-view">
@@ -1049,14 +1049,39 @@
         });
         function toggleTheme() { AppState.sys.isDarkMode = !AppState.sys.isDarkMode; localStorage.setItem('darkMode', AppState.sys.isDarkMode); applyTheme(); }
         
+        let previousView = 'loginView';
         function showView(viewId, isInit = false) {
+            if (viewId !== 'pricingView') previousView = viewId;
             document.querySelectorAll('.view-section').forEach(view => { view.classList.remove('active'); });
             const targetView = document.getElementById(viewId); if (targetView) { targetView.classList.add('active'); }
             
             if (viewId === 'pricingView') {
+                const user = AppState && AppState.auth ? AppState.auth.user : localStorage.getItem('user');
+                const isGuest = localStorage.getItem('currentUser') === 'Guest';
+                const isRealUser = (user && user !== 'Guest' && !isGuest);
+                
+                // Assuming plan is stored somewhere, defaulting to Basic for non-paying users
+                const currentPlan = localStorage.getItem('userPlan') || (AppState && AppState.profile && AppState.profile.cache ? AppState.profile.cache.plan : 'Basic') || 'Basic';
+
                 const bBtn = document.getElementById('basicPlanBtn');
+                const pBtn = document.getElementById('proPlanBtn');
+                const uBtn = document.getElementById('ultraPlanBtn');
+                
                 if (bBtn) {
-                    bBtn.innerText = localStorage.getItem('currentUser') ? '您目前的方案' : '免費註冊';
+                    bBtn.innerText = (isRealUser && currentPlan === 'Basic') ? '您目前的方案' : '免費註冊';
+                    bBtn.style.opacity = (isRealUser && currentPlan === 'Basic') ? '0.6' : '1';
+                    bBtn.style.pointerEvents = (isRealUser && currentPlan === 'Basic') ? 'none' : 'auto';
+                    bBtn.onclick = function() { if(isRealUser || isGuest){ showView('setupView'); } else { showView('registerView'); } };
+                }
+                if (pBtn) {
+                    pBtn.innerText = (isRealUser && (currentPlan === 'Pro' || currentPlan === '專業版')) ? '您目前的方案' : '升級專業版';
+                    pBtn.style.opacity = (isRealUser && (currentPlan === 'Pro' || currentPlan === '專業版')) ? '0.6' : '1';
+                    pBtn.style.pointerEvents = (isRealUser && (currentPlan === 'Pro' || currentPlan === '專業版')) ? 'none' : 'auto';
+                }
+                if (uBtn) {
+                    uBtn.innerText = (isRealUser && (currentPlan === 'Ultra' || currentPlan === 'Elite' || currentPlan === '旗艦版')) ? '您目前的方案' : '升級旗艦版';
+                    uBtn.style.opacity = (isRealUser && (currentPlan === 'Ultra' || currentPlan === 'Elite' || currentPlan === '旗艦版')) ? '0.6' : '1';
+                    uBtn.style.pointerEvents = (isRealUser && (currentPlan === 'Ultra' || currentPlan === 'Elite' || currentPlan === '旗艦版')) ? 'none' : 'auto';
                 }
             }
             
