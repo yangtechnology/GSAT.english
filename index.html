@@ -397,9 +397,8 @@
         <div class="nav-brand">VocabMaster</div>
         
         <div class="season-nav-container" id="navSeasonGroup">
-            <div class="season-nav-banner">🔥 <span id="currentSeasonText">---</span> 學測賽季進行中 ⚔️</div>
-            <div id="gsatCountdown" class="gsat-countdown-pill" style="display:none;">
-                ⏳ 學測倒數 <span id="cdDays" style="color:var(--danger-color); font-size:1.15em;">--</span> 天
+            <div id="gsatCountdown" class="season-nav-banner" style="display:none;">
+                🔥 <span id="currentSeasonText">---</span> 學測賽季倒數 <span id="cdDays" style="color:white; font-size:1.15em; font-weight:900; background:rgba(0,0,0,0.2); padding:2px 8px; border-radius:4px; margin:0 4px;">--</span> 天 ⏳
             </div>
         </div>
 
@@ -1087,7 +1086,7 @@
             
             if (diffDays >= 0) { 
                 document.getElementById('cdDays').textContent = diffDays; 
-                document.getElementById('gsatCountdown').style.display = 'block'; 
+                document.getElementById('gsatCountdown').style.display = 'inline-block'; 
             }
 
             if (AppState.auth.user && AppState.auth.token) {
