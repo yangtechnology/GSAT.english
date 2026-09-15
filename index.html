@@ -583,6 +583,7 @@
                     <div style="font-size: 2em; font-weight: 800; margin-bottom: 20px;">免費</div>
                     <ul style="list-style: none; padding: 0; margin-bottom: 20px; font-size: 0.95em; line-height: 1.8;">
                         <li>✅ 每日測驗限 50 題</li>
+                        <li>✅ 歷屆試題 (僅限近三年)</li>
                         <li>✅ 經典選擇題 (英中/中英/聽力)</li>
                         <li>✅ 基本單字書瀏覽</li>
                         <li>✅ AI 輔助 (1題問答+1篇作文/日)</li>
@@ -599,13 +600,14 @@
                     <div style="font-size: 0.85em; color: #10b981; margin-bottom: 15px; font-weight: bold;">💡 買11個月送1個月 ($1650/年)</div>
                     <ul style="list-style: none; padding: 0; margin-bottom: 20px; font-size: 0.95em; line-height: 1.8;">
                         <li>✅ <b>無限刷題</b>，解除每日限制</li>
+                        <li>✅ 解鎖 <b>全年份歷屆試題</b></li>
                         <li>✅ 解鎖 <b>魔王挑戰 (拼寫輸入)</b></li>
                         <li>✅ 解鎖 <b>記憶系統 (錯題本)</b></li>
                         <li>✅ AI 輔助 (50題問答+5篇作文/月)</li>
                         <li>✅ 查看詳細學習數據與排行榜</li>
                         <li>✅ <b>無廣告</b>純淨體驗</li>
                     </ul>
-                    <button id="proPlanBtn" class="btn" style="background: linear-gradient(135deg, #3b82f6, #06b6d4); color: white; border: none; border-radius: 50px; font-weight: 800; font-size: 1.1em; padding: 12px 24px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);" onclick="alert('即將導向綠界付款，敬請期待！')">升級專業版</button>
+                    <button id="proPlanBtn" class="btn" style="background: linear-gradient(135deg, #3b82f6, #06b6d4); color: white; border: none; border-radius: 50px; font-weight: 800; font-size: 1.1em; padding: 12px 24px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);" onclick="QuotaManager.simulateUpgrade('Pro')">升級專業版</button>
                 </div>
 
                 <!-- 👑 旗艦版 -->
@@ -619,7 +621,7 @@
                         <li>✅ <b>專屬 VIP 戰隊頭像外框</b></li>
                         <li>✅ <b>無廣告</b>，極致衝刺體驗</li>
                     </ul>
-                    <button id="ultraPlanBtn" class="btn" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; border: none; border-radius: 50px; font-weight: 800; font-size: 1.1em; padding: 12px 24px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);" onclick="alert('即將導向綠界付款，敬請期待！')">升級旗艦版</button>
+                    <button id="ultraPlanBtn" class="btn" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; border: none; border-radius: 50px; font-weight: 800; font-size: 1.1em; padding: 12px 24px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);" onclick="QuotaManager.simulateUpgrade('Ultra')">升級旗艦版</button>
                 </div>
             </div>
 
@@ -735,9 +737,14 @@
             <h2>📝 歷屆試題大廳</h2>
             <p class="subtitle">選擇年度，展開 100 分鐘全真模擬考或分項挑戰！</p>
             <div id="examLobby" class="vocab-grid">
-                <div class="vocab-cat-btn" onclick="fetchExamData('115')"><span class="cat-icon">🔥</span>115 學年度</div>
-                <div class="vocab-cat-btn disabled" onclick="Swal.fire('敬請期待', '114學年度考卷尚在建置中！', 'info')"><span class="cat-icon">🔒</span>114 學年度</div>
-                <div class="vocab-cat-btn disabled" onclick="Swal.fire('敬請期待', '113學年度考卷尚在建置中！', 'info')"><span class="cat-icon">🔒</span>113 學年度</div>
+                <div class="vocab-cat-btn" id="exam_115" onclick="fetchExamData('115')"><span class="cat-icon">📄</span>115 學年度</div>
+                <div class="vocab-cat-btn" id="exam_114" onclick="fetchExamData('114')"><span class="cat-icon">📄</span>114 學年度</div>
+                <div class="vocab-cat-btn" id="exam_113" onclick="fetchExamData('113')"><span class="cat-icon">📄</span>113 學年度</div>
+                <div class="vocab-cat-btn" id="exam_112" onclick="fetchExamData('112')"><span class="cat-icon">📄</span>112 學年度</div>
+                <div class="vocab-cat-btn" id="exam_111" onclick="fetchExamData('111')"><span class="cat-icon">📄</span>111 學年度</div>
+                <div class="vocab-cat-btn" id="exam_110" onclick="fetchExamData('110')"><span class="cat-icon">📄</span>110 學年度</div>
+                <div class="vocab-cat-btn" id="exam_109" onclick="fetchExamData('109')"><span class="cat-icon">📄</span>109 學年度</div>
+                <div class="vocab-cat-btn" id="exam_108" onclick="fetchExamData('108')"><span class="cat-icon">📄</span>108 學年度</div>
             </div>
             <div id="examLoading" class="loading-box" style="display:none;"><div class="spinner"></div><p style="margin-top:15px;">從雲端調閱考卷中...</p></div>
             <div id="examPreRoom" style="display:none; text-align:center; background:var(--card-bg); border:2px solid var(--border-color); border-radius:var(--radius-md); padding:30px;">
@@ -1027,6 +1034,150 @@
             chat: { history: [], replyingTo: null, contextMsgId: null, isSyncing: false }
         };
 
+        const QuotaManager = {
+            getPlan: () => localStorage.getItem('userPlan') || 'Basic',
+            simulateUpgrade: (plan) => {
+                localStorage.setItem('userPlan', plan);
+                applyFeatureGates();
+                Swal.fire({
+                    icon: 'success', title: '升級成功', text: `您已切換至 ${plan} 方案！(此為測試模擬)`,
+                    confirmButtonColor: '#10b981'
+                }).then(() => { showView('setupView'); });
+            },
+            getDateKey: () => new Date().toISOString().split('T')[0],
+            getStats: () => JSON.parse(localStorage.getItem(`dailyUsage_${QuotaManager.getDateKey()}`) || '{"quiz":0,"aiQ":0,"aiEssay":0,"adCounter":0}'),
+            saveStats: (s) => localStorage.setItem(`dailyUsage_${QuotaManager.getDateKey()}`, JSON.stringify(s)),
+            addQuiz: (count) => { let s = QuotaManager.getStats(); s.quiz += count; QuotaManager.saveStats(s); },
+            addAiQ: () => { let s = QuotaManager.getStats(); s.aiQ += 1; QuotaManager.saveStats(s); },
+            addAiEssay: () => { let s = QuotaManager.getStats(); s.aiEssay += 1; QuotaManager.saveStats(s); },
+            incrementAdCounter: () => { let s = QuotaManager.getStats(); s.adCounter += 1; QuotaManager.saveStats(s); return s.adCounter; },
+            
+            canTakeQuiz: (count) => {
+                if (QuotaManager.getPlan() !== 'Basic') return true;
+                return (QuotaManager.getStats().quiz + count) <= 50;
+            },
+            canUseAiQ: () => {
+                const plan = QuotaManager.getPlan();
+                if (plan === 'Ultra') return true;
+                const stats = QuotaManager.getStats();
+                if (plan === 'Basic') return stats.aiQ < 1;
+                if (plan === 'Pro') return stats.aiQ < 50; // Approximated as daily for testing, though normally monthly
+                return true;
+            },
+            canUseAiEssay: () => {
+                const plan = QuotaManager.getPlan();
+                if (plan === 'Ultra') return true;
+                const stats = QuotaManager.getStats();
+                if (plan === 'Basic') return stats.aiEssay < 1;
+                if (plan === 'Pro') return stats.aiEssay < 5; // Approximated
+                return true;
+            },
+            showUpgradePrompt: (featureName, limitText) => {
+                Swal.fire({
+                    icon: 'warning', title: 'VIP 會員專屬', 
+                    html: `<b>${featureName}</b> 已達上限或為進階功能。<br><br><span style="font-size: 0.9em; color: var(--text-muted);">${limitText}</span>`,
+                    showCancelButton: true, confirmButtonText: '查看升級方案', cancelButtonText: '稍後再說', confirmButtonColor: '#f59e0b'
+                }).then((r) => { if(r.isConfirmed) showView('pricingView'); });
+            },
+            showAd: (callback) => {
+                Swal.fire({
+                    title: '這是一則模擬廣告',
+                    html: '<div style="background:#f1f5f9; border:2px dashed #94a3b8; padding:30px; border-radius:10px; color:#64748b;">(贊助商版面) 5秒後可跳過...</div>',
+                    timer: 5000, timerProgressBar: true, showConfirmButton: false, allowOutsideClick: false
+                }).then(() => {
+                    if (callback) callback();
+                });
+            }
+        };
+
+        function applyFeatureGates() {
+            const plan = QuotaManager.getPlan();
+            const lockFeature = (id, originalText, isLocked, clickHandler = null) => {
+                let el = document.getElementById(id);
+                if(el) {
+                    if (isLocked) {
+                        el.innerHTML = '🔒 ' + originalText;
+                        el.style.opacity = '0.7';
+                        el.onclick = clickHandler || function(e) { e.preventDefault(); QuotaManager.showUpgradePrompt(originalText, '此功能專屬於 Pro 或 Ultra 方案。'); };
+                    } else {
+                        // Reset if not locked (requires keeping original onclick or relying on showView for navigation)
+                        el.innerHTML = originalText;
+                        el.style.opacity = '1';
+                    }
+                }
+            };
+
+            const isBasic = plan === 'Basic';
+            
+            // Nav Menu Locks
+            lockFeature('navReviewBtn', '記憶系統', isBasic, () => QuotaManager.showUpgradePrompt('記憶系統', '解鎖專屬錯題本，集中複習錯題，事半功倍！'));
+            // Past Exams are allowed for Basic, but years are restricted inside pastExamsView.
+            // Restoring the original onclick for PastExams just in case it was locked by guest mode previously.
+            let pastExamsBtn = document.getElementById('navPastExamsBtn');
+            if(pastExamsBtn) {
+                pastExamsBtn.innerHTML = '📜 歷屆試題';
+                pastExamsBtn.style.opacity = '1';
+                pastExamsBtn.onclick = () => showView('pastExamsView');
+            }
+
+            // Quiz Setup View Limits (Spelling Mode)
+            let spellingRadio = document.getElementById('modeSpelling');
+            if(spellingRadio) {
+                if(isBasic) {
+                    spellingRadio.disabled = true;
+                    spellingRadio.parentElement.style.opacity = '0.6';
+                    spellingRadio.parentElement.onclick = (e) => { e.preventDefault(); QuotaManager.showUpgradePrompt('魔王挑戰 (拼寫輸入)', '透過英聽與填空，深度強化記憶！'); };
+                } else {
+                    spellingRadio.disabled = false;
+                    spellingRadio.parentElement.style.opacity = '1';
+                    spellingRadio.parentElement.onclick = null;
+                }
+            }
+
+            // Static Ad Banner in Sidebar
+            let adBanner = document.getElementById('sidebarAdBanner');
+            if (!adBanner) {
+                adBanner = document.createElement('div');
+                adBanner.id = 'sidebarAdBanner';
+                adBanner.innerHTML = `<div style="background:var(--bg-color); border:1px dashed var(--text-muted); color:var(--text-muted); padding:15px; margin: 20px 10px; border-radius:10px; text-align:center; font-size:0.9em; cursor:pointer;" onclick="showView('pricingView')">🌟 免費版包含廣告<br><br><span style="color:var(--primary-color); font-weight:bold;">升級 VIP 享受純淨無廣告體驗</span></div>`;
+                const navMenu = document.getElementById('navMenu');
+                if (navMenu) {
+                    // Insert before the premium VIP btn in sidebar
+                    const premiumBtn = document.querySelector('.premium-vip-sidebar');
+                    if (premiumBtn) navMenu.insertBefore(adBanner, premiumBtn);
+                    else navMenu.appendChild(adBanner);
+                }
+            }
+            adBanner.style.display = isBasic ? 'block' : 'none';
+            
+            
+            // Past Exams Years Limit (Basic only gets last 3 years: 115, 114, 113)
+            ['112', '111', '110', '109', '108'].forEach(year => {
+                const el = document.getElementById('exam_' + year);
+                if (el) {
+                    if (isBasic) {
+                        el.style.opacity = '0.6';
+                        el.innerHTML = `🔒 ${year} 學年度`;
+                        el.onclick = (e) => { e.preventDefault(); QuotaManager.showUpgradePrompt('解鎖全年份歷屆試題', '升級專業版，無限刷題並回溯完整歷屆題庫！'); };
+                    } else {
+                        el.style.opacity = '1';
+                        el.innerHTML = `<span class="cat-icon">📄</span>${year} 學年度`;
+                        // Fallback: If no real data yet, we keep the original alert or fetch. 
+                        // The user's original logic was fetchExamData(year) except for 114/113 which had Swal.fire.
+                        // We'll just bind fetchExamData.
+                        el.onclick = () => { fetchExamData(year); };
+                    }
+                }
+            });
+
+            // VIP Avatar Border
+            let quickLevel = document.getElementById('quickLevel');
+            if (quickLevel) {
+                if (plan === 'Ultra') quickLevel.style.border = '2px solid #f59e0b';
+                else quickLevel.style.border = 'none';
+            }
+        }
+
         function applyTheme() {
             let isDark = AppState.sys.isDarkMode;
     
@@ -1065,8 +1216,7 @@
                 const isGuest = localStorage.getItem('currentUser') === 'Guest';
                 const isRealUser = (user && user !== 'Guest' && !isGuest);
                 
-                // Assuming plan is stored somewhere, defaulting to Basic for non-paying users
-                const currentPlan = localStorage.getItem('userPlan') || (AppState && AppState.profile && AppState.profile.cache ? AppState.profile.cache.plan : 'Basic') || 'Basic';
+                const currentPlan = QuotaManager.getPlan();
 
                 const bBtn = document.getElementById('basicPlanBtn');
                 const pBtn = document.getElementById('proPlanBtn');
@@ -1089,6 +1239,8 @@
                     uBtn.style.pointerEvents = (isRealUser && (currentPlan === 'Ultra' || currentPlan === 'Elite' || currentPlan === '旗艦版')) ? 'none' : 'auto';
                 }
             }
+
+            applyFeatureGates();
             
             const navbar = document.getElementById('topNavbar');
             const seasonGrp = document.getElementById('navSeasonGroup');
@@ -2136,6 +2288,10 @@
         }
 
         function startGame(isReview = false) { 
+            let num = isReview ? 20 : parseInt(document.getElementById('numQuestionsInput').value);
+            if (!QuotaManager.canTakeQuiz(num)) {
+                return QuotaManager.showUpgradePrompt('每日測驗額度', '基本方案每日限測驗 50 題，升級專業版以無限刷題！');
+            }
             AppState.quiz.isSubmitting = false; AppState.quiz.isReviewMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; 
             if (!navigator.onLine) {
                 if (AppState.quiz.isReviewMode) {
@@ -2205,9 +2361,18 @@
                     if (hasBonus) { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP <div style="font-size: 0.55em; color: var(--secondary-color); margin-top: 8px;">🎉 10題全對額外紅利 +20 XP</div>`; } else { xpDisplay.innerHTML = `⚡ 狂賺 +${gainedXP} XP`; } 
                     xpDisplay.style.display = 'block'; 
                 } else { xpDisplay.style.display = 'none'; } 
+                document.getElementById('summary').textContent = `對 ${correctCount} 題 / 共 ${AppState.quiz.total} 題`; 
+                const onShowResult = () => {
+                    showView('resultView'); 
+                    document.getElementById('scorePercentage').textContent = Math.round((correctCount / AppState.quiz.total) * 100) + '%'; drawChart(correctCount, AppState.quiz.total - correctCount); 
+                };
                 
-                document.getElementById('summary').textContent = `答對 ${correctCount} 題 / 共 ${AppState.quiz.total} 題`; showView('resultView'); 
-                document.getElementById('scorePercentage').textContent = Math.round((correctCount / AppState.quiz.total) * 100) + '%'; drawChart(correctCount, AppState.quiz.total - correctCount); 
+                let currentAdCount = QuotaManager.incrementAdCounter();
+                if (QuotaManager.getPlan() === 'Basic' && currentAdCount % 3 === 0) {
+                    QuotaManager.showAd(onShowResult);
+                } else {
+                    onShowResult();
+                }
                 
                 if (AppState.auth.user !== '訪客') { 
                     const payload = { username: AppState.auth.user, quizSubmissionData: submitData, isReviewMode: AppState.quiz.isReviewMode };
@@ -2241,7 +2406,7 @@
             if (document.getElementById('reviewPage').classList.contains('active') && document.getElementById('flashcardModeContainer').style.display === 'block') { if (e.code === 'Space') { e.preventDefault(); const fc = document.getElementById('fcContainer'); if (fc) fc.classList.toggle('flipped'); } else if (e.code === 'ArrowLeft') { if (!document.getElementById('fcPrev').disabled) document.getElementById('fcPrev').click(); } else if (e.code === 'ArrowRight') { if (!document.getElementById('fcNext').disabled) document.getElementById('fcNext').click(); } }
         });
 
-        function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('提示', res.error || res.message, 'info'); return; } AppState.quiz.data = res.questions; AppState.quiz.total = res.totalQuestions; if (AppState.quiz.data.length > 0) { AppState.quiz.currentIndex = 0; AppState.quiz.answers = {}; document.getElementById('totalQNum').textContent = AppState.quiz.total; showView('quizView'); renderQuestion(0); } }
+        function processQuizData(res) { Swal.close(); if (res.error || !res.success && res.message) { Swal.fire('錯誤', res.error || res.message, 'info'); return; } AppState.quiz.data = res.questions; AppState.quiz.total = res.totalQuestions; if (AppState.quiz.data.length > 0) { QuotaManager.addQuiz(res.questions.length); AppState.quiz.currentIndex = 0; AppState.quiz.answers = {}; document.getElementById('totalQNum').textContent = AppState.quiz.total; showView('quizView'); renderQuestion(0); } }
         document.addEventListener('selectionchange', () => { if (document.activeElement && document.activeElement.id === 'typingInput') updateSpellVisual(); });
         function initSpellTemplate(word) { const pureWord = getSpellBaseWord(word); AppState.quiz.spellTemplate = []; for(let i=0; i<pureWord.length; i++) { const char = pureWord[i]; if (/[^a-zA-Z]/.test(char)) { AppState.quiz.spellTemplate.push(char); } else { let start = i, end = i; while(start > 0 && /[a-zA-Z]/.test(pureWord[start-1])) start--; while(end < pureWord.length - 1 && /[a-zA-Z]/.test(pureWord[end+1])) end++; if (end - start + 1 <= 2 || i === start || i === end) AppState.quiz.spellTemplate.push(char); else AppState.quiz.spellTemplate.push('_'); } } }
         function updateSpellVisual() { const input = document.getElementById('typingInput'); const val = input.value.toLowerCase(); const cursorPos = input.selectionStart || 0; let displayStr = ""; let typedIndex = 0; for(let i=0; i<AppState.quiz.spellTemplate.length; i++) { if (AppState.quiz.spellTemplate[i] === ' ') { displayStr += "&nbsp;&nbsp;"; continue; } if (AppState.quiz.spellTemplate[i] !== '_') { displayStr += AppState.quiz.spellTemplate[i] + " "; continue; } if (typedIndex === cursorPos) displayStr += `<span class="spell-cursor"></span>`; if (typedIndex < val.length) displayStr += `<span style="color:var(--danger-color); pointer-events: auto; cursor:pointer;" onclick="setSpellCursor(${typedIndex}, event)">${val[typedIndex]}</span> `; else displayStr += `<span style="color:var(--text-muted); opacity: 0.5; pointer-events: auto; cursor:pointer;" onclick="setSpellCursor(${val.length}, event)">_</span> `; typedIndex++; } if (cursorPos === typedIndex) displayStr += `<span class="spell-cursor"></span>`; document.getElementById('spellVisual').innerHTML = displayStr; }
@@ -2265,10 +2430,17 @@
         function renderSingleVocabCard() { try { if (AppState.vocab.letterList.length === 0) return; const q = AppState.vocab.letterList[AppState.vocab.cardIndex]; const area = document.getElementById('vbCardContainer'); document.getElementById('vbCounter').textContent = `${AppState.vocab.cardIndex + 1} / ${AppState.vocab.letterList.length}`; document.getElementById('vbPrev').disabled = AppState.vocab.cardIndex === 0; document.getElementById('vbNext').disabled = AppState.vocab.cardIndex === AppState.vocab.letterList.length - 1; const isFav = AppState.vocab.favorites.has(q.word); const cleanWord = getPureWord(q.word); const safeEnWord = cleanWord.replace(/'/g, "\\'"); area.innerHTML = `<div class="flashcard-container" id="vbContainer" onclick="this.classList.toggle('flipped')"><div class="flashcard-inner"><div class="flashcard-front"><button class="speak-btn" style="position:absolute; top:15px; right:15px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><button style="position:absolute; top:15px; left:15px; background:none; border:none; font-size:1.8em; cursor:pointer; color:${isFav?'#ef4444':'#cbd5e1'};" onclick="event.stopPropagation(); toggleFavOnCard('${q.word}', '${q.meaning}')" id="cardFavBtn">${isFav?'❤️':'🤍'}</button><div class="fc-word">${cleanWord}</div><div class="fc-hint">點擊翻面</div></div><div class="flashcard-back" style="overflow-y: auto;"><div class="fc-word" style="font-size:1.5em; margin-bottom:5px;">${q.meaning}</div><div id="aiBlock-${q.pureWord}" style="margin-top:15px; width:100%; text-align:left; font-size:0.9em; line-height:1.5; display:none;"><div id="aiSpinner-${q.pureWord}" style="text-align:center;"><div class="spinner" style="width:25px;height:25px;border-width:2px;"></div></div><div id="aiContent-${q.pureWord}" style="display:none; color: var(--text-main);"></div></div><button class="btn btn-secondary" style="margin-top: 15px; padding: 8px 15px; font-size:0.9em; width:auto;" onclick="event.stopPropagation(); loadAiForCard('${q.pureWord}')" id="aiBtn-${q.pureWord}">🤖 展開 AI 深度解析</button></div></div></div>`; const cardElement = document.getElementById('vbContainer'); cardElement.addEventListener('touchstart', e => { AppState.sys.touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { AppState.sys.touchEndX = e.changedTouches[0].screenX; if (AppState.sys.touchEndX < AppState.sys.touchStartX - 40 && AppState.vocab.cardIndex < AppState.vocab.letterList.length - 1) document.getElementById('vbNext').click(); if (AppState.sys.touchEndX > AppState.sys.touchStartX + 40 && AppState.vocab.cardIndex > 0) document.getElementById('vbPrev').click(); }, {passive: true}); } catch(e) { console.error(e); } }
         function changeVocabCard(delta) { const newIdx = AppState.vocab.cardIndex + delta; if (newIdx >= 0 && newIdx < AppState.vocab.letterList.length) { AppState.vocab.cardIndex = newIdx; const wrapper = document.getElementById('vbSlideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleVocabCard(); } }
         function toggleFavOnCard(word, meaning) { const btn = document.getElementById('cardFavBtn'); const isFav = AppState.vocab.favorites.has(word); if (isFav) { AppState.vocab.favorites.delete(word); btn.textContent = '🤍'; btn.style.color = '#cbd5e1'; } else { AppState.vocab.favorites.add(word); btn.textContent = '❤️'; btn.style.color = '#ef4444'; } apiCall('toggleFavorite', { username: AppState.auth.user, word: word, meaning: meaning, isAdding: !isFav }); }
-        function loadAiForCard(pureWord) { if(!navigator.onLine) return Swal.fire('離線中', 'AI 字典需要網路連線。', 'error'); const btn = document.getElementById(`aiBtn-${pureWord}`); const block = document.getElementById(`aiBlock-${pureWord}`); const spinner = document.getElementById(`aiSpinner-${pureWord}`); const content = document.getElementById(`aiContent-${pureWord}`); if (btn) btn.style.display = 'none'; block.style.display = 'block'; if (content.innerHTML !== '') return; apiCall('aiDictionary', { username: AppState.auth.user, word: pureWord }).then(res => { spinner.style.display = 'none'; if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>📌 意思：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🌱 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 例句：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:var(--text-muted); margin-top:5px;">⚡ 快取秒讀</div>' : ''}`; content.style.display = 'block'; } else { content.innerHTML = `<span style="color:var(--danger-color);">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; } }); }
+        function loadAiForCard(pureWord) { 
+            if (!QuotaManager.canUseAiQ()) return QuotaManager.showUpgradePrompt('AI 單字解析', '您的 AI 輔助額度已達上限！升級以享有更多額度。');
+            if(!navigator.onLine) return Swal.fire('離線', 'AI 字典需要連線。', 'error'); 
+            const btn = document.getElementById(`aiBtn-${pureWord}`); const block = document.getElementById(`aiBlock-${pureWord}`); const spinner = document.getElementById(`aiSpinner-${pureWord}`); const content = document.getElementById(`aiContent-${pureWord}`); if (btn) btn.style.display = 'none'; block.style.display = 'block'; if (content.innerHTML !== '') return; 
+            QuotaManager.addAiQ();
+            apiCall('aiDictionary', { username: AppState.auth.user, word: pureWord }).then(res => { spinner.style.display = 'none'; if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>💡 詞意：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🔄 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 範例：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 易混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:var(--text-muted); margin-top:5px;">⚡ 快取讀取</div>' : ''}`; content.style.display = 'block'; } else { content.innerHTML = `<span style="color:var(--danger-color);">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; } }); 
+        }
 
         function gradeAiEssay() { 
-            if(!navigator.onLine) return Swal.fire('離線中', 'AI 批改需要網路連線。', 'error'); 
+            if (!QuotaManager.canUseAiEssay()) return QuotaManager.showUpgradePrompt('AI 作文批改', '您的 AI 作文批改額度已達上限！');
+            if(!navigator.onLine) return Swal.fire('離線', 'AI 批改需要連線。', 'error'); 
             const text = document.getElementById('essayInput').value.trim(); 
             const topic = document.getElementById('essayTopicInput').value.trim(); 
             if (text.length < 15) return Swal.fire('請認真作答', '內容太少啦！', 'warning'); 
@@ -2278,6 +2450,7 @@
             document.getElementById('essayResult').style.display = 'none'; 
             document.getElementById('essayLoading').style.display = 'block'; 
             
+            QuotaManager.addAiEssay();
             apiCall('aiEssayGrading', { username: AppState.auth.user, topic: topic, essayText: text })
             .then(res => { 
                 btn.disabled = false; 
@@ -2417,13 +2590,23 @@
                 finalLevel = Math.round(percentage * 15);
             }
 
-            // 延遲執行畫面切換，營造批改感
+            // 延遲執行畫面切換，營造批改感            // 模擬分析
             setTimeout(() => {
                 Swal.close();
-                showView('examResultView');
-                document.getElementById('examLevelScore').textContent = `${finalLevel} 級分`; 
-                document.getElementById('examRawScore').textContent = `原始分數：${rawScore} / ${totalQuestions} 題 (此為選擇題批改結果)`; 
-                document.getElementById('examDetailResults').innerHTML = detailHtml;
+                const onShowExamResult = () => {
+                    showView('examResultView');
+                    document.getElementById('examLevelScore').textContent = `${finalLevel} 級分`; 
+                    document.getElementById('examRawScore').textContent = `原始分：${rawScore} / ${totalQuestions} 題 (單題計分結果)`; 
+                    document.getElementById('examDetailResults').innerHTML = detailHtml;
+                };
+
+                let currentAdCount = QuotaManager.incrementAdCounter();
+                if (QuotaManager.getPlan() === 'Basic' && currentAdCount % 3 === 0) {
+                    QuotaManager.showAd(onShowExamResult);
+                } else {
+                    onShowExamResult();
+                }
+                
             }, 800);
         }
 
