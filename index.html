@@ -474,55 +474,60 @@
             max-width: 420px;
             height: 250px;
             margin: 0 auto 30px auto;
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.4);
             overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
             text-align: left;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            letter-spacing: 0.5px;
         }
         .virtual-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 40px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.6);
         }
         .vc-pattern {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.05; pointer-events: none;
-            background-image: repeating-linear-gradient(45deg, #000 0, #000 2px, transparent 2px, transparent 8px);
+            pointer-events: none;
             z-index: 1;
         }
-        .vc-content {
-            position: relative;
-            z-index: 2;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .virtual-card.vc-basic { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); color: #334155; }
-        .virtual-card.vc-pro { background: linear-gradient(135deg, #3b82f6, #60a5fa); color: #fff; }
-        .virtual-card.vc-ultra { 
-            background: linear-gradient(135deg, #f59e0b, #fbbf24, #fcd34d); 
-            color: #78350f; 
-            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
-        }
-        .virtual-card.vc-ultra .vc-pattern { opacity: 0.15; background-image: repeating-linear-gradient(45deg, #fff 0, #fff 2px, transparent 2px, transparent 15px); }
+        .vc-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        /* Basic - Silver */
+        .virtual-card.vc-basic { background: linear-gradient(135deg, #f8fafc, #e2e8f0, #94a3b8); color: #334155; box-shadow: 0 15px 35px rgba(0,0,0,0.1), inset 0 1px 1px #fff; }
+        .virtual-card.vc-basic .vc-pattern { opacity: 0.2; background-image: repeating-linear-gradient(45deg, #cbd5e1 0, #cbd5e1 1px, transparent 1px, transparent 10px); }
+        .virtual-card.vc-basic .vc-chip { filter: grayscale(100%) opacity(0.7); }
+        
+        /* Pro - Platinum Sapphire */
+        .virtual-card.vc-pro { background: linear-gradient(135deg, #0f172a, #1e3a8a, #0f172a); color: #e2e8f0; box-shadow: 0 15px 35px rgba(30, 58, 138, 0.3), inset 0 1px 1px rgba(255,255,255,0.2); }
+        .virtual-card.vc-pro .vc-pattern { background: linear-gradient(45deg, transparent 49%, rgba(255,255,255,0.1) 49%, rgba(255,255,255,0.1) 51%, transparent 51%); background-size: 20px 20px; opacity: 0.5; }
+        
+        /* Ultra - Obsidian Gold */
+        .virtual-card.vc-ultra { background: linear-gradient(135deg, #111, #2a2a2a, #000); color: #d4af37; box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2), inset 0 1px 2px rgba(255,255,255,0.1); border: 1px solid rgba(212, 175, 55, 0.2); }
+        .virtual-card.vc-ultra .vc-pattern { opacity: 0.15; background-image: radial-gradient(circle at 100% 150%, #d4af37 24%, transparent 25%), radial-gradient(circle at 0% -50%, #d4af37 24%, transparent 25%); background-size: 100px 100px; }
+        .virtual-card.vc-ultra .vc-logo, .virtual-card.vc-ultra .vc-tier, .virtual-card.vc-ultra .vc-name { background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); -webkit-background-clip: text; color: transparent; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .virtual-card.vc-ultra .vc-avatar { border-color: #d4af37; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+
         .vc-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .vc-logo { font-size: 1.2em; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-        .vc-tier { font-size: 1.1em; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-        .vc-chip { width: 45px; height: 35px; background: rgba(255,255,255,0.3); border-radius: 6px; border: 1px solid rgba(255,255,255,0.5); position: relative; overflow: hidden; margin-top: 15px; }
-        .vc-chip::before { content: ''; position: absolute; top: 10px; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.4); }
-        .vc-chip::after { content: ''; position: absolute; top: 22px; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.4); }
-        .vc-body { display: flex; align-items: center; gap: 15px; margin-top: 20px; }
-        .vc-avatar { width: 60px; height: 60px; border-radius: 50%; background: #fff; display: flex; justify-content: center; align-items: center; font-size: 2em; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden; border: 3px solid rgba(255,255,255,0.8); }
+        .vc-logo { font-size: 1.25em; font-weight: 800; display: flex; align-items: center; gap: 8px; text-shadow: 0 1px 1px rgba(255,255,255,0.2); }
+        .vc-tier { font-size: 1.15em; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; }
+        
+        .vc-chip { width: 45px; height: 35px; background: linear-gradient(135deg, #d4af37, #aa7700, #f3e5ab); border-radius: 6px; box-shadow: inset 0 0 4px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.2); position: relative; margin-top: 15px; }
+        .vc-chip::before, .vc-chip::after { content: ''; position: absolute; left: 0; width: 100%; height: 1px; background: rgba(0,0,0,0.3); box-shadow: 0 1px 0 rgba(255,255,255,0.4); }
+        .vc-chip::before { top: 12px; }
+        .vc-chip::after { top: 22px; }
+
+        .vc-body { display: flex; align-items: center; gap: 18px; margin-top: 20px; }
+        .vc-avatar { width: 65px; height: 65px; border-radius: 50%; background: #fff; display: flex; justify-content: center; align-items: center; font-size: 2em; box-shadow: 0 4px 10px rgba(0,0,0,0.15); overflow: hidden; border: 3px solid rgba(255,255,255,0.5); }
         .vc-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .vc-info { flex: 1; }
-        .vc-name { font-size: 1.5em; font-weight: 800; margin-bottom: 5px; }
-        .vc-id { font-size: 0.9em; opacity: 0.8; font-family: monospace; letter-spacing: 1px; }
-        .vc-footer { display: flex; justify-content: space-between; align-items: flex-end; font-size: 0.9em; font-weight: 600; opacity: 0.9; margin-top: auto; }
+        .vc-name { font-size: 1.6em; font-weight: 800; margin-bottom: 5px; text-transform: uppercase; }
+        .vc-id { font-size: 0.95em; opacity: 0.8; font-family: 'Courier New', Courier, monospace; letter-spacing: 2px; }
+        .vc-footer { display: flex; justify-content: space-between; align-items: flex-end; font-size: 0.95em; font-weight: 700; opacity: 0.9; margin-top: auto; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -1045,17 +1050,12 @@
             </div>
 
             <div class="profile-card">
-                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">🧠 AI 服務配額與金鑰</h3>
+                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">🧠 AI 服務配額</h3>
                 <div id="quotaInfoBox">
                     <div class="quota-box"><span>🤖 解題家教</span><strong id="qTutor">今日已用: 0 / 2 次</strong></div>
                     <div class="quota-box"><span>✍️ 作文批改</span><strong id="qEssay">今日已用: 0 / 1 篇</strong></div>
                     <p class="input-desc" style="color: #d97706; margin-bottom: 15px;">※ 系統每日重置配額。字典查詢不扣配額。</p>
                 </div>
-                <div class="input-group" style="margin-top: 20px;">
-                    <label style="color: var(--primary-color);">綁定專屬 Gemini API Key</label>
-                    <input type="text" id="profApiKey" placeholder="輸入你的 API Key (以 AIza 開頭...)">
-                </div>
-                <button class="btn btn-outline" onclick="handleApiKeyUpdate()">綁定 API Key</button>
             </div>
         </div>
 
@@ -1298,6 +1298,13 @@
             }
 
             // Update Profile Plan Text
+            let planDisplay = document.getElementById('profileCurrentPlan');
+            if (planDisplay) {
+                planDisplay.textContent = plan;
+                if (plan === 'Ultra') planDisplay.style.color = '#f59e0b';
+                else if (plan === 'Pro' || plan === '專業版') planDisplay.style.color = '#3b82f6';
+                else planDisplay.style.color = 'var(--text-main)';
+            }
         }
 
         function applyTheme() {
