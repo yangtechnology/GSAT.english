@@ -457,6 +457,18 @@
             20% { left: 150%; }
             100% { left: 150%; }
         }
+        @keyframes ultraGlow {
+            0% { box-shadow: 0 0 10px #f59e0b, inset 0 0 10px #f59e0b; border-color: #f59e0b; }
+            50% { box-shadow: 0 0 25px #fbbf24, inset 0 0 15px #fbbf24; border-color: #fbbf24; }
+            100% { box-shadow: 0 0 10px #f59e0b, inset 0 0 10px #f59e0b; border-color: #f59e0b; }
+        }
+        .ultra-avatar-border {
+            border: 4px solid #f59e0b;
+            border-radius: 50%;
+            animation: ultraGlow 2s infinite;
+            padding: 2px;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+        }
     </style>
 </head>
 <body>
@@ -513,7 +525,7 @@
                 <div class="nav-group-items">
                     <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
                     <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
-                    <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">📚 記憶系統</button>
+                    <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">🧠 錯題記憶</button>
                     <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
                 </div>
             </details>
@@ -925,10 +937,17 @@
         <div id="profileView" class="view-section view-container">
             <h2>👤 個人檔案與設定</h2>
             <div class="profile-card" style="text-align: center;">
-                <div class="avatar-preview" id="profileAvatarPreview">👤</div>
+                <div class="avatar-preview" id="profileAvatarPreview">😀</div>
                 <h3 id="profileUsernameDisplay" style="color: var(--text-main); font-weight: 800; font-size: 1.8em; margin-bottom: 20px;"></h3>
                 <div id="profileLevelDisplay" style="margin-bottom: 20px;"></div>
-                <div class="input-group" style="text-align: left; margin-top:20px;"><label>更換大頭貼照</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">上傳您的專屬大頭貼照。</p></div>
+                
+                <div style="margin: 20px 0; padding: 15px; background: var(--bg-color); border-radius: 12px; border: 1px dashed var(--primary-color);">
+                    <div style="font-size: 1em; margin-bottom: 10px;">目前方案：<strong id="profileCurrentPlan" style="color: var(--primary-color);">Basic</strong></div>
+                    <button class="btn btn-outline" style="width: 100%; border-color: var(--primary-color); color: var(--primary-color);" onclick="showView('pricingView')">管理方案 / 變更</button>
+                    <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 10px;">(測試期間，可在此隨時降級回 Basic 或升級其他方案)</div>
+                </div>
+
+                <div class="input-group" style="text-align: left; margin-top:20px;"><label>更換大頭貼</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">上傳您專屬大頭貼。</p></div>
             </div>
             
             <div class="profile-card">
@@ -1110,7 +1129,7 @@
             const isBasic = plan === 'Basic';
             
             // Nav Menu Locks
-            lockFeature('navReviewBtn', '記憶系統', isBasic, () => QuotaManager.showUpgradePrompt('記憶系統', '解鎖專屬錯題本，集中複習錯題，事半功倍！'));
+            lockFeature('navReviewBtn', '🧠 錯題記憶', isBasic, () => QuotaManager.showUpgradePrompt('錯題記憶', '專屬錯題本、複習排程，事半功倍！'));
             // Past Exams are allowed for Basic, but years are restricted inside pastExamsView.
             // Restoring the original onclick for PastExams just in case it was locked by guest mode previously.
             let pastExamsBtn = document.getElementById('navPastExamsBtn');
@@ -1170,11 +1189,22 @@
                 }
             });
 
+            // Hide VIP Upgrade Buttons if already VIP
+            const vipBtns = document.querySelectorAll('.premium-vip-btn, .premium-vip-sidebar');
+            vipBtns.forEach(btn => {
+                if (plan === 'Basic') btn.style.display = '';
+                else btn.style.display = 'none';
+            });
+
             // VIP Avatar Border
             let quickLevel = document.getElementById('quickLevel');
             if (quickLevel) {
-                if (plan === 'Ultra') quickLevel.style.border = '2px solid #f59e0b';
-                else quickLevel.style.border = 'none';
+                quickLevel.style.border = 'none'; // Reverted user complaint
+            }
+            let profileAvatar = document.getElementById('profileAvatarPreview');
+            if (profileAvatar) {
+                if (plan === 'Ultra') profileAvatar.classList.add('ultra-avatar-border');
+                else profileAvatar.classList.remove('ultra-avatar-border');
             }
         }
 
@@ -1223,10 +1253,22 @@
                 const uBtn = document.getElementById('ultraPlanBtn');
                 
                 if (bBtn) {
-                    bBtn.innerText = (isRealUser && currentPlan === 'Basic') ? '您目前的方案' : '免費註冊';
-                    bBtn.style.opacity = (isRealUser && currentPlan === 'Basic') ? '0.6' : '1';
-                    bBtn.style.pointerEvents = (isRealUser && currentPlan === 'Basic') ? 'none' : 'auto';
-                    bBtn.onclick = function() { if(isRealUser || isGuest){ showView('setupView'); } else { showView('registerView'); } };
+                    if (isRealUser && currentPlan === 'Basic') {
+                        bBtn.innerText = '您目前的方案';
+                        bBtn.style.opacity = '0.6';
+                        bBtn.style.pointerEvents = 'none';
+                        bBtn.onclick = null;
+                    } else if (isRealUser && currentPlan !== 'Basic') {
+                        bBtn.innerText = '測試：降回基本版';
+                        bBtn.style.opacity = '1';
+                        bBtn.style.pointerEvents = 'auto';
+                        bBtn.onclick = () => QuotaManager.simulateUpgrade('Basic');
+                    } else {
+                        bBtn.innerText = '免費註冊';
+                        bBtn.style.opacity = '1';
+                        bBtn.style.pointerEvents = 'auto';
+                        bBtn.onclick = () => { showView('registerView'); };
+                    }
                 }
                 if (pBtn) {
                     pBtn.innerText = (isRealUser && (currentPlan === 'Pro' || currentPlan === '專業版')) ? '您目前的方案' : '升級專業版';
