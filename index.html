@@ -424,6 +424,7 @@
             </div>
             
             <button class="nav-btn" id="installAppBtnTop" style="display: none; color: #10b981; font-weight: 800; border-bottom: 4px solid var(--border-color); background: rgba(16,185,129,0.05); font-size: 1.15em;" onclick="installPWA()">⬇️ 安裝 Vocab App</button>
+            <button class="nav-btn" style="color: #f59e0b; font-weight: 800; border-bottom: 4px solid var(--border-color); background: rgba(245,158,11,0.05); font-size: 1.15em;" onclick="showView('pricingView'); toggleMenu()">💎 升級 VIP 方案</button>
             
             <details class="nav-group" open>
                 <summary>🎓 核心學習</summary>
@@ -438,9 +439,9 @@
             <details class="nav-group">
                 <summary>🏆 戰績與社群</summary>
                 <div class="nav-group-items">
-                    <button class="nav-btn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
-                    <button class="nav-btn" onclick="showView('analyticsView')">📈 學習數據</button>
-                    <button class="nav-btn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
+                    <button class="nav-btn" id="navLeaderboardBtn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
+                    <button class="nav-btn" id="navAnalyticsBtn" onclick="showView('analyticsView')">📈 學習數據</button>
+                    <button class="nav-btn" id="navTeamBtn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
                 </div>
             </details>
 
@@ -482,7 +483,6 @@
             
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
                 <button class="btn btn-success" onclick="handleGuestLogin()">👀 訪客模式 (免登入體驗)</button>
-                <button class="btn btn-outline" style="border-color: #f59e0b; color: #f59e0b; margin-top: 10px;" onclick="showView('pricingView')">💎 查看 VIP 升級方案與定價</button>
             </div>
 
             <button class="btn btn-outline" style="border: none; font-size: 0.9em; margin-top: 10px;" onclick="handleForgotPassword()">忘記密碼？點此重置</button>
@@ -573,7 +573,10 @@
         </div>
 
         <div id="setupView" class="view-section view-container">
-            <div class="title-badge-wrapper"><h2>準備開始挑戰</h2></div>
+            <div class="title-badge-wrapper" style="justify-content: space-between;">
+                <h2 style="margin-bottom: 0;">準備開始挑戰</h2>
+                <button class="btn btn-outline" style="border-color: #f59e0b; color: #f59e0b; padding: 8px 15px; width: auto; margin-bottom: 0;" onclick="showView('pricingView')">💎 升級 VIP 方案</button>
+            </div>
             <p class="subtitle">模式越高階，混合的題型越豐富！</p>
             <div class="input-group"><label>測驗模式 🎮</label><select id="quizModeSelect"><option value="1">1. 經典選擇 (英中互譯混出)</option><option value="2">2. 進階聽力 (+ 純聽力題混出)</option><option value="3">3. 魔王挑戰 (+ 拼寫輸入混出)</option></select></div>
             <div class="flex-row"><div class="input-group" style="flex: 1;"><label>題數</label><input type="number" id="numQuestionsInput" value="10" min="1" max="100"></div><div class="input-group" style="flex: 2;"><label>難度級別</label><select id="difficultySelect"><option value="mixed" selected>🔥 綜合學測比例</option><option value="3">⭐ Level 3</option><option value="4">⭐⭐ Level 4</option><option value="5">⭐⭐⭐ Level 5</option><option value="6">👑 Level 6</option></select></div></div>
@@ -2364,21 +2367,45 @@
         }
 
         function handleGuestLogin() {
-            localStorage.setItem('currentUser', 'Guest');
-            localStorage.setItem('userPlan', 'Basic');
-            
             Swal.fire({
-                icon: 'info',
-                title: '歡迎使用訪客模式',
-                text: '您目前為基本會員 (Basic)，享有每日 50 題測驗額度。',
-                confirmButtonText: '開始體驗'
-            }).then(() => {
-                showView('setupView');
-                
-                // If there are UI elements to update for guests, do it here
-                if(document.getElementById('navWelcome')) document.getElementById('navWelcome').innerText = '👋 訪客，您好！';
-                if(document.getElementById('quickName')) document.getElementById('quickName').innerText = '訪客';
-                if(document.getElementById('quickLevel')) document.getElementById('quickLevel').innerText = 'Lv.1';
+                icon: 'warning',
+                title: '訪客模式提醒',
+                text: '您即將以「訪客身分」進入系統體驗。請注意：訪客模式下的所有測驗紀錄與錯題皆【不會儲存】！若要保存學習紀錄，請登入或註冊免費帳號。',
+                showCancelButton: true,
+                confirmButtonText: '我知道了，開始體驗',
+                cancelButtonText: '返回註冊/登入',
+                confirmButtonColor: '#10b981'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    localStorage.setItem('currentUser', 'Guest');
+                    localStorage.setItem('userPlan', 'Basic');
+                    
+                    showView('setupView');
+                    
+                    if(document.getElementById('navWelcome')) document.getElementById('navWelcome').innerText = '👋 訪客，您好！';
+                    if(document.getElementById('quickName')) document.getElementById('quickName').innerText = '訪客';
+                    if(document.getElementById('quickLevel')) document.getElementById('quickLevel').innerText = 'Lv.1';
+                    
+                    // 鎖定側欄權限功能
+                    const lockFeature = (id, originalText) => {
+                        let el = document.getElementById(id);
+                        if(el) {
+                            el.innerHTML = '🔒 ' + originalText + ' (訪客不可用)';
+                            el.style.opacity = '0.5';
+                            el.onclick = function(e) {
+                                e.preventDefault();
+                                Swal.fire('權限不足', '此功能僅開放給註冊會員或 VIP，請先註冊或登入！', 'warning');
+                            };
+                        }
+                    };
+                    
+                    lockFeature('navReviewBtn', '記憶系統');
+                    lockFeature('navPastExamsBtn', '歷屆試題');
+                    lockFeature('navLeaderboardBtn', '排行榜');
+                    lockFeature('navAnalyticsBtn', '學習數據');
+                    lockFeature('navTeamBtn', '戰隊大廳');
+                    lockFeature('navProfileBtn', '個人檔案');
+                }
             });
         }
 
