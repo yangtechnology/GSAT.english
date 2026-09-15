@@ -479,7 +479,75 @@
             <div class="input-group"><input type="password" id="loginPassword" placeholder="密碼 (Password)" required></div>
             <button class="btn btn-primary" onclick="handleLogin()">安全登入</button>
             <button class="btn btn-secondary" onclick="showView('registerView')">建立新帳號</button>
-            <button class="btn btn-outline" style="border: none; font-size: 0.9em; margin-top: -5px;" onclick="handleForgotPassword()">忘記密碼？點此重置</button>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
+                <button class="btn btn-success" onclick="handleGuestLogin()">👀 訪客模式 (免登入體驗)</button>
+                <button class="btn btn-outline" style="border-color: #f59e0b; color: #f59e0b; margin-top: 10px;" onclick="showView('pricingView')">💎 查看 VIP 升級方案與定價</button>
+            </div>
+
+            <button class="btn btn-outline" style="border: none; font-size: 0.9em; margin-top: 10px;" onclick="handleForgotPassword()">忘記密碼？點此重置</button>
+        </div>
+
+        <div id="pricingView" class="view-section view-container centered-view" style="max-width: 850px;">
+            <div style="font-size: 3.5em; margin-bottom: 10px;">💎</div>
+            <h2>選擇最適合你的學習方案</h2>
+            <p class="subtitle">升級專業版或旗艦版，解鎖完整 AI 功能，學測英文衝刺滿級分！</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 30px; text-align: left;">
+                
+                <!-- 🟢 基本會員 -->
+                <div style="border: 2px solid var(--border-color); border-radius: 16px; padding: 25px; background: var(--card-bg);">
+                    <h3 style="color: var(--text-muted); margin-bottom: 10px;">🟢 基本會員 (Basic)</h3>
+                    <div style="font-size: 2em; font-weight: 800; margin-bottom: 20px;">免費</div>
+                    <ul style="list-style: none; padding: 0; margin-bottom: 20px; font-size: 0.95em; line-height: 1.8;">
+                        <li>✅ 每日測驗限 50 題</li>
+                        <li>✅ 經典選擇題 (英中/中英/聽力)</li>
+                        <li>✅ 基本單字書瀏覽</li>
+                        <li>✅ AI 輔助 (1題問答+1篇作文/日)</li>
+                        <li style="color: var(--text-muted);">⚠️ 包含廣告</li>
+                    </ul>
+                    <button class="btn btn-secondary" onclick="showView('registerView')">免費註冊</button>
+                </div>
+
+                <!-- 🔵 專業版 -->
+                <div style="border: 2px solid var(--primary-color); border-radius: 16px; padding: 25px; background: var(--card-bg); position: relative; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);">
+                    <div style="position: absolute; top: -12px; right: 20px; background: var(--primary-color); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold;">主打推薦</div>
+                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">🔵 專業版 (Pro)</h3>
+                    <div style="font-size: 2em; font-weight: 800;">NT$ 150 <span style="font-size: 0.4em; color: var(--text-muted);">/月</span></div>
+                    <div style="font-size: 0.85em; color: #10b981; margin-bottom: 15px; font-weight: bold;">💡 買11個月送1個月 ($1650/年)</div>
+                    <ul style="list-style: none; padding: 0; margin-bottom: 20px; font-size: 0.95em; line-height: 1.8;">
+                        <li>✅ <b>無限刷題</b>，解除每日限制</li>
+                        <li>✅ 解鎖 <b>魔王挑戰 (拼寫輸入)</b></li>
+                        <li>✅ 解鎖 <b>記憶系統 (錯題本)</b></li>
+                        <li>✅ AI 輔助 (50題問答+5篇作文/月)</li>
+                        <li>✅ 查看詳細學習數據與排行榜</li>
+                        <li>✅ <b>無廣告</b>純淨體驗</li>
+                    </ul>
+                    <button class="btn btn-primary" onclick="alert('即將導向綠界付款，敬請期待！')">升級專業版</button>
+                </div>
+
+                <!-- 👑 旗艦版 -->
+                <div style="border: 2px solid #f59e0b; border-radius: 16px; padding: 25px; background: var(--card-bg);">
+                    <h3 style="color: #f59e0b; margin-bottom: 10px;">👑 旗艦版 (Elite)</h3>
+                    <div style="font-size: 2em; font-weight: 800;">NT$ 299 <span style="font-size: 0.4em; color: var(--text-muted);">/月</span></div>
+                    <div style="font-size: 0.85em; color: #10b981; margin-bottom: 15px; font-weight: bold;">💡 買10個月送2個月 ($2990/年)</div>
+                    <ul style="list-style: none; padding: 0; margin-bottom: 20px; font-size: 0.95em; line-height: 1.8;">
+                        <li>✅ 包含 Pro 版所有功能</li>
+                        <li>✅ <b>無限次</b>使用所有 AI 功能</li>
+                        <li>✅ <b>專屬 VIP 戰隊頭像外框</b></li>
+                        <li>✅ <b>無廣告</b>，極致衝刺體驗</li>
+                    </ul>
+                    <button class="btn btn-outline" style="border-color: #f59e0b; color: #f59e0b;" onclick="alert('即將導向綠界付款，敬請期待！')">升級旗艦版</button>
+                </div>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.03); padding: 20px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color);">
+                <h4 style="margin-bottom: 10px; color: var(--text-main);">📞 客服與聯絡資訊</h4>
+                <p style="margin-bottom: 5px; color: var(--text-muted);">客服信箱 Email: <strong style="color: var(--text-main);">yangtechnology01@gmail.com</strong></p>
+                <p style="margin-bottom: 0; color: var(--text-muted);">客服專線 Phone: <strong style="color: var(--text-main);">0906071298</strong></p>
+            </div>
+            
+            <button class="btn btn-outline" style="margin-top: 25px; width: auto; padding: 10px 30px; margin-left: auto; margin-right: auto;" onclick="showView('loginView')">返回登入頁</button>
         </div>
         
         <div id="registerView" class="view-section view-container centered-view">
@@ -2292,6 +2360,25 @@
                         else Swal.fire('傳送失敗', res.message, 'error');
                     });
                 }
+            });
+        }
+
+        function handleGuestLogin() {
+            localStorage.setItem('currentUser', 'Guest');
+            localStorage.setItem('userPlan', 'Basic');
+            
+            Swal.fire({
+                icon: 'info',
+                title: '歡迎使用訪客模式',
+                text: '您目前為基本會員 (Basic)，享有每日 50 題測驗額度。',
+                confirmButtonText: '開始體驗'
+            }).then(() => {
+                showView('setupView');
+                
+                // If there are UI elements to update for guests, do it here
+                if(document.getElementById('navWelcome')) document.getElementById('navWelcome').innerText = '👋 訪客，您好！';
+                if(document.getElementById('quickName')) document.getElementById('quickName').innerText = '訪客';
+                if(document.getElementById('quickLevel')) document.getElementById('quickLevel').innerText = 'Lv.1';
             });
         }
 
