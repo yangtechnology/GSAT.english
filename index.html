@@ -649,7 +649,7 @@
             
             <div class="billing-toggle-container" style="margin: 20px auto 30px; display: inline-flex; align-items: center; background: var(--nav-bg); padding: 5px; border-radius: 30px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
                 <button id="billMonthlyBtn" onclick="setBillingCycle('monthly')" style="background: var(--primary-color); color: white; border: none; padding: 8px 24px; border-radius: 20px; font-weight: bold; font-size: 1.05em; cursor: pointer; transition: all 0.3s ease;">月繳</button>
-                <button id="billYearlyBtn" onclick="setBillingCycle('yearly')" style="background: transparent; color: var(--text-muted); border: none; padding: 8px 24px; border-radius: 20px; font-weight: bold; font-size: 1.05em; cursor: pointer; transition: all 0.3s ease;">年繳 <span style="color:#10b981; font-size:0.9em;">(省下兩個月)</span></button>
+                <button id="billYearlyBtn" onclick="setBillingCycle('yearly')" style="background: transparent; color: var(--text-muted); border: none; padding: 8px 24px; border-radius: 20px; font-weight: bold; font-size: 1.05em; cursor: pointer; transition: all 0.3s ease;">年繳 <span style="color:#10b981; font-size:0.9em;">(最高省 2 個月)</span></button>
             </div>
             
             <script>
@@ -664,8 +664,8 @@
                     } else {
                         yBtn.style.background = 'var(--primary-color)'; yBtn.style.color = 'white';
                         mBtn.style.background = 'transparent'; mBtn.style.color = 'var(--text-muted)';
-                        document.getElementById('proPrice').innerHTML = 'NT$ 1,500 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span>';
-                        document.getElementById('ultraPrice').innerHTML = 'NT$ 2,990 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span>';
+                        document.getElementById('proPrice').innerHTML = 'NT$ 1,650 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span><div style="font-size: 0.45em; color: #10b981; margin-top: 5px; font-weight: 700;">(立省 1 個月)</div>';
+                        document.getElementById('ultraPrice').innerHTML = 'NT$ 2,990 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span><div style="font-size: 0.45em; color: #10b981; margin-top: 5px; font-weight: 700;">(立省 2 個月)</div>';
                     }
                 }
             </script>
