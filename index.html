@@ -659,13 +659,13 @@
                     if (cycle === 'monthly') {
                         mBtn.style.background = 'var(--primary-color)'; mBtn.style.color = 'white';
                         yBtn.style.background = 'transparent'; yBtn.style.color = 'var(--text-muted)';
-                        document.getElementById('proPrice').innerHTML = 'NT$ 150 <span style="font-size: 0.4em; color: var(--text-muted);">/月</span>';
-                        document.getElementById('ultraPrice').innerHTML = 'NT$ 299 <span style="font-size: 0.4em; color: var(--text-muted);">/月</span>';
+                        document.getElementById('proPrice').innerHTML = '<div style="line-height: 1.2;">NT$ 150 <span style="font-size: 0.4em; color: var(--text-muted);">/月</span></div>';
+                        document.getElementById('ultraPrice').innerHTML = '<div style="line-height: 1.2;">NT$ 299 <span style="font-size: 0.4em; color: var(--text-muted);">/月</span></div>';
                     } else {
                         yBtn.style.background = 'var(--primary-color)'; yBtn.style.color = 'white';
                         mBtn.style.background = 'transparent'; mBtn.style.color = 'var(--text-muted)';
-                        document.getElementById('proPrice').innerHTML = '<s style="font-size: 0.5em; color: #94a3b8; font-weight: normal; margin-right: 8px;">NT$ 1,800</s>NT$ 1,650 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span><div style="font-size: 0.45em; color: #10b981; margin-top: 5px; font-weight: 700;">(特價！立省 1 個月)</div>';
-                        document.getElementById('ultraPrice').innerHTML = '<s style="font-size: 0.5em; color: #94a3b8; font-weight: normal; margin-right: 8px;">NT$ 3,588</s>NT$ 2,990 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span><div style="font-size: 0.45em; color: #10b981; margin-top: 5px; font-weight: 700;">(特價！立省 2 個月)</div>';
+                        document.getElementById('proPrice').innerHTML = '<div style="font-size: 0.45em; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px; font-weight: normal;">原價 NT$ 1,800</div><div style="line-height: 1;">NT$ 1,650 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span></div><div style="font-size: 0.45em; color: #10b981; margin-top: 8px; font-weight: 700; background: rgba(16, 185, 129, 0.1); display: inline-block; padding: 4px 12px; border-radius: 20px;">🔥 特價立省 1 個月</div>';
+                        document.getElementById('ultraPrice').innerHTML = '<div style="font-size: 0.45em; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px; font-weight: normal;">原價 NT$ 3,588</div><div style="line-height: 1;">NT$ 2,990 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span></div><div style="font-size: 0.45em; color: #10b981; margin-top: 8px; font-weight: 700; background: rgba(16, 185, 129, 0.1); display: inline-block; padding: 4px 12px; border-radius: 20px;">🔥 特價立省 2 個月</div>';
                     }
                 }
             </script>
