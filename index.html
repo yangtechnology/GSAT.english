@@ -644,8 +644,8 @@
         <div id="loginView" class="view-section active view-container centered-view">
             <div style="font-size: 3.5em; margin-bottom: 10px;">🎓</div>
             <h2>登入您的帳號</h2>
-            <div class="input-group"><input type="text" id="loginUsername" placeholder="帳號 (Username)" required></div>
-            <div class="input-group"><input type="password" id="loginPassword" placeholder="密碼 (Password)" required></div>
+            <div class="input-group"><input type="text" id="loginUsername" placeholder="帳號 (Username)" onkeydown="if(event.key === 'Enter') handleLogin()" required></div>
+            <div class="input-group"><input type="password" id="loginPassword" placeholder="密碼 (Password)" onkeydown="if(event.key === 'Enter') handleLogin()" required></div>
             <button class="btn btn-primary" onclick="handleLogin()">安全登入</button>
             <button class="btn btn-secondary" onclick="showView('registerView')">建立新帳號</button>
             
@@ -765,9 +765,9 @@
                 </select>
                 <p class="input-desc" style="color:#d97706;">系統會自動為您推算學測目標年度與自動升級。</p>
             </div>
-            <div class="input-group"><input type="email" id="regEmail" placeholder="電子郵件 (忘記密碼時用來接收密碼)" required></div>
-            <div class="input-group"><input type="text" id="regUsername" placeholder="中英文或數字皆可 (帳號)" required></div>
-            <div class="input-group"><input type="password" id="regPassword" placeholder="長度至少 4 碼 (密碼)" required></div>
+            <div class="input-group"><input type="email" id="regEmail" placeholder="信箱 (用於忘記密碼)" onkeydown="if(event.key === 'Enter') handleRegister()" required></div>
+            <div class="input-group"><input type="text" id="regUsername" placeholder="帳號 (英文數字組合)" onkeydown="if(event.key === 'Enter') handleRegister()" required></div>
+            <div class="input-group"><input type="password" id="regPassword" placeholder="密碼 (至少 4 碼)" onkeydown="if(event.key === 'Enter') handleRegister()" required></div>
             <button class="btn btn-primary" onclick="handleRegister()">立即註冊</button>
             <button class="btn btn-outline" onclick="showView('loginView')">返回登入</button>
         </div>
@@ -1165,7 +1165,9 @@
         const QuotaManager = {
             getPlan: () => localStorage.getItem('userPlan') || 'Basic',
             simulateUpgrade: (plan) => {
-                if (!localStorage.getItem('currentUser') || localStorage.getItem('currentUser') === 'Guest') {
+                const currentUser = AppState.auth.user || localStorage.getItem('user');
+                const isGuest = localStorage.getItem('currentUser') === 'Guest';
+                if (!currentUser || isGuest) {
                     Swal.fire({icon: 'warning', title: '請先登入', text: '請先登入或註冊，才能進行付費升級！', confirmButtonColor: '#3b82f6'}).then(() => { showView('loginView'); });
                     return;
                 }
