@@ -644,8 +644,8 @@
         <div id="loginView" class="view-section active view-container centered-view">
             <div style="font-size: 3.5em; margin-bottom: 10px;">🎓</div>
             <h2>登入您的帳號</h2>
-            <div class="input-group"><input type="text" id="loginUsername" placeholder="帳號 (Username)" onkeydown="if(event.key === 'Enter') handleLogin()" required></div>
-            <div class="input-group"><input type="password" id="loginPassword" placeholder="密碼 (Password)" onkeydown="if(event.key === 'Enter') handleLogin()" required></div>
+            <div class="input-group"><input type="text" id="loginUsername" placeholder="帳號 (Username)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleLogin(); }" required></div>
+            <div class="input-group"><input type="password" id="loginPassword" placeholder="密碼 (Password)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleLogin(); }" required></div>
             <button class="btn btn-primary" onclick="handleLogin()">安全登入</button>
             <button class="btn btn-secondary" onclick="showView('registerView')">建立新帳號</button>
             
@@ -765,9 +765,9 @@
                 </select>
                 <p class="input-desc" style="color:#d97706;">系統會自動為您推算學測目標年度與自動升級。</p>
             </div>
-            <div class="input-group"><input type="email" id="regEmail" placeholder="信箱 (用於忘記密碼)" onkeydown="if(event.key === 'Enter') handleRegister()" required></div>
-            <div class="input-group"><input type="text" id="regUsername" placeholder="帳號 (英文數字組合)" onkeydown="if(event.key === 'Enter') handleRegister()" required></div>
-            <div class="input-group"><input type="password" id="regPassword" placeholder="密碼 (至少 4 碼)" onkeydown="if(event.key === 'Enter') handleRegister()" required></div>
+            <div class="input-group"><input type="email" id="regEmail" placeholder="信箱 (用於忘記密碼)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleRegister(); }" required></div>
+            <div class="input-group"><input type="text" id="regUsername" placeholder="帳號 (英文數字組合)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleRegister(); }" required></div>
+            <div class="input-group"><input type="password" id="regPassword" placeholder="密碼 (至少 4 碼)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleRegister(); }" required></div>
             <button class="btn btn-primary" onclick="handleRegister()">立即註冊</button>
             <button class="btn btn-outline" onclick="showView('loginView')">返回登入</button>
         </div>
@@ -2456,7 +2456,9 @@
         // ==========================================
         // 🔑 驗證與設定邏輯 
         // ==========================================
+        let isSubmittingAuth = false;
         function handleRegister() { 
+            if(isSubmittingAuth) return;
             if(!navigator.onLine) return Swal.fire('離線中', '註冊需要網路連線。', 'error');
             const eMail = document.getElementById('regEmail').value.trim();
             const u = document.getElementById('regUsername').value.trim(); 
@@ -2465,34 +2467,40 @@
             
             if(!eMail || !eMail.includes('@')) return Swal.fire('錯誤','請輸入有效的電子郵件','warning');
             if(u.length < 3 || p.length < 4) return Swal.fire('錯誤','帳號至少3碼, 密碼4碼','warning'); 
-            showLoading('安全註冊中...'); 
+            isSubmittingAuth = true;
+            showLoading('註冊中...'); 
             let tYear = calculateTargetYear(gradeOffset);
             
             apiCall('registerUser', { username: u, password: p, targetYear: tYear, email: eMail }).then(res => {
+                isSubmittingAuth = false;
                 if(res.success){
                     Swal.fire('成功','註冊成功！請登入','success');
                     showView('loginView');
                     document.getElementById('loginUsername').value = u;
                 } else Swal.fire('失敗',res.message,'error');
-            }); 
+            }).catch(() => { isSubmittingAuth = false; }); 
         }
 
         function handleLogin() { 
-            if(!navigator.onLine) return Swal.fire('離線中', '登入需要網路連線。', 'error');
+            if(isSubmittingAuth) return;
+            if(!navigator.onLine) return Swal.fire('斷線', '登入需要連線。', 'error');
             const u = document.getElementById('loginUsername').value.trim(); 
             const p = document.getElementById('loginPassword').value; 
+            if(!u || !p) return Swal.fire('錯誤','請輸入帳號與密碼','warning');
+            isSubmittingAuth = true;
             showLoading('驗證憑證中...'); 
             
             apiCall('loginUser', { username: u, password: p }).then(res => {
+                isSubmittingAuth = false;
                 if(res.success){
                     const executeLogin = () => {
-                        AppState.auth.user = res.user; AppState.auth.token = res.token; localStorage.setItem('user', u); localStorage.setItem('token', res.token); Swal.close(); showView('setupView'); applyTheme(); 
+                        AppState.auth.user = res.user; AppState.auth.token = res.token; localStorage.setItem('user', u); localStorage.setItem('token', res.token); localStorage.removeItem('currentUser'); Swal.close(); showView('setupView'); applyTheme(); 
                     };
 
                     if(res.needsEmail) {
                         Swal.fire({
                             title: '系統安全性升級',
-                            text: '偵測到您的舊帳號尚未綁定信箱。為確保日後能找回密碼，請立即綁定 Email：',
+                            text: '您尚未綁定信箱。忘記密碼時，請立即綁定 Email：',
                             input: 'email',
                             inputPlaceholder: '請輸入您的電子信箱',
                             allowOutsideClick: false,
@@ -2505,15 +2513,19 @@
                                 showLoading('綁定中...');
                                 apiCall('bindEmail', { username: u, email: r.value, sessionToken: res.token }).then(bindRes => {
                                     if(bindRes.success) { Swal.fire('綁定成功', '感謝您的配合！', 'success'); executeLogin(); }
-                                    else { Swal.fire('錯誤', bindRes.message, 'error'); handleLogout(); }
+                                    else { Swal.fire('錯誤', bindRes.message, 'error'); }
                                 });
+                            } else {
+                                Swal.fire('注意', '建議盡快綁定信箱以保障帳號安全！', 'info'); executeLogin();
                             }
                         });
                     } else {
                         executeLogin();
                     }
-                } else { Swal.fire('失敗', res.message, 'error'); }
-            }); 
+                    document.getElementById('loginUsername').value = '';
+                    document.getElementById('loginPassword').value = '';
+                } else { Swal.fire('登入失敗', res.message, 'error'); }
+            }).catch(() => { isSubmittingAuth = false; }); 
         }
 
         function handleCredentialUpdate() {
