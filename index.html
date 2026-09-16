@@ -15,6 +15,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script>
+        window.addEventListener('error', function(e) {
+            const el = document.getElementById('splashScreen');
+            if(el) {
+                el.innerHTML += '<div style="color: red; font-size: 20px; z-index: 999999; position: absolute; bottom: 20px; background: white; padding: 10px;">ERROR: ' + e.message + '<br>' + e.filename + ':' + e.lineno + '</div>';
+            }
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            const el = document.getElementById('splashScreen');
+            if(el) {
+                el.innerHTML += '<div style="color: red; font-size: 20px; z-index: 999999; position: absolute; bottom: 20px; background: white; padding: 10px;">PROMISE ERR: ' + (e.reason && e.reason.message ? e.reason.message : e.reason) + '</div>';
+            }
+        });
+    </script>
 
     <style>
         :root {
