@@ -1058,7 +1058,7 @@
                     </div>
                     <div class="vc-footer">
                         <span>Level <span id="vcLevelDisplay">1</span></span>
-                        <span>MEMBER</span>
+                        <span></span>
                     </div>
                 </div>
             </div>
@@ -1451,14 +1451,26 @@
                     }
                 }
                 if (pBtn) {
-                    pBtn.innerText = (isRealUser && (currentPlan === 'Pro' || currentPlan === '專業版')) ? '您目前的方案' : '升級專業版';
-                    pBtn.style.opacity = (isRealUser && (currentPlan === 'Pro' || currentPlan === '專業版')) ? '0.6' : '1';
-                    pBtn.style.pointerEvents = (isRealUser && (currentPlan === 'Pro' || currentPlan === '專業版')) ? 'none' : 'auto';
+                    if (isRealUser && (currentPlan === 'Pro' || currentPlan === '專業版')) {
+                        pBtn.innerText = '續約 / 更改週期';
+                        pBtn.style.opacity = '1';
+                        pBtn.style.pointerEvents = 'auto';
+                    } else {
+                        pBtn.innerText = '升級專業版';
+                        pBtn.style.opacity = '1';
+                        pBtn.style.pointerEvents = 'auto';
+                    }
                 }
                 if (uBtn) {
-                    uBtn.innerText = (isRealUser && (currentPlan === 'Ultra' || currentPlan === 'Elite' || currentPlan === '旗艦版')) ? '您目前的方案' : '升級旗艦版';
-                    uBtn.style.opacity = (isRealUser && (currentPlan === 'Ultra' || currentPlan === 'Elite' || currentPlan === '旗艦版')) ? '0.6' : '1';
-                    uBtn.style.pointerEvents = (isRealUser && (currentPlan === 'Ultra' || currentPlan === 'Elite' || currentPlan === '旗艦版')) ? 'none' : 'auto';
+                    if (isRealUser && (currentPlan === 'Ultra' || currentPlan === 'Elite' || currentPlan === '旗艦版')) {
+                        uBtn.innerText = '續約 / 更改週期';
+                        uBtn.style.opacity = '1';
+                        uBtn.style.pointerEvents = 'auto';
+                    } else {
+                        uBtn.innerText = '升級旗艦版';
+                        uBtn.style.opacity = '1';
+                        uBtn.style.pointerEvents = 'auto';
+                    }
                 }
             }
 
