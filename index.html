@@ -595,12 +595,13 @@
             <button class="nav-btn premium-vip-sidebar" style="color: #f59e0b; font-weight: 800; font-size: 1.15em;" onclick="showView('pricingView')">💎 <span class="premium-vip-text">升級 VIP 方案</span></button>
             
             <details class="nav-group" open>
-                <summary>🎓 核心學習</summary>
+                <summary>🧭 導航學習</summary>
                 <div class="nav-group-items">
-                    <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
-                    <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
+                    <button class="nav-btn" onclick="showView('setupView')">🚀 首頁</button>
+                    <button class="nav-btn" onclick="showView('vocabBookView')">📚 單字書</button>
                     <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">🧠 錯題記憶</button>
                     <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
+                    <button class="nav-btn" onclick="showView('streakView')">🔥 打卡紀錄</button>
                 </div>
             </details>
 
@@ -873,12 +874,12 @@
             <p class="subtitle">收錄大考中心標準字彙。點選等級後透過 A-Z 篩選單字卡。</p>
             <div id="vocabHomeGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
                 <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(1)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">🌿 Level 1</span><span style="font-size:0.8em; color:var(--text-muted);">國中小基礎</span></div>
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">🌿 Level 1</span><span style="font-size:0.8em; color:var(--text-muted);">升高中必背</span></div>
                     <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:100%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
                     <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 100%</div>
                 </div>
                 <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(2)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">🍃 Level 2</span><span style="font-size:0.8em; color:var(--text-muted);">國中小進階</span></div>
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">🍃 Level 2</span><span style="font-size:0.8em; color:var(--text-muted);">升高中必背</span></div>
                     <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:68%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
                     <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 68%</div>
                 </div>
@@ -888,17 +889,17 @@
                     <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 42%</div>
                 </div>
                 <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(4)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📙 Level 4</span><span style="font-size:0.8em; color:var(--text-muted);">高中進階</span></div>
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📙 Level 4</span><span style="font-size:0.8em; color:var(--text-muted);">學測常考</span></div>
                     <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:15%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
                     <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 15%</div>
                 </div>
                 <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(5)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📕 Level 5</span><span style="font-size:0.8em; color:var(--text-muted);">大學指考</span></div>
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📕 Level 5</span><span style="font-size:0.8em; color:var(--text-muted);">學測常考(進階)</span></div>
                     <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:0%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
                     <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 0%</div>
                 </div>
                 <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(6)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📓 Level 6</span><span style="font-size:0.8em; color:var(--text-muted);">進階詞彙</span></div>
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📓 Level 6</span><span style="font-size:0.8em; color:var(--text-muted);">學測進階</span></div>
                     <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:0%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
                     <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 0%</div>
                 </div>
@@ -981,21 +982,22 @@
             </div>
         </div>
 
-        <div id="teamView" class="view-section view-container" style="max-width: 800px;">
-            <h2>🏆 戰績與社群</h2>
-            
-            <!-- 打卡戰績區 -->
+        <div id="streakView" class="view-section view-container" style="max-width: 800px;">
+            <h2>🔥 打卡紀錄</h2>
             <div style="background: linear-gradient(135deg, rgba(249,115,22,0.1), rgba(239,68,68,0.1)); border: 2px solid rgba(249,115,22,0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
                 <div style="flex: 1; min-width: 200px;">
-                    <h3 style="color: #ea580c; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;">🔥 連續打卡紀錄</h3>
-                    <p style="font-size: 0.9em; color: var(--text-muted); line-height: 1.5; margin: 0;">每日完成 <b>10 題以上 (不含錯題複習)</b> 即可延續打卡。<br>中斷可是會讓連擊歸零的喔！</p>
+                    <h3 style="color: #ea580c; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;">🔥 連續打卡挑戰</h3>
+                    <p style="font-size: 0.9em; color: var(--text-muted); line-height: 1.5; margin: 0;">每日完成 <b>10 題以上 (不含錯題複習)</b> 即可延續打卡。<br>中斷可是會讓連擊歸零的喔，請保持每天來報到！</p>
                 </div>
                 <div style="text-align: center; background: white; padding: 15px 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(249,115,22,0.15);">
                     <div style="font-size: 0.9em; color: var(--text-muted); font-weight: bold; margin-bottom: 5px;">目前連續</div>
                     <div style="font-size: 2.5em; font-weight: 900; color: #f97316;">12 <span style="font-size: 0.4em; color: var(--text-muted);">天</span></div>
                 </div>
             </div>
+        </div>
 
+        <div id="teamView" class="view-section view-container" style="max-width: 800px;">
+            <h2>🏆 戰績與社群</h2>
             <div id="teamNoTeamArea">
                 <p class="subtitle">與同儕一起組隊刷題，爭奪賽季排行榜榮耀！</p>
                 <div class="flex-row">
@@ -2669,14 +2671,25 @@
         function simulateLineLogin() {
             Swal.fire({
                 title: 'LINE 授權登入',
-                text: '將導向 LINE 官方授權頁面。授權後將自動登入系統。',
+                text: '即將前往 LINE 進行安全授權...',
                 icon: 'info',
                 showCancelButton: true,
-                confirmButtonText: '模擬授權成功',
+                confirmButtonText: '前往授權',
                 cancelButtonText: '取消',
                 confirmButtonColor: '#06C755'
             }).then((res) => {
                 if (res.isConfirmed) {
+                    const clientId = '2011647494';
+                    const redirectUri = encodeURIComponent('https://script.google.com/macros/s/AKfycbyyjXQY6TfvKy8BLp5N3kv328Om9yZav_eQADKHUfxrNl7KOatJP_RmgKzA94DJiogJ/exec');
+                    const state = 'login_request';
+                    
+                    const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid`;
+                    
+                    // 正式環境直接跳轉： window.location.href = lineAuthUrl;
+                    // 在此純網頁版中先以模擬帶過：
+                    window.location.href = lineAuthUrl;
+
+                    // Mock success for now since we can't actually complete OAuth in this static HTML
                     document.getElementById('loginUsername').value = 'user123';
                     document.getElementById('loginPassword').value = '1234';
                     handleLogin();
@@ -2929,11 +2942,24 @@
                 if (existingLetters.has(char)) { 
                     btn.className = 'az-btn'; 
                     btn.onclick = () => showLetterCards(char); 
-                    btn.innerHTML = `<div style="font-size:1.2em;">${char}</div><div style="font-size:0.5em; margin-top:2px; opacity:0.8;">看過 ${progress}%</div>`;
+                    // Set linear gradient for progress fill, light blue (#38bdf8) from bottom
+                    btn.style.background = `linear-gradient(to top, #38bdf8 ${progress}%, var(--card-bg) ${progress}%)`;
+                    btn.style.border = '2px solid #e2e8f0';
+                    btn.style.position = 'relative';
+                    btn.style.overflow = 'hidden';
+                    btn.style.display = 'flex';
+                    btn.style.flexDirection = 'column';
+                    btn.style.justifyContent = 'center';
+                    btn.style.alignItems = 'center';
+                    btn.innerHTML = `<div style="font-size:1.2em; font-weight:800; color:var(--text-main); position:relative; z-index:2;">${char}</div>
+                                     <div style="font-size:0.6em; margin-top:2px; font-weight:bold; color:var(--text-muted); position:relative; z-index:2;">${progress}%</div>`;
                 } else { 
                     btn.className = 'az-btn disabled'; 
                     btn.disabled = true; 
-                    btn.innerHTML = char;
+                    btn.style.display = 'flex';
+                    btn.style.justifyContent = 'center';
+                    btn.style.alignItems = 'center';
+                    btn.innerHTML = `<div style="font-size:1.2em; font-weight:800;">${char}</div>`;
                 } 
                 azGrid.appendChild(btn); 
             } 
