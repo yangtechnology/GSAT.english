@@ -571,10 +571,6 @@
         </div>
 
         <div class="nav-right-group" id="navToolsGroup">
-            <!-- 增加連續打卡徽章 -->
-            <div id="navStreakBadge" style="display: flex; align-items: center; gap: 6px; color: #f97316; font-weight: 800; font-size: 1.05em; background: rgba(249,115,22,0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(249,115,22,0.2); cursor: pointer; transition: 0.2s;" title="連續學習天數 (中斷可是會很痛的喔！)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                🔥 <span id="streakCount">12</span> <span style="font-size: 0.7em; opacity: 0.8; margin-top: 2px;">天</span>
-            </div>
             <button class="premium-vip-btn" onclick="showView('pricingView')">💎 <span class="premium-vip-text">升級 VIP</span></button>
             <div class="nav-quick-info" id="navQuickInfo">
                 <span id="quickName" class="quick-item desktop-only"></span>
@@ -790,9 +786,46 @@
 
         <div id="setupView" class="view-section view-container">
             <div class="title-badge-wrapper"><h2>準備開始挑戰</h2></div>
-            <p class="subtitle">模式越高階，混合的題型越豐富！</p>
-            <div class="input-group"><label>測驗模式 🎮</label><select id="quizModeSelect"><option value="1">1. 經典選擇 (英中互譯混出)</option><option value="2">2. 進階聽力 (+ 純聽力題混出)</option><option value="3">3. 魔王挑戰 (+ 拼寫輸入混出)</option></select></div>
-            <div class="flex-row"><div class="input-group" style="flex: 1;"><label>題數</label><input type="number" id="numQuestionsInput" value="10" min="1" max="100"></div><div class="input-group" style="flex: 2;"><label>難度級別</label><select id="difficultySelect"><option value="mixed" selected>🔥 綜合學測比例</option><option value="3">⭐ Level 3</option><option value="4">⭐⭐ Level 4</option><option value="5">⭐⭐⭐ Level 5</option><option value="6">👑 Level 6</option></select></div></div>
+            <p class="subtitle">模式越難，獲得的經驗值越豐富！</p>
+            <div class="input-group"><label>測驗模式 🕹️</label><select id="quizModeSelect"><option value="1">1. 經典模式 (英中互譯混出)</option><option value="2">2. 聽力模式 (+ 純聽發音混出)</option><option value="3">3. 魔王挑戰 (+ 拼寫輸入混出)</option></select></div>
+            
+            <div class="input-group" style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+                <label style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>自訂測驗範圍</span>
+                    <span style="font-size: 0.7em; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 3px 8px; border-radius: 12px; font-weight: bold; cursor:pointer;" onclick="showView('pricingView')">PRO 專屬</span>
+                </label>
+                <select id="customRangeSelect" style="margin-top: 5px;" onchange="handleCustomRangeChange()">
+                    <option value="all">系統隨機出題 (預設)</option>
+                    <option value="today">今日看過的單字</option>
+                    <option value="range">自訂字母區間 (A ~ Z)</option>
+                </select>
+                <div id="customRangeArea" style="display:none; margin-top: 15px; gap: 10px; align-items: center; justify-content:space-between;">
+                    <select id="rangeStart" style="flex:1;"><option value="A">A</option><option value="C">C</option><option value="M">M</option></select>
+                    <span style="font-weight:bold; color:var(--text-muted);">到</span>
+                    <select id="rangeEnd" style="flex:1;"><option value="B">B</option><option value="D">D</option><option value="Z">Z</option></select>
+                </div>
+            </div>
+            
+            <script>
+                function handleCustomRangeChange() {
+                    let sel = document.getElementById('customRangeSelect');
+                    if (sel.value !== 'all') {
+                        if (QuotaManager.getPlan() === 'Basic') {
+                            sel.value = 'all';
+                            QuotaManager.showUpgradePrompt('自訂測驗範圍', '解鎖 PRO 方案即可針對今日背過的單字、或自訂 A~Z 區間進行高效率精準複習！');
+                            document.getElementById('customRangeArea').style.display = 'none';
+                            return;
+                        }
+                    }
+                    if (sel.value === 'range') {
+                        document.getElementById('customRangeArea').style.display = 'flex';
+                    } else {
+                        document.getElementById('customRangeArea').style.display = 'none';
+                    }
+                }
+            </script>
+
+            <div class="flex-row"><div class="input-group" style="flex: 1;"><label>題數</label><input type="number" id="numQuestionsInput" value="10" min="1" max="100"></div><div class="input-group" style="flex: 2;"><label>目標級別</label><select id="difficultySelect"><option value="mixed" selected>🎯 綜合學測比例</option><option value="3">📘 Level 3</option><option value="4">⭐📙 Level 4</option><option value="5">⭐⭐📕 Level 5</option><option value="6">🔥📓 Level 6</option></select></div></div>
             <button class="btn btn-primary" onclick="startGame(false)" style="margin-top: 10px; padding: 18px; font-size: 1.15em;">🚀 開始測驗</button>
         </div>
 
@@ -838,16 +871,40 @@
                 <button class="btn btn-outline" style="width:auto; padding:8px 15px;" onclick="window.print()">🖨️ 匯出 PDF/列印</button>
             </div>
             <p class="subtitle">收錄大考中心標準字彙。點選等級後透過 A-Z 篩選單字卡。</p>
-            <div id="vocabHomeGrid" class="vocab-grid">
-                <div class="vocab-cat-btn" onclick="openVocabSearch()"><span class="cat-icon">🔍</span>查單字</div>
-                <div class="vocab-cat-btn" onclick="loadVocabLevel(1)"><span class="cat-icon">🟢</span>Lv. 1</div>
-                <div class="vocab-cat-btn" onclick="loadVocabLevel(2)"><span class="cat-icon">🟡</span>Lv. 2</div>
-                <div class="vocab-cat-btn" onclick="loadVocabLevel(3)"><span class="cat-icon">🟠</span>Lv. 3</div>
-                <div class="vocab-cat-btn" onclick="loadVocabLevel(4)"><span class="cat-icon">🔴</span>Lv. 4</div>
-                <div class="vocab-cat-btn" onclick="loadVocabLevel(5)"><span class="cat-icon">🔥</span>Lv. 5</div>
-                <div class="vocab-cat-btn" onclick="loadVocabLevel(6)"><span class="cat-icon">👑</span>Lv. 6</div>
-                <div class="vocab-cat-btn" onclick="loadVocabFavorites()"><span class="cat-icon">❤️</span>不熟單字</div>
-                <div class="vocab-cat-btn" onclick="addCustomVocab()"><span class="cat-icon">✍️</span>自訂單字</div>
+            <div id="vocabHomeGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(1)">
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">🌿 Level 1</span><span style="font-size:0.8em; color:var(--text-muted);">國中小基礎</span></div>
+                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:100%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
+                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 100%</div>
+                </div>
+                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(2)">
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">🍃 Level 2</span><span style="font-size:0.8em; color:var(--text-muted);">國中小進階</span></div>
+                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:68%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
+                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 68%</div>
+                </div>
+                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(3)">
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📘 Level 3</span><span style="font-size:0.8em; color:var(--text-muted);">高中基礎</span></div>
+                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:42%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
+                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 42%</div>
+                </div>
+                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(4)">
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📙 Level 4</span><span style="font-size:0.8em; color:var(--text-muted);">高中進階</span></div>
+                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:15%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
+                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 15%</div>
+                </div>
+                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(5)">
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📕 Level 5</span><span style="font-size:0.8em; color:var(--text-muted);">大學指考</span></div>
+                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:0%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
+                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 0%</div>
+                </div>
+                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(6)">
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📓 Level 6</span><span style="font-size:0.8em; color:var(--text-muted);">進階詞彙</span></div>
+                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:0%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
+                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 0%</div>
+                </div>
+                <div class="vocab-cat-btn" style="justify-content: center;" onclick="openVocabSearch()"><span class="cat-icon">🔍</span>找單字</div>
+                <div class="vocab-cat-btn" style="justify-content: center;" onclick="loadVocabFavorites()"><span class="cat-icon">❤️</span>不熟單字</div>
+                <div class="vocab-cat-btn" style="justify-content: center;" onclick="addCustomVocab()"><span class="cat-icon">➕</span>新增單字</div>
             </div>
             <div id="vocabNavArea" style="display:none;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;"><h3 id="vocabListTitle" style="margin:0; color: var(--primary-color);"></h3><button class="btn btn-secondary" style="width:auto; padding: 6px 12px; margin:0;" onclick="backToVocabHome()">返回目錄</button></div><div id="azGrid" class="az-grid"></div></div>
             <div id="vocabFlashcardArea" style="display:none; margin-top:20px;"><div class="fc-nav"><button class="fc-nav-btn" id="vbPrev" onclick="changeVocabCard(-1)">&lt;</button><span id="vbCounter" style="font-weight: 600; color: var(--text-muted);">0 / 0</span><button class="fc-nav-btn" id="vbNext" onclick="changeVocabCard(1)">&gt;</button></div><div id="vbSlideWrapper"><div id="vbCardContainer"></div></div><div style="text-align:center; margin-top:15px;"><button id="vbBackToAzBtn" class="btn btn-outline" onclick="backToAzGrid()">返回字母列表</button></div></div>
@@ -925,7 +982,20 @@
         </div>
 
         <div id="teamView" class="view-section view-container" style="max-width: 800px;">
-            <h2>🤝 戰隊大廳</h2>
+            <h2>🏆 戰績與社群</h2>
+            
+            <!-- 打卡戰績區 -->
+            <div style="background: linear-gradient(135deg, rgba(249,115,22,0.1), rgba(239,68,68,0.1)); border: 2px solid rgba(249,115,22,0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                <div style="flex: 1; min-width: 200px;">
+                    <h3 style="color: #ea580c; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;">🔥 連續打卡紀錄</h3>
+                    <p style="font-size: 0.9em; color: var(--text-muted); line-height: 1.5; margin: 0;">每日完成 <b>10 題以上 (不含錯題複習)</b> 即可延續打卡。<br>中斷可是會讓連擊歸零的喔！</p>
+                </div>
+                <div style="text-align: center; background: white; padding: 15px 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(249,115,22,0.15);">
+                    <div style="font-size: 0.9em; color: var(--text-muted); font-weight: bold; margin-bottom: 5px;">目前連續</div>
+                    <div style="font-size: 2.5em; font-weight: 900; color: #f97316;">12 <span style="font-size: 0.4em; color: var(--text-muted);">天</span></div>
+                </div>
+            </div>
+
             <div id="teamNoTeamArea">
                 <p class="subtitle">與同儕一起組隊刷題，爭奪賽季排行榜榮耀！</p>
                 <div class="flex-row">
@@ -2844,7 +2914,30 @@
         function backToVocabHome() { document.getElementById('vocabHomeGrid').style.display = 'grid'; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'none'; }
         function backToAzGrid() { if (AppState.vocab.level === 0) backToVocabHome(); else { document.getElementById('vocabFlashcardArea').style.display = 'none'; document.getElementById('vocabNavArea').style.display = 'block'; } }
         function loadVocabLevel(level) { AppState.vocab.level = level; document.getElementById('vocabHomeGrid').style.display = 'none'; document.getElementById('vocabLoading').style.display = 'block'; apiCall('getVocabByLevel', { level }).then(res => { document.getElementById('vocabLoading').style.display = 'none'; if (res.success && res.words.length > 0) { AppState.vocab.list = res.words; renderAzGrid(level); } else { Swal.fire('讀取失敗', '此級別尚無單字', 'error'); backToVocabHome(); } }); }
-        function renderAzGrid(level) { document.getElementById('vocabListTitle').textContent = `Level ${level} 單字庫`; document.getElementById('vocabNavArea').style.display = 'block'; const existingLetters = new Set(AppState.vocab.list.map(w => w.firstLetter)); const azGrid = document.getElementById('azGrid'); azGrid.innerHTML = ''; for (let i = 65; i <= 90; i++) { const char = String.fromCharCode(i); const btn = document.createElement('button'); btn.textContent = char; if (existingLetters.has(char)) { btn.className = 'az-btn'; btn.onclick = () => showLetterCards(char); } else { btn.className = 'az-btn disabled'; btn.disabled = true; } azGrid.appendChild(btn); } }
+        function renderAzGrid(level) { 
+            document.getElementById('vocabListTitle').textContent = `Level ${level} 詞庫`; 
+            document.getElementById('vocabNavArea').style.display = 'block'; 
+            const existingLetters = new Set(AppState.vocab.list.map(w => w.firstLetter)); 
+            const azGrid = document.getElementById('azGrid'); 
+            azGrid.innerHTML = ''; 
+            for (let i = 65; i <= 90; i++) { 
+                const char = String.fromCharCode(i); 
+                const btn = document.createElement('button'); 
+                
+                let progress = existingLetters.has(char) ? Math.floor(Math.random() * 60 + 20) : 0; // Mockup progress
+                
+                if (existingLetters.has(char)) { 
+                    btn.className = 'az-btn'; 
+                    btn.onclick = () => showLetterCards(char); 
+                    btn.innerHTML = `<div style="font-size:1.2em;">${char}</div><div style="font-size:0.5em; margin-top:2px; opacity:0.8;">看過 ${progress}%</div>`;
+                } else { 
+                    btn.className = 'az-btn disabled'; 
+                    btn.disabled = true; 
+                    btn.innerHTML = char;
+                } 
+                azGrid.appendChild(btn); 
+            } 
+        }
         function showLetterCards(letter) { AppState.vocab.letterList = AppState.vocab.list.filter(w => w.firstLetter === letter); AppState.vocab.cardIndex = 0; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').style.display = 'inline-block'; renderSingleVocabCard(); }
         function openVocabSearch() { AppState.vocab.level = 0; Swal.fire({ title: '🔍 查單字', input: 'text', inputPlaceholder: '請輸入想查詢的單字', showCancelButton: true, confirmButtonText: '使用 AI 查詢', background: 'var(--card-bg)', color: 'var(--text-main)' }).then((result) => { if (result.isConfirmed && result.value) { AppState.vocab.letterList = [{ word: result.value, pureWord: getPureWord(result.value), meaning: '點擊展開 AI 解析' }]; AppState.vocab.cardIndex = 0; document.getElementById('vocabHomeGrid').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').textContent = '返回單字書首頁'; renderSingleVocabCard(); setTimeout(() => { document.getElementById('vbContainer').classList.add('flipped'); loadAiForCard(AppState.vocab.letterList[0].pureWord); }, 500); } }); }
         function addCustomVocab() { Swal.fire({ title: '✍️ 加入自訂單字', html: '<input id="swal-word" class="swal2-input" placeholder="英文單字">' + '<input id="swal-meaning" class="swal2-input" placeholder="中文意思 (選填)">', focusConfirm: false, showCancelButton: true, confirmButtonText: '加入我的不熟單字', background: 'var(--card-bg)', color: 'var(--text-main)', preConfirm: () => { const w = document.getElementById('swal-word').value.trim(); if (!w) Swal.showValidationMessage('單字不能為空！'); return { word: w, meaning: document.getElementById('swal-meaning').value.trim() }; } }).then((result) => { if (result.isConfirmed) { const { word, meaning } = result.value; apiCall('toggleFavorite', { username: AppState.auth.user, word: word, meaning: meaning, isAdding: true }).then(() => { AppState.vocab.favorites.add(word); Swal.fire('已加入', '', 'success'); }); } }); }
