@@ -1174,16 +1174,61 @@
                 function simulateLineBind() {
                     let btn = document.getElementById('btnLineBind');
                     if (btn.innerText.includes('已綁定')) {
-                        Swal.fire('已解除綁定', '您已取消接收 LINE 每日學習推播。', 'info');
-                        btn.innerText = '立即綁定並開啟推播';
-                        btn.style.background = '#06C755';
-                        btn.style.color = 'white';
+                        Swal.fire({
+                            title: '解除綁定？',
+                            text: '解除後將無法接收每日打卡提醒，確定要解除嗎？',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: '確定解除',
+                            cancelButtonText: '取消',
+                            confirmButtonColor: '#ef4444'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                Swal.fire({title: '處理中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+                                apiCall('unbindLine', { username: AppState.auth.user }).then(res => {
+                                    if (res.success) {
+                                        Swal.fire('已解除', '已取消 LINE 綁定。', 'info');
+                                        btn.innerText = '立即綁定並開啟推播';
+                                        btn.style.background = '#06C755';
+                                        btn.style.color = 'white';
+                                        btn.style.border = 'none';
+                                    } else {
+                                        Swal.fire('失敗', res.message, 'error');
+                                    }
+                                });
+                            }
+                        });
                     } else {
-                        Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天會收到「今日測驗已重置」與「學習打卡提醒」喔！', 'success');
-                        btn.innerText = '✅ 已綁定 (點擊解除)';
-                        btn.style.background = 'var(--card-bg)';
-                        btn.style.color = 'var(--text-muted)';
-                        btn.style.border = '1px solid var(--border-color)';
+                        // 開啟 LINE 登入視窗來獲取 UID 綁定
+                        const scriptUrl = 'https://script.google.com/macros/s/AKfycbyyjXQY6TfvKy8BLp5N3kv328Om9yZav_eQADKHUfxrNl7KOatJP_RmgKzA94DJiogJ/exec';
+                        const authWindow = window.open(scriptUrl, 'LineBind', 'width=500,height=600');
+                        
+                        // 監聽回傳
+                        const bindListener = function(event) {
+                            try {
+                                const data = JSON.parse(event.data);
+                                if (data.type === 'LINE_LOGIN_RESULT') {
+                                    window.removeEventListener('message', bindListener);
+                                    if (data.lineUid) {
+                                        Swal.fire({title: '處理中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+                                        apiCall('bindLine', { username: AppState.auth.user, lineUid: data.lineUid }).then(res => {
+                                            if (res.success) {
+                                                Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天會收到「今日測驗已重置」與「學習打卡提醒」喔！', 'success');
+                                                btn.innerText = '✅ 已綁定 (點擊解除)';
+                                                btn.style.background = 'var(--card-bg)';
+                                                btn.style.color = 'var(--text-muted)';
+                                                btn.style.border = '1px solid var(--border-color)';
+                                            } else {
+                                                Swal.fire('綁定失敗', res.message, 'error');
+                                            }
+                                        });
+                                    } else {
+                                        Swal.fire('錯誤', '無法取得 LINE 授權資訊。', 'error');
+                                    }
+                                }
+                            } catch (e) {}
+                        };
+                        window.addEventListener('message', bindListener);
                     }
                 }
             </script>
@@ -1994,11 +2039,26 @@
                 vcId.textContent = `ID: ${fakeId}`;
             }
 
-            const av = resProf.avatar || '😀'; const avDiv = document.getElementById('vcAvatarPreview'); 
+            const av = resProf.avatar || '👤'; const avDiv = document.getElementById('vcAvatarPreview'); 
             if(avDiv) { if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}">`; } else { avDiv.innerHTML = av; } }
             
             const vcLevel = document.getElementById('vcLevelDisplay');
             if(vcLevel) vcLevel.textContent = level;
+
+            const btnLineBind = document.getElementById('btnLineBind');
+            if (btnLineBind) {
+                if (resProf.isLineBound) {
+                    btnLineBind.innerText = '✅ 已綁定 (點擊解除)';
+                    btnLineBind.style.background = 'var(--card-bg)';
+                    btnLineBind.style.color = 'var(--text-muted)';
+                    btnLineBind.style.border = '1px solid var(--border-color)';
+                } else {
+                    btnLineBind.innerText = '立即綁定並開啟推播';
+                    btnLineBind.style.background = '#06C755';
+                    btnLineBind.style.color = 'white';
+                    btnLineBind.style.border = 'none';
+                }
+            }
 
             const currentLevelBaseXP = Math.pow(level - 1, 2) * 10; const nextLevelXP = Math.pow(level, 2) * 10; const xpProgress = ((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100; 
 
