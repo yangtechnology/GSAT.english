@@ -595,22 +595,22 @@
             <button class="nav-btn premium-vip-sidebar" style="color: #f59e0b; font-weight: 800; font-size: 1.15em;" onclick="showView('pricingView')">💎 <span class="premium-vip-text">升級 VIP 方案</span></button>
             
             <details class="nav-group" open>
-                <summary>🧭 導航學習</summary>
+                <summary>🎓 核心學習</summary>
                 <div class="nav-group-items">
-                    <button class="nav-btn" onclick="showView('setupView')">🚀 首頁</button>
-                    <button class="nav-btn" onclick="showView('vocabBookView')">📚 單字書</button>
+                    <button class="nav-btn" onclick="showView('setupView')">🏠 首頁</button>
+                    <button class="nav-btn" onclick="showView('vocabBookView')">📖 單字書</button>
                     <button class="nav-btn" id="navReviewBtn" onclick="showView('reviewPage'); loadIncorrectQuestions()">🧠 錯題記憶</button>
                     <button class="nav-btn" id="navPastExamsBtn" onclick="showView('pastExamsView')">📝 歷屆試題</button>
-                    <button class="nav-btn" onclick="showView('streakView')">🔥 打卡紀錄</button>
                 </div>
             </details>
 
             <details class="nav-group">
                 <summary>🏆 戰績與社群</summary>
                 <div class="nav-group-items">
-                    <button class="nav-btn" id="navLeaderboardBtn" onclick="showView('leaderboardView'); loadLeaderboardData()">🏆 排行榜</button>
-                    <button class="nav-btn" id="navAnalyticsBtn" onclick="showView('analyticsView')">📈 學習數據</button>
-                    <button class="nav-btn" id="navTeamBtn" onclick="showView('teamView'); loadTeamChat()">🤝 戰隊大廳</button>
+                    <button class="nav-btn" onclick="showView('streakView')">🔥 打卡紀錄</button>
+                    <button class="nav-btn" id="navLeaderboardBtn" onclick="showView('leaderboardView'); loadLeaderboardData()">📊 排行榜</button>
+                    <button class="nav-btn" id="navAnalyticsBtn" onclick="showView('analyticsView')">📈 學習分析</button>
+                    <button class="nav-btn" id="navTeamBtn" onclick="showView('teamView'); loadTeamChat()">🛡️ 戰隊大廳</button>
                 </div>
             </details>
 
@@ -2942,17 +2942,35 @@
                 if (existingLetters.has(char)) { 
                     btn.className = 'az-btn'; 
                     btn.onclick = () => showLetterCards(char); 
-                    // Set linear gradient for progress fill, light blue (#38bdf8) from bottom
-                    btn.style.background = `linear-gradient(to top, #38bdf8 ${progress}%, var(--card-bg) ${progress}%)`;
-                    btn.style.border = '2px solid #e2e8f0';
-                    btn.style.position = 'relative';
-                    btn.style.overflow = 'hidden';
-                    btn.style.display = 'flex';
-                    btn.style.flexDirection = 'column';
-                    btn.style.justifyContent = 'center';
-                    btn.style.alignItems = 'center';
-                    btn.innerHTML = `<div style="font-size:1.2em; font-weight:800; color:var(--text-main); position:relative; z-index:2;">${char}</div>
-                                     <div style="font-size:0.6em; margin-top:2px; font-weight:bold; color:var(--text-muted); position:relative; z-index:2;">${progress}%</div>`;
+                    // Circular progress ring using conic-gradient
+                    btn.style.background = 'transparent';
+                    btn.style.border = 'none';
+                    btn.style.padding = '5px';
+                    btn.innerHTML = `
+                        <div style="
+                            width: 50px; 
+                            height: 50px; 
+                            border-radius: 50%; 
+                            background: conic-gradient(#38bdf8 ${progress}%, var(--border-color) 0);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin: 0 auto;
+                        ">
+                            <div style="
+                                width: 42px; 
+                                height: 42px; 
+                                border-radius: 50%; 
+                                background: var(--card-bg);
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                            ">
+                                <div style="font-size:1.1em; font-weight:900; color:var(--text-main); line-height:1;">${char}</div>
+                                <div style="font-size:0.55em; font-weight:bold; color:var(--text-muted); margin-top:2px;">${progress}%</div>
+                            </div>
+                        </div>`;
                 } else { 
                     btn.className = 'az-btn disabled'; 
                     btn.disabled = true; 
