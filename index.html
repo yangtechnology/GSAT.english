@@ -2701,27 +2701,34 @@
                                 text: '已自動獲取您的帳號資料！', 
                                 icon: 'success'
                             }).then(() => {
-                                // 為了純前端展示，這裡直接強制進入系統 (跳過 GAS 後端密碼驗證)
+                                // 為了純前端展示，這裡直接強制進入系統 (模擬後端回傳成功)
                                 AppState.auth.isLoggedIn = true;
                                 AppState.auth.user = 'LINE_User';
                                 AppState.auth.token = 'mock_token_for_line';
                                 
-                                document.getElementById('loginUsername').value = '';
-                                document.getElementById('loginPassword').value = '';
+                                // 正確切換視圖
+                                localStorage.setItem('currentUser', 'LINE_User');
+                                localStorage.setItem('userPlan', 'Pro');
                                 
-                                // 更新 UI
-                                document.getElementById('navReviewBtn').style.display = 'block';
-                                document.getElementById('navPastExamsBtn').style.display = 'block';
-                                document.getElementById('navLeaderboardBtn').style.display = 'block';
-                                document.getElementById('navAnalyticsBtn').style.display = 'block';
-                                document.getElementById('navTeamBtn').style.display = 'block';
-                                document.getElementById('userProfileMenu').style.display = 'flex';
-                                document.getElementById('authButtons').style.display = 'none';
-                                document.getElementById('loginView').classList.remove('active');
-                                document.getElementById('usernameDisplay').textContent = 'LINE_User';
-                                document.getElementById('avatarDisplay').textContent = '👤';
+                                AppState.auth.user = 'LINE_User';
+                                AppState.auth.token = 'mock_line_token';
                                 
                                 showView('setupView');
+                                
+                                if(document.getElementById('navWelcome')) document.getElementById('navWelcome').innerText = '👋 LINE 用戶，您好！';
+                                if(document.getElementById('quickName')) document.getElementById('quickName').innerText = 'LINE 用戶';
+                                if(document.getElementById('quickLevel')) document.getElementById('quickLevel').innerText = 'Lv.1';
+                                if(document.getElementById('quickXP')) document.getElementById('quickXP').innerText = '0 XP';
+                                
+                                const pData = { totalAnswered: 0, totalCorrect: 0, correctRate: '0%', avatar: '👤', totalXP: 0, targetYear: new Date().getFullYear(), tutorUsed: 0, essayUsed: 0, badges: '', avatarFrame: '', activityLog: '{}', teamName: '', teamCode: '' };
+                                renderGlobalProfile(pData);
+                                
+                                // 生成一些假單字假裝載入成功
+                                AppState.vocab.cache = [{word:'apple', meaning:'蘋果'}, {word:'banana', meaning:'香蕉'}];
+                                AppState.vocab.favorites.clear();
+                                AppState.vocab.cache.forEach(w => AppState.vocab.favorites.add(w.word));
+                                
+                                applyTheme();
                             });
                         }
                     }, 500);
