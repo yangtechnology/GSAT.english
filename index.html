@@ -1358,14 +1358,27 @@
                             }
                         });
                         
-                        // 這裡未來會發送 API 給 code.gs，取得真實的 ECPay URL
+                        // 這裡未來會發送 API 給 code.gs，取得真實的 ECPay 參數
                         apiCall('createOrder', { 
                             username: currentUser, 
                             plan: plan, 
                             cycle: targetCycle 
                         }).then(res => {
-                            if (res.success && res.paymentUrl) {
-                                // 真實上線時，直接導向綠界付款頁面
+                            if (res.success && res.ecpayParams) {
+                                // 綠界真實金流：建立隱藏表單並自動送出
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5';
+                                for (const key in res.ecpayParams) {
+                                    const input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = key;
+                                    input.value = res.ecpayParams[key];
+                                    form.appendChild(input);
+                                }
+                                document.body.appendChild(form);
+                                form.submit();
+                            } else if (res.success && res.paymentUrl) {
                                 window.location.href = res.paymentUrl;
                             } else {
                                 Swal.close();
@@ -2786,7 +2799,7 @@
                 isSubmittingAuth = false;
                 if(res.success){
                     const executeLogin = () => {
-                        AppState.auth.user = res.user; AppState.auth.token = res.token; localStorage.setItem('user', u); localStorage.setItem('token', res.token); localStorage.removeItem('currentUser'); Swal.close(); showView('setupView'); applyTheme(); 
+                        AppState.auth.user = res.user; AppState.auth.token = res.token; localStorage.setItem('user', u); localStorage.setItem('token', res.token); localStorage.removeItem('currentUser'); Swal.close(); window.location.reload(); 
                     };
 
                     if(res.needsEmail) {
@@ -3131,11 +3144,9 @@
         function changeVocabCard(delta) { const newIdx = AppState.vocab.cardIndex + delta; if (newIdx >= 0 && newIdx < AppState.vocab.letterList.length) { AppState.vocab.cardIndex = newIdx; const wrapper = document.getElementById('vbSlideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleVocabCard(); } }
         function toggleFavOnCard(word, meaning) { const btn = document.getElementById('cardFavBtn'); const isFav = AppState.vocab.favorites.has(word); if (isFav) { AppState.vocab.favorites.delete(word); btn.textContent = '🤍'; btn.style.color = '#cbd5e1'; } else { AppState.vocab.favorites.add(word); btn.textContent = '❤️'; btn.style.color = '#ef4444'; } apiCall('toggleFavorite', { username: AppState.auth.user, word: word, meaning: meaning, isAdding: !isFav }); }
         function loadAiForCard(pureWord) { 
-            if (!QuotaManager.canUseAiQ()) return QuotaManager.showUpgradePrompt('AI 單字解析', '您的 AI 輔助額度已達上限！升級以享有更多額度。');
-            if(!navigator.onLine) return Swal.fire('離線', 'AI 字典需要連線。', 'error'); 
+            if(!navigator.onLine) return Swal.fire('錯誤', 'AI 字典需要網路', 'error'); 
             const btn = document.getElementById(`aiBtn-${pureWord}`); const block = document.getElementById(`aiBlock-${pureWord}`); const spinner = document.getElementById(`aiSpinner-${pureWord}`); const content = document.getElementById(`aiContent-${pureWord}`); if (btn) btn.style.display = 'none'; block.style.display = 'block'; if (content.innerHTML !== '') return; 
-            QuotaManager.addAiQ();
-            apiCall('aiDictionary', { username: AppState.auth.user, word: pureWord }).then(res => { spinner.style.display = 'none'; if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>💡 詞意：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🔄 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>💬 範例：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 易混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:var(--text-muted); margin-top:5px;">⚡ 快取讀取</div>' : ''}`; content.style.display = 'block'; } else { content.innerHTML = `<span style="color:var(--danger-color);">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; } }); 
+            apiCall('aiDictionary', { username: AppState.auth.user, word: pureWord }).then(res => { spinner.style.display = 'none'; if (res.success && res.data) { content.innerHTML = `<div style="margin-bottom:8px;"><strong>📚 詞性：</strong> <span style="color:var(--primary-color);">${res.data.primary}</span></div><div style="margin-bottom:8px;"><strong>🔄 衍生：</strong> <span>${res.data.derived}</span></div><div style="margin-bottom:8px;"><strong>📝 範例：</strong> <span style="font-weight:600;">${res.data.example}</span></div><div><strong style="color:var(--danger-color);">⚠️ 易混淆：</strong> <span style="font-size:0.95em;">${res.data.confused}</span></div>${res.cached ? '<div style="text-align:right; font-size:0.7em; color:var(--text-muted); margin-top:5px;">⚡快取讀取</div>' : ''}`; content.style.display = 'block'; } else { content.innerHTML = `<span style="color:var(--danger-color);">${res.message}</span>`; content.style.display = 'block'; if (btn) btn.style.display = 'block'; } }); 
         }
 
         function gradeAiEssay() { 
