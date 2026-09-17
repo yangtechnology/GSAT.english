@@ -669,6 +669,7 @@
             
             <script>
                 function setBillingCycle(cycle) {
+                    window.currentBillingCycle = cycle;
                     const mBtn = document.getElementById('billMonthlyBtn');
                     const gBtn = document.getElementById('billGsatBtn');
                     const yBtn = document.getElementById('billYearlyBtn');
@@ -1173,38 +1174,93 @@
                 }
                 if (plan === 'Basic') {
                     localStorage.setItem('userPlan', 'Basic');
+                    localStorage.setItem('userCycle', 'monthly');
                     applyFeatureGates();
                     showView('pricingView');
                     return;
                 }
+
+                let targetCycle = window.currentBillingCycle || 'monthly';
+                let currentPlan = QuotaManager.getPlan(); 
+                let currentCycle = localStorage.getItem('userCycle') || 'monthly'; 
+                
+                // Convert plan string to weight
+                const pWeight = { 'Basic': 0, 'Pro': 10, 'Ultra': 20 };
+                // Convert cycle string to weight
+                const cWeight = { 'monthly': 1, 'gsat': 2, 'yearly': 3 };
+
+                let currentWeight = pWeight[currentPlan] + (currentPlan !== 'Basic' ? cWeight[currentCycle] : 0);
+                let targetWeight = pWeight[plan] + cWeight[targetCycle];
+
+                let targetNameTW = `${plan} ${targetCycle === 'monthly' ? '月繳' : targetCycle === 'gsat' ? '學測衝刺包' : '年繳'}`;
+                let currentNameTW = `${currentPlan} ${currentCycle === 'monthly' ? '月繳' : currentCycle === 'gsat' ? '學測衝刺包' : '年繳'}`;
+
+                let htmlText = '';
+                let confirmText = '前往綠界結帳';
+                let isDowngrade = false;
+
+                if (currentPlan === 'Basic') {
+                    htmlText = `您即將升級為 <b>${targetNameTW}</b>！<br><br>這是一筆全新訂閱，為提供最佳體驗，結帳將於安全彈出視窗進行，不會離開主網頁。`;
+                } else if (targetWeight > currentWeight) {
+                    if (currentCycle === targetCycle) {
+                        htmlText = `您即將升級為 <b>${targetNameTW}</b>！<br><br>系統將自動結算您 <b>${currentNameTW}</b> 的當期剩餘價值，並在結帳時為您<b>折抵差額</b>。升級將於結帳後立即生效！`;
+                    } else if (targetCycle === 'gsat' && currentCycle === 'gsat') {
+                        htmlText = `您即將升級為 <b>${targetNameTW}</b>！<br><br>學測衝刺包到期日不變，結帳時僅需<b>補齊方案差額</b>，升級將於結帳後立即生效！`;
+                    } else {
+                        htmlText = `您即將轉換為 <b>${targetNameTW}</b>！<br><br>您原本的 <b>${currentNameTW}</b> 剩餘價值，將按比例<b>折抵本次結帳金額</b>。新週期將於結帳後立即生效！`;
+                    }
+                } else if (targetWeight < currentWeight) {
+                    isDowngrade = true;
+                    if (currentCycle === 'gsat' || currentCycle === 'yearly') {
+                        if (targetCycle === 'monthly') {
+                            htmlText = `您目前使用的是 <b>${currentNameTW}</b> (長週期方案)。<br><br>根據不退費原則，您的降級/變更預約將在<b>當前方案到期後</b>才生效，屆時系統將自動轉為 <b>${targetNameTW}</b>。期間您仍可完整享有現有權益！`;
+                            confirmText = '確認預約變更';
+                        } else {
+                            htmlText = `您目前使用的是 <b>${currentNameTW}</b>。<br><br>您的降級預約將在<b>本期滿後生效</b>。到期前您仍可完整享有原權益，次期起將改為 <b>${targetNameTW}</b>。`;
+                            confirmText = '確認預約變更';
+                        }
+                    } else {
+                        htmlText = `您即將預約降級為 <b>${targetNameTW}</b>。<br><br>降級將於<b>下個月結算日生效</b>，在此之前您仍可享有原 <b>${currentNameTW}</b> 的完整功能。`;
+                        confirmText = '確認預約變更';
+                    }
+                } else {
+                    htmlText = `您目前已經是 <b>${currentNameTW}</b> 了！<br><br>若您需要提前續約，請點擊下方按鈕前往結帳。`;
+                    confirmText = '提前續約結帳';
+                }
                 
                 Swal.fire({
-                    title: '準備前往綠界付款',
-                    text: '為提供最佳體驗，結帳將於安全彈出視窗進行，請勿關閉主網頁。',
+                    title: '方案結算確認',
+                    html: htmlText,
                     icon: 'info',
                     showCancelButton: true,
-                    confirmButtonText: '前往結帳',
+                    confirmButtonText: confirmText,
                     cancelButtonText: '取消',
                     confirmButtonColor: '#10b981'
                 }).then((r) => {
                     if (r.isConfirmed) {
+                        if (isDowngrade) {
+                            Swal.fire('預約成功', `您的 <b>${targetNameTW}</b> 降級預約已成立，將於下期自動生效！`, 'success');
+                            return;
+                        }
+
                         const paymentWindow = window.open('', 'PaymentWindow', 'width=600,height=700,left=200,top=100');
                         paymentWindow.document.write(`
                             <html>
                             <head><title>綠界 ECPay 模擬付款</title><style>body{font-family:sans-serif;text-align:center;padding:50px; background:#f8fafc;}</style></head>
                             <body>
-                                <h2 style="color:#10b981; font-size: 2em; margin-bottom: 10px;">🛡️ 綠界 ECPay 安全付款中心</h2>
-                                <p style="font-size: 1.2em; color: #475569;">您正在購買: <strong>${plan} 方案</strong></p>
+                                <h2 style="color:#10b981; font-size: 2em; margin-bottom: 10px;">🔒 綠界 ECPay 安全付款中心</h2>
+                                <p style="font-size: 1.2em; color: #475569;">您正準備購買: <strong>${targetNameTW}</strong></p>
                                 <div style="margin: 40px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px;">
-                                    <p style="color: #64748b; margin-bottom: 30px;">請點擊下方按鈕以模擬「刷卡成功」或「取得超商代碼」並返回系統。</p>
+                                    <p style="color: #64748b; margin-bottom: 30px;">請點擊按鈕以模擬「刷卡」或「取得超商代碼」並返回系統。</p>
                                     <button onclick="simulatePaymentSuccess()" style="padding:15px 30px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:30px; font-size:1.2em; font-weight:bold; cursor:pointer; width: 100%; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">模擬付款成功 (ReturnURL)</button>
                                 </div>
                                 <script>
                                     function simulatePaymentSuccess() {
-                                        document.body.innerHTML = '<div style="margin-top: 100px;"><h2 style="color:#10b981; font-size: 2.5em;">✅ 付款成功！</h2><p style="font-size: 1.2em; color: #64748b;">正在為您升級 VIP 權限並返回系統...</p></div>';
+                                        document.body.innerHTML = '<div style="margin-top: 100px;"><h2 style="color:#10b981; font-size: 2.5em;">🎉 付款成功！</h2><p style="font-size: 1.2em; color: #64748b;">正在為您開通 VIP 權益並返回系統...</p></div>';
                                         setTimeout(() => {
                                             if (window.opener && !window.opener.closed) {
                                                 window.opener.localStorage.setItem('userPlan', '${plan}');
+                                                window.opener.localStorage.setItem('userCycle', '${targetCycle}');
                                                 window.opener.location.reload();
                                             }
                                             window.close();
