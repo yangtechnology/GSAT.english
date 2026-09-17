@@ -1358,7 +1358,23 @@
                             }
                         });
                         
-                        // 這裡未來會發送 API 給 code.gs，取得真實的 ECPay 參數
+                        const testCode = prompt("即將前往綠界付款。\n如果您是開發者測試，請輸入測試密碼 (一般用戶請留白)：");
+                        if (testCode === "0712") {
+                            Swal.close();
+                            Swal.fire({
+                                icon: 'success',
+                                title: '【測試模式】升級成功！',
+                                text: `已為您升級至 ${plan} ${targetCycle}，感謝您的支持！`,
+                                confirmButtonColor: '#3b82f6'
+                            }).then(() => {
+                                localStorage.setItem('userPlan', plan);
+                                localStorage.setItem('userCycle', targetCycle);
+                                window.location.reload();
+                            });
+                            return;
+                        }
+                        
+                        // 這裡會觸發打去 code.gs，取得真實的 ECPay 參數
                         apiCall('createOrder', { 
                             username: currentUser, 
                             plan: plan, 
