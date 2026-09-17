@@ -1479,6 +1479,9 @@
                                 form.submit();
                             } else if (res.success && res.paymentUrl) {
                                 window.location.href = res.paymentUrl;
+                            } else if (!res.success && res.message) {
+                                Swal.close();
+                                Swal.fire('錯誤', res.message, 'error');
                             } else {
                                 Swal.close();
                                 // 目前因為後端還沒接好金流，我們先保留「模擬 UI」入口讓您能繼續測試及展示
