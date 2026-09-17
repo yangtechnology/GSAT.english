@@ -961,7 +961,7 @@
                 </div>
                 <div style="text-align: center; background: white; padding: 15px 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(249,115,22,0.15);">
                     <div style="font-size: 0.9em; color: var(--text-muted); font-weight: bold; margin-bottom: 5px;">目前連續</div>
-                    <div style="font-size: 2.5em; font-weight: 900; color: #f97316;">12 <span style="font-size: 0.4em; color: var(--text-muted);">天</span></div>
+                    <div style="font-size: 2.5em; font-weight: 900; color: #f97316;"><span id="streakDaysDisplay">0</span> <span style="font-size: 0.4em; color: var(--text-muted);">天</span></div>
                 </div>
             </div>
         </div>
@@ -1920,7 +1920,12 @@
             }
             AppState.profile.level = level; AppState.profile.targetYear = resProf.targetYear;
 
-            document.getElementById('quickLevel').textContent = `Lv. ${level}`; document.getElementById('quickXP').textContent = `${xp} XP`;
+            document.getElementById('quickLevel').textContent = `Lv. ${level}`; 
+            document.getElementById('quickXP').textContent = `${xp} XP`;
+            
+            if (document.getElementById('streakDaysDisplay')) {
+                document.getElementById('streakDaysDisplay').textContent = resProf.checkInDays || 0;
+            }
             
             // Virtual Card Data
             const vcUsername = document.getElementById('vcUsernameDisplay');
@@ -2895,9 +2900,33 @@
             }
             if (AppState.quiz.isReviewMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: AppState.auth.user }).then(res => processQuizData(res)); } 
             else { 
-                const num = parseInt(document.getElementById('numQuestionsInput').value); const diff = document.getElementById('difficultySelect').value; 
+                const num = parseInt(document.getElementById('numQuestionsInput').value); 
+                const diff = document.getElementById('difficultySelect').value; 
+                const rangeType = document.getElementById('customRangeSelect').value;
+                const rangeStart = document.getElementById('rangeStart').value;
+                const rangeEnd = document.getElementById('rangeEnd').value;
+                
                 if (isNaN(num) || num < 1) return Swal.fire('錯誤', '題數無效', 'warning'); 
-                showLoading('抽取題目中...'); apiCall('getAllQuestions', { numQuestions: num, sessionToken: AppState.auth.token, mode: diff, quizType: activeMode }).then(res => processQuizData(res)); 
+                
+                // 若選擇「今日看過的單字」，且看過的數量小於選擇的題數，可以跳出提示
+                if (rangeType === 'today') {
+                    const viewedToday = JSON.parse(localStorage.getItem('vocab_viewed_' + AppState.auth.user) || '[]');
+                    if (viewedToday.length === 0) {
+                        return Swal.fire('沒有紀錄', '您今天還沒有看過任何單字喔！請先去單字書背單字。', 'warning');
+                    }
+                }
+                
+                showLoading('抽取題目中...'); 
+                apiCall('getAllQuestions', { 
+                    numQuestions: num, 
+                    sessionToken: AppState.auth.token, 
+                    mode: diff, 
+                    quizType: activeMode,
+                    customRange: rangeType,
+                    rangeStart: rangeStart,
+                    rangeEnd: rangeEnd,
+                    viewedWords: Array.from(AppState.vocab.viewed) // 傳送前端紀錄的已看過單字給後端
+                }).then(res => processQuizData(res)); 
             } 
         }
 
