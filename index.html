@@ -679,7 +679,32 @@
                 <button id="billYearlyBtn" onclick="setBillingCycle('yearly')" style="background: transparent; color: var(--text-muted); border: none; padding: 8px 24px; border-radius: 20px; font-weight: bold; font-size: 1.05em; cursor: pointer; transition: all 0.3s ease;">年繳 <span style="color:#10b981; font-size:0.9em;">(最高省 2 個月)</span></button>
             </div>
             
+            <div style="text-align: center; margin-bottom: 25px;">
+                <button onclick="promptPromoCode()" class="btn" style="background: none; border: 1.5px dashed #f59e0b; color: #f59e0b; padding: 6px 18px; font-size: 0.95em; border-radius: 20px; cursor: pointer; transition: 0.3s;">🎁 點此輸入折扣碼</button>
+                <div id="activePromoDisplay" style="display: none; margin-top: 10px; color: #10b981; font-weight: bold; font-size: 0.95em;"></div>
+            </div>
+            
             <script>
+                window.currentPromoCode = "";
+                window.promptPromoCode = function() {
+                    Swal.fire({
+                        title: '輸入折扣碼',
+                        input: 'text',
+                        inputPlaceholder: '請輸入您的專屬折扣碼',
+                        showCancelButton: true,
+                        confirmButtonText: '套用',
+                        cancelButtonText: '取消',
+                        confirmButtonColor: '#f59e0b'
+                    }).then((result) => {
+                        if (result.isConfirmed && result.value) {
+                            window.currentPromoCode = result.value.trim().toUpperCase();
+                            document.getElementById('activePromoDisplay').style.display = 'block';
+                            document.getElementById('activePromoDisplay').innerText = `✅ 已套用折扣碼：${window.currentPromoCode} (將於結帳時生效)`;
+                            Swal.fire({icon: 'success', title: '折扣碼已記錄', text: '請選擇下方方案，系統將在結帳時自動為您計算專屬優惠！', timer: 2000, showConfirmButton: false});
+                        }
+                    });
+                }
+                
                 function setBillingCycle(cycle) {
                     window.currentBillingCycle = cycle;
                     const mBtn = document.getElementById('billMonthlyBtn');
@@ -1378,9 +1403,22 @@
                         apiCall('createOrder', { 
                             username: currentUser, 
                             plan: plan, 
-                            cycle: targetCycle 
+                            cycle: targetCycle,
+                            promoCode: window.currentPromoCode || ''
                         }).then(res => {
-                            if (res.success && res.ecpayParams) {
+                            if (res.success && res.isFreeUpgrade) {
+                                Swal.close();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '🎉 免費升級成功！',
+                                    text: `已使用折扣碼為您免費升級至 ${plan}，歡迎體驗！`,
+                                    confirmButtonColor: '#3b82f6'
+                                }).then(() => {
+                                    localStorage.setItem('userPlan', plan);
+                                    localStorage.setItem('userCycle', targetCycle);
+                                    window.location.reload();
+                                });
+                            } else if (res.success && res.ecpayParams) {
                                 // 綠界真實金流：建立隱藏表單並自動送出
                                 const form = document.createElement('form');
                                 form.method = 'POST';
