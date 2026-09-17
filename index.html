@@ -873,36 +873,6 @@
             </div>
             <p class="subtitle">收錄大考中心標準字彙。點選等級後透過 A-Z 篩選單字卡。</p>
             <div id="vocabHomeGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(1)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">🌿 Level 1</span><span style="font-size:0.8em; color:var(--text-muted);">升高中必背</span></div>
-                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:100%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
-                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 100%</div>
-                </div>
-                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(2)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">🍃 Level 2</span><span style="font-size:0.8em; color:var(--text-muted);">升高中必背</span></div>
-                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:68%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
-                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 68%</div>
-                </div>
-                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(3)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📘 Level 3</span><span style="font-size:0.8em; color:var(--text-muted);">高中基礎</span></div>
-                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:42%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
-                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 42%</div>
-                </div>
-                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(4)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📙 Level 4</span><span style="font-size:0.8em; color:var(--text-muted);">學測常考</span></div>
-                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:15%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
-                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 15%</div>
-                </div>
-                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(5)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📕 Level 5</span><span style="font-size:0.8em; color:var(--text-muted);">學測常考(進階)</span></div>
-                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:0%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
-                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 0%</div>
-                </div>
-                <div class="vocab-cat-btn" style="flex-direction: column; align-items: flex-start; padding: 15px;" onclick="loadVocabLevel(6)">
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">📓 Level 6</span><span style="font-size:0.8em; color:var(--text-muted);">學測進階</span></div>
-                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:0%; height:100%; background:var(--primary-color); border-radius:3px;"></div></div>
-                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 0%</div>
-                </div>
                 <div class="vocab-cat-btn" style="justify-content: center;" onclick="openVocabSearch()"><span class="cat-icon">🔍</span>找單字</div>
                 <div class="vocab-cat-btn" style="justify-content: center;" onclick="loadVocabFavorites()"><span class="cat-icon">❤️</span>不熟單字</div>
                 <div class="vocab-cat-btn" style="justify-content: center;" onclick="addCustomVocab()"><span class="cat-icon">➕</span>新增單字</div>
@@ -1277,10 +1247,26 @@
             quiz: { data: [], currentIndex: 0, answers: {}, total: 0, isReviewMode: false, timer: null, isSubmitting: false, spellTemplate: [] },
             exam: { data: null, timer: null, endTime: 0, answers: {} },
             review: { cards: [], currentIndex: 0, isFlashcardMode: true },
-            vocab: { level: 0, list: [], letterList: [], cardIndex: 0, favorites: new Set(), cache: [] },
+            vocab: { level: 0, list: [], letterList: [], cardIndex: 0, favorites: new Set(), cache: [], viewed: new Set() },
             sys: { leaderboard: [], teamLeaderboard: [], isDarkMode: localStorage.getItem('darkMode') === 'true', currentTeam: null },
             chat: { history: [], replyingTo: null, contextMsgId: null, isSyncing: false }
         };
+
+        function markWordAsViewed(word) {
+            if (!word) return;
+            if (!AppState.vocab.viewed.has(word)) {
+                AppState.vocab.viewed.add(word);
+                const userForSync = AppState.auth.user || localStorage.getItem('user') || 'Guest';
+                localStorage.setItem('vocab_viewed_' + userForSync, JSON.stringify([...AppState.vocab.viewed]));
+                
+                if (userForSync !== 'Guest' && userForSync !== '訪客' && userForSync !== 'LINE_User') {
+                    if (window.vocabSyncTimer) clearTimeout(window.vocabSyncTimer);
+                    window.vocabSyncTimer = setTimeout(() => {
+                        apiCall('syncVocabProgress', { username: userForSync, viewedWords: [...AppState.vocab.viewed] });
+                    }, 3000);
+                }
+            }
+        }
 
         const QuotaManager = {
             getPlan: () => localStorage.getItem('userPlan') || 'Basic',
@@ -1362,33 +1348,34 @@
                             return;
                         }
 
-                        const paymentWindow = window.open('', 'PaymentWindow', 'width=600,height=700,left=200,top=100');
-                        paymentWindow.document.write(`
-                            <html>
-                            <head><title>綠界 ECPay 模擬付款</title><style>body{font-family:sans-serif;text-align:center;padding:50px; background:#f8fafc;}</style></head>
-                            <body>
-                                <h2 style="color:#10b981; font-size: 2em; margin-bottom: 10px;">🔒 綠界 ECPay 安全付款中心</h2>
-                                <p style="font-size: 1.2em; color: #475569;">您正準備購買: <strong>${targetNameTW}</strong></p>
-                                <div style="margin: 40px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px;">
-                                    <p style="color: #64748b; margin-bottom: 30px;">請點擊按鈕以模擬「刷卡」或「取得超商代碼」並返回系統。</p>
-                                    <button onclick="simulatePaymentSuccess()" style="padding:15px 30px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:30px; font-size:1.2em; font-weight:bold; cursor:pointer; width: 100%; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">模擬付款成功 (ReturnURL)</button>
-                                </div>
-                                <script>
-                                    function simulatePaymentSuccess() {
-                                        document.body.innerHTML = '<div style="margin-top: 100px;"><h2 style="color:#10b981; font-size: 2.5em;">🎉 付款成功！</h2><p style="font-size: 1.2em; color: #64748b;">正在為您開通 VIP 權益並返回系統...</p></div>';
-                                        setTimeout(() => {
-                                            if (window.opener && !window.opener.closed) {
-                                                window.opener.localStorage.setItem('userPlan', '${plan}');
-                                                window.opener.localStorage.setItem('userCycle', '${targetCycle}');
-                                                window.opener.location.reload();
-                                            }
-                                            window.close();
-                                        }, 1500);
-                                    }
-                                <\/script>
-                            </body>
-                            </html>
-                        `);
+                        // 準備串接真實綠界 ECPay
+                        Swal.fire({
+                            title: '建立訂單中',
+                            text: '正在與伺服器連線以產生綠界付款連結...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        
+                        // 這裡未來會發送 API 給 code.gs，取得真實的 ECPay URL
+                        apiCall('createOrder', { 
+                            username: currentUser, 
+                            plan: plan, 
+                            cycle: targetCycle 
+                        }).then(res => {
+                            if (res.success && res.paymentUrl) {
+                                // 真實上線時，直接導向綠界付款頁面
+                                window.location.href = res.paymentUrl;
+                            } else {
+                                // 目前因為後端還沒接好金流，我們先保留一個「模擬」入口讓您能繼續測試 UI
+                                Swal.fire('模擬模式', '後端金流 API 尚未實作。<br>此處將直接跳轉為模擬付款成功。', 'info').then(() => {
+                                    localStorage.setItem('userPlan', plan);
+                                    localStorage.setItem('userCycle', targetCycle);
+                                    window.location.reload();
+                                });
+                            }
+                        });
                     }
                 });
             },
@@ -1727,6 +1714,13 @@
             if (!navigator.onLine) document.getElementById('offlineBanner').style.display = 'block';
             let savedUser = localStorage.getItem('user');
             if (savedUser && savedUser !== 'null') document.getElementById('loginUsername').value = savedUser;
+
+            // 載入已看過的單字
+            const userForSync = AppState.auth.user || savedUser || 'Guest';
+            try {
+                const savedViewed = JSON.parse(localStorage.getItem('vocab_viewed_' + userForSync) || '[]');
+                savedViewed.forEach(w => AppState.vocab.viewed.add(w));
+            } catch(e) {}
 
             const promises = []; 
             // 🚀 動畫完整播完再隱藏
@@ -2658,7 +2652,12 @@
             showLoading('註冊中...'); 
             let tYear = calculateTargetYear(gradeOffset);
             
-            apiCall('registerUser', { username: u, password: p, targetYear: tYear, email: eMail }).then(res => {
+            const payload = { username: u, password: p, targetYear: tYear, email: eMail };
+            if (AppState.auth.pendingLineUid) {
+                payload.lineUid = AppState.auth.pendingLineUid;
+            }
+            
+            apiCall('registerUser', payload).then(res => {
                 isSubmittingAuth = false;
                 if(res.success){
                     Swal.fire('成功','註冊成功！請登入','success');
@@ -2670,7 +2669,7 @@
 
         function simulateLineLogin() {
             Swal.fire({
-                title: 'LINE 授權登入',
+                title: 'LINE 一鍵登入',
                 text: '即將前往 LINE 進行安全授權...',
                 icon: 'info',
                 showCancelButton: true,
@@ -2692,46 +2691,47 @@
                         return;
                     }
                     
-                    // 監控彈出視窗是否被關閉
-                    const checkClosed = setInterval(function() {
-                        if (popup.closed) {
-                            clearInterval(checkClosed);
-                            Swal.fire({
-                                title: 'LINE 驗證成功', 
-                                text: '已自動獲取您的帳號資料！', 
-                                icon: 'success'
-                            }).then(() => {
-                                // 為了純前端展示，這裡直接強制進入系統 (模擬後端回傳成功)
-                                AppState.auth.isLoggedIn = true;
-                                AppState.auth.user = 'LINE_User';
-                                AppState.auth.token = 'mock_token_for_line';
+                    // 監聽來自彈出視窗的訊息 (真實驗證)
+                    const messageListener = function(event) {
+                        try {
+                            if (typeof event.data === 'string' && event.data.startsWith('LINE_LOGIN_RESULT:')) {
+                                window.removeEventListener('message', messageListener);
+                                const data = JSON.parse(event.data.replace('LINE_LOGIN_RESULT:', ''));
                                 
-                                // 正確切換視圖
-                                localStorage.setItem('currentUser', 'LINE_User');
-                                localStorage.setItem('userPlan', 'Pro');
-                                
-                                AppState.auth.user = 'LINE_User';
-                                AppState.auth.token = 'mock_line_token';
-                                
-                                showView('setupView');
-                                
-                                if(document.getElementById('navWelcome')) document.getElementById('navWelcome').innerText = '👋 LINE 用戶，您好！';
-                                if(document.getElementById('quickName')) document.getElementById('quickName').innerText = 'LINE 用戶';
-                                if(document.getElementById('quickLevel')) document.getElementById('quickLevel').innerText = 'Lv.1';
-                                if(document.getElementById('quickXP')) document.getElementById('quickXP').innerText = '0 XP';
-                                
-                                const pData = { totalAnswered: 0, totalCorrect: 0, correctRate: '0%', avatar: '👤', totalXP: 0, targetYear: new Date().getFullYear(), tutorUsed: 0, essayUsed: 0, badges: '', avatarFrame: '', activityLog: '{}', teamName: '', teamCode: '' };
-                                renderGlobalProfile(pData);
-                                
-                                // 生成一些假單字假裝載入成功
-                                AppState.vocab.cache = [{word:'apple', meaning:'蘋果'}, {word:'banana', meaning:'香蕉'}];
-                                AppState.vocab.favorites.clear();
-                                AppState.vocab.cache.forEach(w => AppState.vocab.favorites.add(w.word));
-                                
-                                applyTheme();
-                            });
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'LINE 驗證成功', 
+                                        text: '歡迎回來！', 
+                                        icon: 'success'
+                                    }).then(() => {
+                                        AppState.auth.isLoggedIn = true;
+                                        AppState.auth.user = data.user;
+                                        AppState.auth.token = data.token;
+                                        
+                                        localStorage.setItem('user', data.user); 
+                                        localStorage.setItem('token', data.token); 
+                                        localStorage.removeItem('currentUser'); 
+                                        
+                                        document.getElementById('loginUsername').value = '';
+                                        document.getElementById('loginPassword').value = '';
+                                        
+                                        showView('setupView');
+                                        applyTheme();
+                                    });
+                                } else if (data.isNewLine) {
+                                    Swal.fire('LINE 綁定', '這是您第一次使用此 LINE 帳號登入系統。<br>請完成帳號註冊（或登入既有帳號），系統將自動為您綁定！', 'info').then(() => {
+                                        AppState.auth.pendingLineUid = data.lineUid;
+                                        showView('registerView');
+                                    });
+                                } else {
+                                    Swal.fire('登入失敗', data.message || '未知錯誤', 'error');
+                                }
+                            }
+                        } catch (e) {
+                            console.error('解析 LINE 登入訊息失敗:', e);
                         }
-                    }, 500);
+                    };
+                    window.addEventListener('message', messageListener);
                 }
             });
         }
@@ -2743,9 +2743,14 @@
             const p = document.getElementById('loginPassword').value; 
             if(!u || !p) return Swal.fire('錯誤','請輸入帳號與密碼','warning');
             isSubmittingAuth = true;
-            showLoading('驗證憑證中...'); 
+            showLoading('驗證中...'); 
             
-            apiCall('loginUser', { username: u, password: p }).then(res => {
+            const payload = { username: u, password: p };
+            if (AppState.auth.pendingLineUid) {
+                payload.lineUid = AppState.auth.pendingLineUid;
+            }
+            
+            apiCall('loginUser', payload).then(res => {
                 isSubmittingAuth = false;
                 if(res.success){
                     const executeLogin = () => {
@@ -2963,9 +2968,47 @@
         function updateNavButtons() { const isLast = AppState.quiz.currentIndex === AppState.quiz.data.length - 1; document.getElementById('prevButton').disabled = AppState.quiz.currentIndex === 0; const nextBtn = document.getElementById('nextButton'); nextBtn.textContent = isLast ? '交卷送出' : '下一題'; nextBtn.className = isLast ? 'btn btn-success' : 'btn btn-primary'; }
         function submitQuiz() { document.getElementById('nextButton').disabled = true; const q = AppState.quiz.data[AppState.quiz.currentIndex]; if (q.qType === 'spell') AppState.quiz.answers[q.id] = getSpellAnswer(); const unans = AppState.quiz.data.length - Object.keys(AppState.quiz.answers).filter(k => AppState.quiz.answers[k].trim() !== '').length; if (unans > 0) { Swal.fire({ title: `還有 ${unans} 題未完整作答！`, text: '確定要提早交卷嗎？', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '確定交卷', cancelButtonText: '繼續作答' }).then(r => { if(r.isConfirmed) { processSubmit(); } else { document.getElementById('nextButton').disabled = false; } }); } else { processSubmit(); } }
         function loadVocabFavorites() { AppState.vocab.level = 0; document.getElementById('vocabHomeGrid').style.display = 'none'; const renderFavs = (list) => { if (list.length === 0) { Swal.fire('空空如也', '目前還沒有收藏任何單字喔！', 'info'); backToVocabHome(); } else { AppState.vocab.letterList = list; AppState.vocab.cardIndex = 0; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').style.display = 'inline-block'; document.getElementById('vbBackToAzBtn').textContent = '返回首頁'; renderSingleVocabCard(); } }; if (AppState.vocab.cache && AppState.vocab.cache.length > 0) { renderFavs(AppState.vocab.cache); } else { document.getElementById('vocabLoading').style.display = 'block'; } if(!navigator.onLine) return document.getElementById('vocabLoading').style.display = 'none'; apiCall('getFavorites', { username: AppState.auth.user }).then(res => { document.getElementById('vocabLoading').style.display = 'none'; if (res.success) { AppState.vocab.favorites.clear(); res.words.forEach(w => AppState.vocab.favorites.add(w.word)); AppState.vocab.cache = res.words; if (document.getElementById('vocabFlashcardArea').style.display === 'none' && !document.getElementById('vocabHomeGrid').style.display.includes('grid')) { renderFavs(res.words); } } }); }
-        function backToVocabHome() { document.getElementById('vocabHomeGrid').style.display = 'grid'; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'none'; }
+        function backToVocabHome() { renderVocabLevels(); document.getElementById('vocabHomeGrid').style.display = 'grid'; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'none'; }
         function backToAzGrid() { if (AppState.vocab.level === 0) backToVocabHome(); else { document.getElementById('vocabFlashcardArea').style.display = 'none'; document.getElementById('vocabNavArea').style.display = 'block'; } }
         function loadVocabLevel(level) { AppState.vocab.level = level; document.getElementById('vocabHomeGrid').style.display = 'none'; document.getElementById('vocabLoading').style.display = 'block'; apiCall('getVocabByLevel', { level }).then(res => { document.getElementById('vocabLoading').style.display = 'none'; if (res.success && res.words.length > 0) { AppState.vocab.list = res.words; renderAzGrid(level); } else { Swal.fire('讀取失敗', '此級別尚無單字', 'error'); backToVocabHome(); } }); }
+        function renderVocabLevels() {
+            const container = document.getElementById('vocabHomeGrid');
+            if (!container) return;
+            // 保留最後三個固定按鈕，先移除前面的 level-card
+            Array.from(container.children).forEach(child => {
+                if (!child.innerHTML.includes('找單字') && !child.innerHTML.includes('不熟單字') && !child.innerHTML.includes('新增單字')) {
+                    container.removeChild(child);
+                }
+            });
+
+            const levels = [
+                { id: 1, icon: '🌿', title: 'Level 1', desc: '升高中必背' },
+                { id: 2, icon: '🍃', title: 'Level 2', desc: '升高中必背' },
+                { id: 3, icon: '📘', title: 'Level 3', desc: '高中基礎' },
+                { id: 4, icon: '📙', title: 'Level 4', desc: '學測常考' },
+                { id: 5, icon: '📕', title: 'Level 5', desc: '學測常考(進階)' },
+                { id: 6, icon: '📓', title: 'Level 6', desc: '學測進階' }
+            ];
+            
+            // 將等級卡片插入到最前面
+            levels.reverse().forEach(lvl => {
+                let total = AppState.vocab.list.filter(w => w.level === lvl.id).length;
+                let viewed = AppState.vocab.list.filter(w => w.level === lvl.id && AppState.vocab.viewed.has(getPureWord(w.word))).length;
+                let progress = total > 0 ? Math.round((viewed / total) * 100) : 0;
+                
+                const el = document.createElement('div');
+                el.className = 'vocab-cat-btn';
+                el.style.cssText = 'flex-direction: column; align-items: flex-start; padding: 15px; cursor: pointer;';
+                el.onclick = () => loadVocabLevel(lvl.id);
+                el.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">${lvl.icon} ${lvl.title}</span><span style="font-size:0.8em; color:var(--text-muted);">${lvl.desc}</span></div>
+                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:${progress}%; height:100%; background:var(--primary-color); border-radius:3px; transition:width 0.3s;"></div></div>
+                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 ${progress}%</div>
+                `;
+                container.insertBefore(el, container.firstChild);
+            });
+        }
+
         function renderAzGrid(level) { 
             document.getElementById('vocabListTitle').textContent = `Level ${level} 詞庫`; 
             document.getElementById('vocabNavArea').style.display = 'block'; 
@@ -2976,7 +3019,12 @@
                 const char = String.fromCharCode(i); 
                 const btn = document.createElement('button'); 
                 
-                let progress = existingLetters.has(char) ? Math.floor(Math.random() * 60 + 20) : 0; // Mockup progress
+                let progress = 0;
+                if (existingLetters.has(char)) {
+                    let letterTotal = AppState.vocab.list.filter(w => w.firstLetter === char).length;
+                    let letterViewed = AppState.vocab.list.filter(w => w.firstLetter === char && AppState.vocab.viewed.has(getPureWord(w.word))).length;
+                    progress = letterTotal > 0 ? Math.round((letterViewed / letterTotal) * 100) : 0;
+                }
                 
                 if (existingLetters.has(char)) { 
                     btn.className = 'az-btn'; 
@@ -3048,7 +3096,7 @@
         function showLetterCards(letter) { AppState.vocab.letterList = AppState.vocab.list.filter(w => w.firstLetter === letter); AppState.vocab.cardIndex = 0; document.getElementById('vocabNavArea').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').style.display = 'inline-block'; renderSingleVocabCard(); }
         function openVocabSearch() { AppState.vocab.level = 0; Swal.fire({ title: '🔍 查單字', input: 'text', inputPlaceholder: '請輸入想查詢的單字', showCancelButton: true, confirmButtonText: '使用 AI 查詢', background: 'var(--card-bg)', color: 'var(--text-main)' }).then((result) => { if (result.isConfirmed && result.value) { AppState.vocab.letterList = [{ word: result.value, pureWord: getPureWord(result.value), meaning: '點擊展開 AI 解析' }]; AppState.vocab.cardIndex = 0; document.getElementById('vocabHomeGrid').style.display = 'none'; document.getElementById('vocabFlashcardArea').style.display = 'block'; document.getElementById('vbBackToAzBtn').textContent = '返回單字書首頁'; renderSingleVocabCard(); setTimeout(() => { document.getElementById('vbContainer').classList.add('flipped'); loadAiForCard(AppState.vocab.letterList[0].pureWord); }, 500); } }); }
         function addCustomVocab() { Swal.fire({ title: '✍️ 加入自訂單字', html: '<input id="swal-word" class="swal2-input" placeholder="英文單字">' + '<input id="swal-meaning" class="swal2-input" placeholder="中文意思 (選填)">', focusConfirm: false, showCancelButton: true, confirmButtonText: '加入我的不熟單字', background: 'var(--card-bg)', color: 'var(--text-main)', preConfirm: () => { const w = document.getElementById('swal-word').value.trim(); if (!w) Swal.showValidationMessage('單字不能為空！'); return { word: w, meaning: document.getElementById('swal-meaning').value.trim() }; } }).then((result) => { if (result.isConfirmed) { const { word, meaning } = result.value; apiCall('toggleFavorite', { username: AppState.auth.user, word: word, meaning: meaning, isAdding: true }).then(() => { AppState.vocab.favorites.add(word); Swal.fire('已加入', '', 'success'); }); } }); }
-        function renderSingleVocabCard() { try { if (AppState.vocab.letterList.length === 0) return; const q = AppState.vocab.letterList[AppState.vocab.cardIndex]; const area = document.getElementById('vbCardContainer'); document.getElementById('vbCounter').textContent = `${AppState.vocab.cardIndex + 1} / ${AppState.vocab.letterList.length}`; document.getElementById('vbPrev').disabled = AppState.vocab.cardIndex === 0; document.getElementById('vbNext').disabled = AppState.vocab.cardIndex === AppState.vocab.letterList.length - 1; const isFav = AppState.vocab.favorites.has(q.word); const cleanWord = getPureWord(q.word); const safeEnWord = cleanWord.replace(/'/g, "\\'"); area.innerHTML = `<div class="flashcard-container" id="vbContainer" onclick="this.classList.toggle('flipped')"><div class="flashcard-inner"><div class="flashcard-front"><button class="speak-btn" style="position:absolute; top:15px; right:15px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><button style="position:absolute; top:15px; left:15px; background:none; border:none; font-size:1.8em; cursor:pointer; color:${isFav?'#ef4444':'#cbd5e1'};" onclick="event.stopPropagation(); toggleFavOnCard('${q.word}', '${q.meaning}')" id="cardFavBtn">${isFav?'❤️':'🤍'}</button><div class="fc-word">${cleanWord}</div><div class="fc-hint">點擊翻面</div></div><div class="flashcard-back" style="overflow-y: auto;"><div class="fc-word" style="font-size:1.5em; margin-bottom:5px;">${q.meaning}</div><div id="aiBlock-${q.pureWord}" style="margin-top:15px; width:100%; text-align:left; font-size:0.9em; line-height:1.5; display:none;"><div id="aiSpinner-${q.pureWord}" style="text-align:center;"><div class="spinner" style="width:25px;height:25px;border-width:2px;"></div></div><div id="aiContent-${q.pureWord}" style="display:none; color: var(--text-main);"></div></div><button class="btn btn-secondary" style="margin-top: 15px; padding: 8px 15px; font-size:0.9em; width:auto;" onclick="event.stopPropagation(); loadAiForCard('${q.pureWord}')" id="aiBtn-${q.pureWord}">🤖 展開 AI 深度解析</button></div></div></div>`; const cardElement = document.getElementById('vbContainer'); cardElement.addEventListener('touchstart', e => { AppState.sys.touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { AppState.sys.touchEndX = e.changedTouches[0].screenX; if (AppState.sys.touchEndX < AppState.sys.touchStartX - 40 && AppState.vocab.cardIndex < AppState.vocab.letterList.length - 1) document.getElementById('vbNext').click(); if (AppState.sys.touchEndX > AppState.sys.touchStartX + 40 && AppState.vocab.cardIndex > 0) document.getElementById('vbPrev').click(); }, {passive: true}); } catch(e) { console.error(e); } }
+        function renderSingleVocabCard() { try { if (AppState.vocab.letterList.length === 0) return; const q = AppState.vocab.letterList[AppState.vocab.cardIndex]; const area = document.getElementById('vbCardContainer'); document.getElementById('vbCounter').textContent = `${AppState.vocab.cardIndex + 1} / ${AppState.vocab.letterList.length}`; document.getElementById('vbPrev').disabled = AppState.vocab.cardIndex === 0; document.getElementById('vbNext').disabled = AppState.vocab.cardIndex === AppState.vocab.letterList.length - 1; const isFav = AppState.vocab.favorites.has(q.word); const cleanWord = getPureWord(q.word); const safeEnWord = cleanWord.replace(/'/g, "\\'"); markWordAsViewed(cleanWord); area.innerHTML = `<div class="flashcard-container" id="vbContainer" onclick="this.classList.toggle('flipped')"><div class="flashcard-inner"><div class="flashcard-front"><button class="speak-btn" style="position:absolute; top:15px; right:15px;" onclick="event.stopPropagation(); speakWord('${safeEnWord}')">🔊</button><button style="position:absolute; top:15px; left:15px; background:none; border:none; font-size:1.8em; cursor:pointer; color:${isFav?'#ef4444':'#cbd5e1'};" onclick="event.stopPropagation(); toggleFavOnCard('${q.word}', '${q.meaning}')" id="cardFavBtn">${isFav?'❤️':'🤍'}</button><div class="fc-word">${cleanWord}</div><div class="fc-hint">點擊翻面</div></div><div class="flashcard-back" style="overflow-y: auto;"><div class="fc-word" style="font-size:1.5em; margin-bottom:5px;">${q.meaning}</div><div id="aiBlock-${q.pureWord}" style="margin-top:15px; width:100%; text-align:left; font-size:0.9em; line-height:1.5; display:none;"><div id="aiSpinner-${q.pureWord}" style="text-align:center;"><div class="spinner" style="width:25px;height:25px;border-width:2px;"></div></div><div id="aiContent-${q.pureWord}" style="display:none; color: var(--text-main);"></div></div><button class="btn btn-secondary" style="margin-top: 15px; padding: 8px 15px; font-size:0.9em; width:auto;" onclick="event.stopPropagation(); loadAiForCard('${q.pureWord}')" id="aiBtn-${q.pureWord}">✨ 展開 AI 深度解析</button></div></div></div>`; const cardElement = document.getElementById('vbContainer'); cardElement.addEventListener('touchstart', e => { AppState.sys.touchStartX = e.changedTouches[0].screenX; }, {passive: true}); cardElement.addEventListener('touchend', e => { AppState.sys.touchEndX = e.changedTouches[0].screenX; if (AppState.sys.touchEndX < AppState.sys.touchStartX - 40 && AppState.vocab.cardIndex < AppState.vocab.letterList.length - 1) document.getElementById('vbNext').click(); if (AppState.sys.touchEndX > AppState.sys.touchStartX + 40 && AppState.vocab.cardIndex > 0) document.getElementById('vbPrev').click(); }, {passive: true}); } catch(e) { console.error(e); } }
         function changeVocabCard(delta) { const newIdx = AppState.vocab.cardIndex + delta; if (newIdx >= 0 && newIdx < AppState.vocab.letterList.length) { AppState.vocab.cardIndex = newIdx; const wrapper = document.getElementById('vbSlideWrapper'); wrapper.classList.remove('slide-left', 'slide-right'); void wrapper.offsetWidth; wrapper.classList.add(delta > 0 ? 'slide-left' : 'slide-right'); renderSingleVocabCard(); } }
         function toggleFavOnCard(word, meaning) { const btn = document.getElementById('cardFavBtn'); const isFav = AppState.vocab.favorites.has(word); if (isFav) { AppState.vocab.favorites.delete(word); btn.textContent = '🤍'; btn.style.color = '#cbd5e1'; } else { AppState.vocab.favorites.add(word); btn.textContent = '❤️'; btn.style.color = '#ef4444'; } apiCall('toggleFavorite', { username: AppState.auth.user, word: word, meaning: meaning, isAdding: !isFav }); }
         function loadAiForCard(pureWord) { 
