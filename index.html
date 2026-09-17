@@ -571,6 +571,10 @@
         </div>
 
         <div class="nav-right-group" id="navToolsGroup">
+            <!-- 增加連續打卡徽章 -->
+            <div id="navStreakBadge" style="display: flex; align-items: center; gap: 6px; color: #f97316; font-weight: 800; font-size: 1.05em; background: rgba(249,115,22,0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(249,115,22,0.2); cursor: pointer; transition: 0.2s;" title="連續學習天數 (中斷可是會很痛的喔！)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                🔥 <span id="streakCount">12</span> <span style="font-size: 0.7em; opacity: 0.8; margin-top: 2px;">天</span>
+            </div>
             <button class="premium-vip-btn" onclick="showView('pricingView')">💎 <span class="premium-vip-text">升級 VIP</span></button>
             <div class="nav-quick-info" id="navQuickInfo">
                 <span id="quickName" class="quick-item desktop-only"></span>
@@ -647,10 +651,21 @@
             <div class="input-group"><input type="text" id="loginUsername" placeholder="帳號 (Username)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleLogin(); }" required></div>
             <div class="input-group"><input type="password" id="loginPassword" placeholder="密碼 (Password)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleLogin(); }" required></div>
             <button class="btn btn-primary" onclick="handleLogin()">安全登入</button>
-            <button class="btn btn-secondary" onclick="showView('registerView')">建立新帳號</button>
+            
+            <div style="margin: 20px 0; display:flex; align-items:center; text-align:center; color:var(--text-muted); font-size:0.9em;">
+                <div style="flex:1; height:1px; background:var(--border-color);"></div>
+                <div style="padding: 0 10px;">或</div>
+                <div style="flex:1; height:1px; background:var(--border-color);"></div>
+            </div>
+            
+            <button class="btn" style="background: #06C755; color: white; border: none; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="simulateLineLogin()">
+                <span style="font-weight: 900; font-size: 1.2em;">LINE</span> 使用 LINE 一鍵登入
+            </button>
+            
+            <button class="btn btn-secondary" onclick="showView('registerView')" style="margin-top: 15px;">建立新帳號</button>
             
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
-                <button class="btn btn-success" onclick="handleGuestLogin()">👀 訪客模式 (免登入體驗)</button>
+                <button class="btn btn-success" onclick="handleGuestLogin()">🏃 訪客模式 (免登入)</button>
             </div>
 
             <button class="btn btn-outline" style="border: none; font-size: 0.9em; margin-top: 10px;" onclick="handleForgotPassword()">忘記密碼？點此重置</button>
@@ -1075,7 +1090,39 @@
             </div>
             
             <div class="profile-card">
-                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">🎓 學籍與帳號安全</h3>
+                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">💬 LINE 推播與通知綁定</h3>
+                <div style="background: rgba(6, 199, 85, 0.05); border: 1px solid rgba(6, 199, 85, 0.3); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="background: #06C755; color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5em; font-weight: bold;">L</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; font-size: 1.1em; color: var(--text-main);">綁定 LINE 官方帳號</div>
+                            <div style="font-size: 0.85em; color: var(--text-muted); margin-top: 5px;">開啟每日「50 題重置」推播提醒，維持打卡連續天數不中斷！</div>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #06C755; color: white; border: none; font-weight: bold; margin: 0;" onclick="simulateLineBind()" id="btnLineBind">立即綁定並開啟推播</button>
+                </div>
+            </div>
+
+            <script>
+                function simulateLineBind() {
+                    let btn = document.getElementById('btnLineBind');
+                    if (btn.innerText.includes('已綁定')) {
+                        Swal.fire('已解除綁定', '您已取消接收 LINE 每日學習推播。', 'info');
+                        btn.innerText = '立即綁定並開啟推播';
+                        btn.style.background = '#06C755';
+                        btn.style.color = 'white';
+                    } else {
+                        Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天會收到「今日測驗已重置」與「學習打卡提醒」喔！', 'success');
+                        btn.innerText = '✅ 已綁定 (點擊解除)';
+                        btn.style.background = 'var(--card-bg)';
+                        btn.style.color = 'var(--text-muted)';
+                        btn.style.border = '1px solid var(--border-color)';
+                    }
+                }
+            </script>
+
+            <div class="profile-card">
+                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">👤 學習與帳號設定</h3>
                 <div class="input-group">
                     <label>目前年級狀態</label>
                     <div id="profCurrentGrade" style="font-weight:bold; color:var(--primary-color); margin-bottom:10px; font-size:1.1em; background:var(--bg-color); padding:10px; border-radius:8px;">讀取中...</div>
@@ -2549,6 +2596,24 @@
             }).catch(() => { isSubmittingAuth = false; }); 
         }
 
+        function simulateLineLogin() {
+            Swal.fire({
+                title: 'LINE 授權登入',
+                text: '將導向 LINE 官方授權頁面。授權後將自動登入系統。',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: '模擬授權成功',
+                cancelButtonText: '取消',
+                confirmButtonColor: '#06C755'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    document.getElementById('loginUsername').value = 'user123';
+                    document.getElementById('loginPassword').value = '1234';
+                    handleLogin();
+                }
+            });
+        }
+
         function handleLogin() { 
             if(isSubmittingAuth) return;
             if(!navigator.onLine) return Swal.fire('斷線', '登入需要連線。', 'error');
@@ -2692,8 +2757,13 @@
                 }); 
                 
                 let hasBonus = false; if (correctCount === AppState.quiz.total && AppState.quiz.total >= 10 && !AppState.quiz.isReviewMode) { hasBonus = true; } 
-                if (correctCount === AppState.quiz.total && AppState.quiz.total >= 5 && !AppState.quiz.isReviewMode && AppState.auth.user !== '訪客') { Swal.fire('太神啦！', '滿分通關！', 'success'); } 
-                else if (AppState.quiz.isReviewMode && correctCount > 0) { Swal.fire('記憶引擎啟動！', `SM-2 已將 ${correctCount} 題推進下一個複習階段！`, 'success'); } 
+                if (AppState.quiz.isReviewMode) {
+                    if (correctCount > 0) Swal.fire('記憶引擎啟動', `SM-2 已將 ${correctCount} 題推進至下一複習階段。`, 'success');
+                } else if (AppState.auth.user !== '訪客' && AppState.quiz.total >= 5) {
+                    let wrongCount = AppState.quiz.total - correctCount;
+                    let msg = wrongCount > 0 ? `🎯 <b>今日目標已達成！</b><br><br>我們已為您將 <b style="color:#ef4444; font-size:1.2em;">${wrongCount}</b> 個易錯單字加入明天的「智慧複習池」。<br><br><span style="font-size:0.85em; color:var(--text-muted);">💡 記得綁定 LINE 推播提醒，明天準時回來複習！中斷打卡可是會很痛的喔！</span>` : `🎯 <b>今日目標已達成！</b><br><br>太完美了！您的單字全對！我們已記錄您的優秀表現。<br><br><span style="font-size:0.85em; color:var(--text-muted);">💡 記得綁定 LINE 推播提醒，明天準時回來！中斷打卡可是會很痛的喔！</span>`;
+                    Swal.fire({ title: correctCount === AppState.quiz.total ? '太棒了，滿分！' : '測驗完成！', html: msg, icon: 'success', confirmButtonText: '查看我的成果', confirmButtonColor: '#10b981' });
+                }
                 
                 if (AppState.auth.user !== '訪客' && AppState.profile.cache) {
                     if (!AppState.quiz.isReviewMode) {
