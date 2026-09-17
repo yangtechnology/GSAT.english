@@ -1368,12 +1368,35 @@
                                 // 真實上線時，直接導向綠界付款頁面
                                 window.location.href = res.paymentUrl;
                             } else {
-                                // 目前因為後端還沒接好金流，我們先保留一個「模擬」入口讓您能繼續測試 UI
-                                Swal.fire('模擬模式', '後端金流 API 尚未實作。<br>此處將直接跳轉為模擬付款成功。', 'info').then(() => {
-                                    localStorage.setItem('userPlan', plan);
-                                    localStorage.setItem('userCycle', targetCycle);
-                                    window.location.reload();
-                                });
+                                Swal.close();
+                                // 目前因為後端還沒接好金流，我們先保留「模擬 UI」入口讓您能繼續測試及展示
+                                const paymentWindow = window.open('', 'PaymentWindow', 'width=600,height=700,left=200,top=100');
+                                paymentWindow.document.write(`
+                                    <html>
+                                    <head><title>綠界 ECPay 模擬付款</title><style>body{font-family:sans-serif;text-align:center;padding:50px; background:#f8fafc;}</style></head>
+                                    <body>
+                                        <h2 style="color:#10b981; font-size: 2em; margin-bottom: 10px;">🔒 綠界 ECPay 安全付款中心</h2>
+                                        <p style="font-size: 1.2em; color: #475569;">您正準備購買: <strong>${targetNameTW}</strong></p>
+                                        <div style="margin: 40px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px;">
+                                            <p style="color: #64748b; margin-bottom: 30px;">(由於真實 API 尚未上線，目前為展示模式)<br><br>請點擊按鈕以模擬「刷卡」並返回系統。</p>
+                                            <button onclick="simulatePaymentSuccess()" style="padding:15px 30px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:30px; font-size:1.2em; font-weight:bold; cursor:pointer; width: 100%; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">模擬付款成功</button>
+                                        </div>
+                                        <script>
+                                            function simulatePaymentSuccess() {
+                                                document.body.innerHTML = '<div style="margin-top: 100px;"><h2 style="color:#10b981; font-size: 2.5em;">🎉 付款成功！</h2><p style="font-size: 1.2em; color: #64748b;">正在為您開通 VIP 權益並返回系統...</p></div>';
+                                                setTimeout(() => {
+                                                    if (window.opener && !window.opener.closed) {
+                                                        window.opener.localStorage.setItem('userPlan', '${plan}');
+                                                        window.opener.localStorage.setItem('userCycle', '${targetCycle}');
+                                                        window.opener.location.reload();
+                                                    }
+                                                    window.close();
+                                                }, 1500);
+                                            }
+                                        <\/script>
+                                    </body>
+                                    </html>
+                                `);
                             }
                         });
                     }
@@ -1771,6 +1794,10 @@
 
             const splash = document.getElementById('splashScreen'); 
             if(splash) { setTimeout(() => splash.classList.add('hidden'), 500); }
+            
+            // 初次載入時渲染單字書 Level 1-6
+            renderVocabLevels();
+
             if (AppState.auth.user && AppState.auth.token) { showView('setupView', true); } else { showView('loginView'); }
         };
 
@@ -2974,7 +3001,7 @@
         function renderVocabLevels() {
             const container = document.getElementById('vocabHomeGrid');
             if (!container) return;
-            // 保留最後三個固定按鈕，先移除前面的 level-card
+            // 移除舊有的 level-card，保留三個固定按鈕
             Array.from(container.children).forEach(child => {
                 if (!child.innerHTML.includes('找單字') && !child.innerHTML.includes('不熟單字') && !child.innerHTML.includes('新增單字')) {
                     container.removeChild(child);
@@ -2982,28 +3009,22 @@
             });
 
             const levels = [
-                { id: 1, icon: '🌿', title: 'Level 1', desc: '升高中必背' },
-                { id: 2, icon: '🍃', title: 'Level 2', desc: '升高中必背' },
-                { id: 3, icon: '📘', title: 'Level 3', desc: '高中基礎' },
-                { id: 4, icon: '📙', title: 'Level 4', desc: '學測常考' },
-                { id: 5, icon: '📕', title: 'Level 5', desc: '學測常考(進階)' },
-                { id: 6, icon: '📓', title: 'Level 6', desc: '學測進階' }
+                { id: 1, icon: '🟢', title: 'Level 1', desc: '升高中必背' },
+                { id: 2, icon: '🟡', title: 'Level 2', desc: '升高中必背' },
+                { id: 3, icon: '🟠', title: 'Level 3', desc: '高中基礎' },
+                { id: 4, icon: '🔴', title: 'Level 4', desc: '學測常考' },
+                { id: 5, icon: '🟣', title: 'Level 5', desc: '學測常考(進階)' },
+                { id: 6, icon: '⚫', title: 'Level 6', desc: '學測進階' }
             ];
             
-            // 將等級卡片插入到最前面
             levels.reverse().forEach(lvl => {
-                let total = AppState.vocab.list.filter(w => w.level === lvl.id).length;
-                let viewed = AppState.vocab.list.filter(w => w.level === lvl.id && AppState.vocab.viewed.has(getPureWord(w.word))).length;
-                let progress = total > 0 ? Math.round((viewed / total) * 100) : 0;
-                
                 const el = document.createElement('div');
                 el.className = 'vocab-cat-btn';
-                el.style.cssText = 'flex-direction: column; align-items: flex-start; padding: 15px; cursor: pointer;';
+                el.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; cursor: pointer;';
                 el.onclick = () => loadVocabLevel(lvl.id);
                 el.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold; font-size:1.1em;">${lvl.icon} ${lvl.title}</span><span style="font-size:0.8em; color:var(--text-muted);">${lvl.desc}</span></div>
-                    <div style="width:100%; height:6px; background:var(--border-color); border-radius:3px; margin-top:12px;"><div style="width:${progress}%; height:100%; background:var(--primary-color); border-radius:3px; transition:width 0.3s;"></div></div>
-                    <div style="font-size:0.75em; text-align:right; margin-top:4px; color:var(--text-muted); width:100%;">看過率 ${progress}%</div>
+                    <div style="font-size:1.5em; margin-bottom: 5px;">${lvl.icon} ${lvl.title}</div>
+                    <div style="font-size:0.9em; color:var(--text-muted);">${lvl.desc}</div>
                 `;
                 container.insertBefore(el, container.firstChild);
             });
