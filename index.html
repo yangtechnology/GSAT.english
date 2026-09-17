@@ -997,7 +997,7 @@
         </div>
 
         <div id="teamView" class="view-section view-container" style="max-width: 800px;">
-            <h2>🏆 戰績與社群</h2>
+            <h2>🛡️ 戰隊大廳</h2>
             <div id="teamNoTeamArea">
                 <p class="subtitle">與同儕一起組隊刷題，爭奪賽季排行榜榮耀！</p>
                 <div class="flex-row">
@@ -2685,14 +2685,21 @@
                     
                     const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid`;
                     
-                    // 正式環境直接跳轉： window.location.href = lineAuthUrl;
-                    // 在此純網頁版中先以模擬帶過：
-                    window.location.href = lineAuthUrl;
-
-                    // Mock success for now since we can't actually complete OAuth in this static HTML
-                    document.getElementById('loginUsername').value = 'user123';
-                    document.getElementById('loginPassword').value = '1234';
-                    handleLogin();
+                    // 打開彈出視窗進行登入
+                    const popup = window.open(lineAuthUrl, 'line_login', 'width=500,height=600');
+                    
+                    // 監聽來自彈出視窗的訊息
+                    const messageListener = function(event) {
+                        if (event.data === 'LINE_LOGIN_SUCCESS') {
+                            window.removeEventListener('message', messageListener);
+                            Swal.fire('驗證成功', '已透過 LINE 成功登入！', 'success').then(() => {
+                                document.getElementById('loginUsername').value = 'user123';
+                                document.getElementById('loginPassword').value = '1234';
+                                handleLogin();
+                            });
+                        }
+                    };
+                    window.addEventListener('message', messageListener);
                 }
             });
         }
@@ -2974,10 +2981,34 @@
                 } else { 
                     btn.className = 'az-btn disabled'; 
                     btn.disabled = true; 
-                    btn.style.display = 'flex';
-                    btn.style.justifyContent = 'center';
-                    btn.style.alignItems = 'center';
-                    btn.innerHTML = `<div style="font-size:1.2em; font-weight:800;">${char}</div>`;
+                    btn.style.background = 'transparent';
+                    btn.style.border = 'none';
+                    btn.style.padding = '5px';
+                    btn.innerHTML = `
+                        <div style="
+                            width: 50px; 
+                            height: 50px; 
+                            border-radius: 50%; 
+                            background: var(--border-color);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin: 0 auto;
+                            opacity: 0.5;
+                        ">
+                            <div style="
+                                width: 42px; 
+                                height: 42px; 
+                                border-radius: 50%; 
+                                background: var(--card-bg);
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                            ">
+                                <div style="font-size:1.1em; font-weight:900; color:var(--text-muted); line-height:1;">${char}</div>
+                            </div>
+                        </div>`;
                 } 
                 azGrid.appendChild(btn); 
             } 
