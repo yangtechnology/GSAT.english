@@ -2021,7 +2021,7 @@
             if (resProf.plan) {
                 localStorage.setItem('userPlan', resProf.plan);
                 localStorage.setItem('userCycle', resProf.cycle || 'monthly');
-                QuotaManager.init(); // Refresh UI dynamically based on the synced plan
+                applyFeatureGates(); // Refresh UI dynamically based on the synced plan
             }
             
             const xp = parseInt(resProf.totalXP) || 0; const level = Math.floor(Math.sqrt(xp / 10)) + 1;
