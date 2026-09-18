@@ -1148,10 +1148,9 @@
 
             <div class="profile-card" style="text-align: center;">
                 <div style="margin: 0 0 20px 0; padding: 15px; background: var(--bg-color); border-radius: 12px; border: 1px dashed var(--primary-color);">
-                    <div style="font-size: 1em; margin-bottom: 5px;">目前方案：<strong id="profileCurrentPlan" style="color: var(--primary-color);">Basic</strong></div>
-                    <div id="profileExpiryDate" style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 10px;"></div>
+                    <div style="font-size: 1em; margin-bottom: 10px;">目前方案：<strong id="profileCurrentPlan" style="color: var(--primary-color);">Basic</strong></div>
                     <button class="btn btn-outline" style="width: 100%; border-color: var(--primary-color); color: var(--primary-color);" onclick="showView('pricingView')">管理方案 / 變更</button>
-                    <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 10px;">(測試期間，可透過此按鈕隨時從 Basic 升級其他方案)</div>
+                    <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 10px;">(測試期間，可在此隨時降級回 Basic 或升級其他方案)</div>
                 </div>
 
                 <div class="input-group" style="text-align: left;"><label>更換大頭貼</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">上傳您專屬大頭貼，這將顯示在您的虛擬會員卡上。</p></div>
@@ -1686,20 +1685,16 @@
             // Update Profile Plan Text
             let planDisplay = document.getElementById('profileCurrentPlan');
             if (planDisplay) {
-                planDisplay.textContent = plan;
+                let planText = plan;
+                if (plan !== 'Basic' && resProf.expiryDate) {
+                    let d = new Date(resProf.expiryDate);
+                    planText += ` (到期日: ${d.getFullYear()}/${String(d.getMonth()+1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')})`;
+                }
+                planDisplay.textContent = planText;
+                
                 if (plan === 'Ultra') planDisplay.style.color = '#f59e0b';
                 else if (plan === 'Pro' || plan === '專業版') planDisplay.style.color = '#3b82f6';
                 else planDisplay.style.color = 'var(--text-main)';
-            }
-            
-            let expiryDisplay = document.getElementById('profileExpiryDate');
-            if (expiryDisplay) {
-                let expiry = localStorage.getItem('userExpiry');
-                if (plan !== 'Basic' && expiry) {
-                    expiryDisplay.textContent = `到期日：${expiry}`;
-                } else {
-                    expiryDisplay.textContent = '';
-                }
             }
         }
 
@@ -2029,20 +2024,9 @@
 
         function renderGlobalProfile(resProf) {
             AppState.profile.cache = resProf;
-            
-            if (resProf.isExpired) {
-                Swal.fire('方案已到期', '您的訂閱方案已到期，目前已恢復為 Basic 基本版。', 'info');
-            }
-            
             if (resProf.plan) {
                 localStorage.setItem('userPlan', resProf.plan);
                 localStorage.setItem('userCycle', resProf.cycle || 'monthly');
-                if (resProf.expiryDate) {
-                    let d = new Date(resProf.expiryDate);
-                    localStorage.setItem('userExpiry', d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate());
-                } else {
-                    localStorage.removeItem('userExpiry');
-                }
                 applyFeatureGates(); // Refresh UI dynamically based on the synced plan
             }
             
@@ -3216,10 +3200,17 @@
             levels.reverse().forEach(lvl => {
                 let total = 0;
                 let viewed = 0;
-                if (AppState.profile.cache && AppState.profile.cache.levelStats && AppState.profile.cache.levelStats[lvl.id]) {
-                    total = AppState.profile.cache.levelStats[lvl.id].total;
-                    viewed = AppState.profile.cache.levelStats[lvl.id].viewed;
+                
+                if (AppState.profile && AppState.profile.cache && AppState.profile.cache.levelStats && AppState.profile.cache.levelStats[lvl.id]) {
+                    const stats = AppState.profile.cache.levelStats[lvl.id];
+                    total = stats.t || 0;
+                    viewed = stats.v || 0;
+                } else if (AppState.vocab.list && AppState.vocab.list.length > 0 && AppState.vocab.list[0].level !== undefined) {
+                    // Fallback to local calculation if backend stats are missing (and we have the full list)
+                    total = AppState.vocab.list.filter(w => w.level === lvl.id).length;
+                    viewed = AppState.vocab.list.filter(w => w.level === lvl.id && AppState.vocab.viewed.has(getPureWord(w.word))).length;
                 }
+                
                 let progress = total > 0 ? Math.round((viewed / total) * 100) : 0;
                 
                 const el = document.createElement('div');
