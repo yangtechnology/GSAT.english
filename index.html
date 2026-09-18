@@ -1428,18 +1428,22 @@
                             }
                         });
                         
-                        const testCode = prompt("即將前往綠界付款。\n如果您是開發者測試，請輸入測試密碼 (一般用戶請留白)：");
+                        const testCode = prompt("即將前往綠界付款。\n如果您是開發者測試，請輸入測試代碼 (一般用戶請留白)：");
                         if (testCode === "0712") {
                             Swal.close();
-                            Swal.fire({
-                                icon: 'success',
-                                title: '【測試模式】升級成功！',
-                                text: `已為您升級至 ${plan} ${targetCycle}，感謝您的支持！`,
-                                confirmButtonColor: '#3b82f6'
-                            }).then(() => {
-                                localStorage.setItem('userPlan', plan);
-                                localStorage.setItem('userCycle', targetCycle);
-                                window.location.reload();
+                            Swal.fire({title: '處理中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+                            apiCall('updateUserPlan', { username: currentUser, plan: plan, cycle: targetCycle }).then(() => {
+                                Swal.close();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '【測試模式】升級成功！',
+                                    text: `已為您升級至 ${plan} ${targetCycle}，感謝您的支持！`,
+                                    confirmButtonColor: '#3b82f6'
+                                }).then(() => {
+                                    localStorage.setItem('userPlan', plan);
+                                    localStorage.setItem('userCycle', targetCycle);
+                                    window.location.reload();
+                                });
                             });
                             return;
                         }
@@ -2014,6 +2018,12 @@
 
         function renderGlobalProfile(resProf) {
             AppState.profile.cache = resProf;
+            if (resProf.plan) {
+                localStorage.setItem('userPlan', resProf.plan);
+                localStorage.setItem('userCycle', resProf.cycle || 'monthly');
+                QuotaManager.init(); // Refresh UI dynamically based on the synced plan
+            }
+            
             const xp = parseInt(resProf.totalXP) || 0; const level = Math.floor(Math.sqrt(xp / 10)) + 1;
             
             if (AppState.profile.level !== null && AppState.profile.level !== undefined && level > AppState.profile.level) {
