@@ -1686,8 +1686,8 @@
             let planDisplay = document.getElementById('profileCurrentPlan');
             if (planDisplay) {
                 let planText = plan;
-                if (plan !== 'Basic' && resProf.expiryDate) {
-                    let d = new Date(resProf.expiryDate);
+                if (plan !== 'Basic' && AppState.profile && AppState.profile.cache && AppState.profile.cache.expiryDate) {
+                    let d = new Date(AppState.profile.cache.expiryDate);
                     planText += ` (到期日: ${d.getFullYear()}/${String(d.getMonth()+1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')})`;
                 }
                 planDisplay.textContent = planText;
