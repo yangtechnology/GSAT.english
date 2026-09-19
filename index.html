@@ -2024,6 +2024,14 @@
 
         function renderGlobalProfile(resProf) {
             AppState.profile.cache = resProf;
+            
+            // 同步後端的單字進度到前端 Set
+            if (resProf.vocabProgress && Array.isArray(resProf.vocabProgress)) {
+                resProf.vocabProgress.forEach(w => AppState.vocab.viewed.add(w));
+                const userForSync = AppState.auth.user || localStorage.getItem('user') || 'Guest';
+                localStorage.setItem('vocab_viewed_' + userForSync, JSON.stringify([...AppState.vocab.viewed]));
+            }
+
             if (resProf.plan) {
                 localStorage.setItem('userPlan', resProf.plan);
                 localStorage.setItem('userCycle', resProf.cycle || 'monthly');
@@ -2117,7 +2125,40 @@
                 if (window.chatPollInterval) { clearInterval(window.chatPollInterval); window.chatPollInterval = null; }
             }
 
-            if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + AppState.auth.user)) { showGradeUpdatePopup(); }
+            if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + AppState.auth.user)) { 
+                showGradeUpdatePopup(); 
+            } else {
+                // 檢查每日登入智慧複習提醒
+                const d = new Date();
+                const todayStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                const lastPromptDate = localStorage.getItem('lastReviewPromptDate_' + AppState.auth.user);
+                
+                if (todayStr !== lastPromptDate) {
+                    localStorage.setItem('lastReviewPromptDate_' + AppState.auth.user, todayStr);
+                    apiCall('getIncorrectQuestions', { username: AppState.auth.user }).then(res => {
+                        if (res.success && res.questions && res.questions.length > 0) {
+                            const dueCount = res.questions.filter(q => q.isDue).length;
+                            if (dueCount > 0) {
+                                Swal.fire({
+                                    title: '🌟 每日複習任務',
+                                    html: `我們已將您之前的錯題排入了智慧複習池！<br><br>今日共有 <b style="color:var(--danger-color); font-size:1.5em;">${dueCount}</b> 題待複習單字<br>是否立刻進行複習？`,
+                                    icon: 'info',
+                                    showCancelButton: true,
+                                    confirmButtonText: '馬上複習',
+                                    cancelButtonText: '稍後再說',
+                                    confirmButtonColor: '#10b981'
+                                }).then(result => {
+                                    if (result.isConfirmed) {
+                                        AppState.review.cards = res.questions;
+                                        showView('reviewPage');
+                                        setupReviewUI();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
         }
 
         // ==========================================
