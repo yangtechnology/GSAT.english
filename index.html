@@ -913,7 +913,10 @@
                 <button class="btn btn-outline" style="width:auto; padding:8px 15px;" onclick="window.print()">🖨️ 匯出 PDF/列印</button>
             </div>
             <div class="flex-row" style="margin-bottom: 20px;"><div style="flex:1; background:var(--card-bg); border: 2px solid var(--danger-color); padding:15px; border-radius:12px; text-align:center;"><div style="color:var(--danger-color); font-weight:700;">🔥 今日待複習</div><div id="dueCountLabel" style="font-size:2em; font-weight:800; color:var(--danger-color);">0</div></div><div style="flex:1; background:var(--card-bg); border: 2px solid var(--text-muted); padding:15px; border-radius:12px; text-align:center;"><div style="color:var(--text-muted); font-weight:700;">⏳ 記憶轉換中</div><div id="pendingCountLabel" style="font-size:2em; font-weight:800; color:var(--text-muted);">0</div></div></div>
-            <div style="display:flex; gap:10px; margin-bottom: 20px;"><button id="startReviewBtn" class="btn btn-primary" style="margin:0; flex:2;" onclick="startGame(true)">🗡️ 實戰複習測驗</button><button class="btn btn-secondary" style="margin:0; flex:1; font-size:0.9em;" onclick="toggleFlashcardMode()">📋 列表總覽</button></div>
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <button id="startReviewBtn" class="btn btn-primary" style="margin:0; flex:2;" onclick="promptReviewOptions()">🚀 實戰複習測驗</button>
+                <button class="btn btn-secondary" style="margin:0; flex:1; font-size:0.9em;" onclick="toggleFlashcardMode()">📜 列表總覽</button>
+            </div>
             <div id="flashcardModeContainer"><div class="fc-nav"><button class="fc-nav-btn" id="fcPrev" onclick="changeFlashcard(-1)">&lt;</button><span id="fcCounter" style="font-weight: 600; color: var(--text-muted);">0 / 0</span><button class="fc-nav-btn" id="fcNext" onclick="changeFlashcard(1)">&gt;</button></div><div id="slideWrapper"><div id="singleFlashcardArea"></div></div></div>
             <div id="listModeContainer" style="display: none; max-height: 500px; overflow-y: auto; padding-right: 10px;"></div>
         </div>
@@ -2041,7 +2044,7 @@
             const xp = parseInt(resProf.totalXP) || 0; const level = Math.floor(Math.sqrt(xp / 10)) + 1;
             
             if (AppState.profile.level !== null && AppState.profile.level !== undefined && level > AppState.profile.level) {
-                Swal.fire({ title: '🎊 恭喜升級！ 🎊', html: `太神啦！你的等級提升到了 <b>Level ${level}</b>！<br>繼續保持這個氣勢！`, icon: 'success', confirmButtonColor: '#f59e0b', confirmButtonText: '繼續刷題' });
+                Swal.fire({ title: '🎉 等級提升！', html: `太棒了！你的等級來到了 <b>Level ${level}</b><br>繼續保持這個氣勢！`, icon: 'success', confirmButtonColor: '#f59e0b', confirmButtonText: '繼續努力' });
                 document.getElementById('quickLevel').classList.add('level-up-anim'); setTimeout(() => document.getElementById('quickLevel').classList.remove('level-up-anim'), 1500);
             }
             AppState.profile.level = level; AppState.profile.targetYear = resProf.targetYear;
@@ -2053,16 +2056,50 @@
                 document.getElementById('streakDaysDisplay').textContent = resProf.checkInDays || 0;
             }
             
+            // 處理會員到期提醒
+            const plan = QuotaManager.getPlan();
+            if (plan !== 'Basic' && resProf.expiryDate) {
+                let d = new Date(resProf.expiryDate);
+                const now = new Date();
+                const diffMs = d.getTime() - now.getTime();
+                const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                
+                const lastWarningDate = localStorage.getItem('expiryWarning_' + AppState.auth.user);
+                const todayStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
+                
+                if (diffDays <= 3 && lastWarningDate !== todayStr) {
+                    localStorage.setItem('expiryWarning_' + AppState.auth.user, todayStr);
+                    let msg = '';
+                    if (diffDays > 0) {
+                        msg = `您的 ${plan} 方案即將在 <b>${diffDays} 天後</b> 到期 (至 ${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})。<br><br>若未取消訂閱將會自動續約。<br><span style="color:var(--danger-color); font-size:0.9em;">如欲取消，請至少於到期前一天操作喔！</span>`;
+                    } else if (diffDays === 0 || diffDays === -1) {
+                        msg = `您的 ${plan} 方案已經到期！<br><br>今日為<b>最後的 1 天寬限期</b>，請盡快續約以免失去權限。`;
+                    }
+                    
+                    if (msg) {
+                        setTimeout(() => {
+                            Swal.fire({
+                                title: '👑 會員到期提醒',
+                                html: msg,
+                                icon: 'warning',
+                                confirmButtonText: '查看方案',
+                                showCancelButton: true,
+                                cancelButtonText: '我知道了'
+                            }).then(res => {
+                                if(res.isConfirmed) showView('pricingView');
+                            });
+                        }, 1000);
+                    }
+                }
+            }
+
             // Virtual Card Data
             const vcUsername = document.getElementById('vcUsernameDisplay');
             if(vcUsername) vcUsername.textContent = AppState.auth.user; 
-            
+
             const vcId = document.getElementById('vcIdDisplay');
             if(vcId) {
-                // Generate a stable fake ID based on username if real ID doesn't exist
-                let hash = 0;
-                for (let i = 0; i < AppState.auth.user.length; i++) hash = AppState.auth.user.charCodeAt(i) + ((hash << 5) - hash);
-                const fakeId = Math.abs(hash).toString().padStart(12, '0').replace(/(\d{4})(?=\d)/g, '$1 ');
+                let fakeId = (AppState.auth.user.length * 12345).toString().padStart(6, '0');
                 vcId.textContent = `ID: ${fakeId}`;
             }
 
@@ -2070,7 +2107,7 @@
             if(avDiv) { if(av.startsWith('data:image') || av.startsWith('http')){ avDiv.innerHTML = `<img src="${av}">`; } else { avDiv.innerHTML = av; } }
             
             const vcLevel = document.getElementById('vcLevelDisplay');
-            if(vcLevel) vcLevel.textContent = level;
+            if(vcLevel) vcLevel.textContent = `Lv.${level}`;
 
             const btnLineBind = document.getElementById('btnLineBind');
             if (btnLineBind) {
@@ -2078,18 +2115,31 @@
                     btnLineBind.innerText = '✅ 已綁定 (點擊解除)';
                     btnLineBind.style.background = 'var(--card-bg)';
                     btnLineBind.style.color = 'var(--text-muted)';
-                    btnLineBind.style.border = '1px solid var(--border-color)';
+                    btnLineBind.onclick = () => {
+                        Swal.fire({
+                            title: '解除綁定', text: '確定要解除 LINE 帳號綁定嗎？解綁後將無法使用 LINE 快速登入。', icon: 'warning', showCancelButton: true, confirmButtonText: '確定解除', confirmButtonColor: '#ef4444'
+                        }).then(r => {
+                            if(r.isConfirmed) {
+                                showLoading('解除綁定中...');
+                                window.open('https://script.google.com/macros/s/AKfycbyi8dZ55h7T-3Hq8wG86lY-X3_b2v9Hl617k2eIeK7xM7442wI5O5aWq9r-k3pWnE__/exec?action=unbind', 'lineBind', 'width=500,height=600');
+                            }
+                        });
+                    }
                 } else {
-                    btnLineBind.innerText = '立即綁定並開啟推播';
+                    btnLineBind.innerText = '綁定 LINE 官方帳號';
                     btnLineBind.style.background = '#06C755';
-                    btnLineBind.style.color = 'white';
-                    btnLineBind.style.border = 'none';
+                    btnLineBind.style.color = '#fff';
+                    btnLineBind.onclick = () => {
+                        window.open('https://script.google.com/macros/s/AKfycbyi8dZ55h7T-3Hq8wG86lY-X3_b2v9Hl617k2eIeK7xM7442wI5O5aWq9r-k3pWnE__/exec?action=bind', 'lineBind', 'width=500,height=600');
+                    };
                 }
             }
-
-            const currentLevelBaseXP = Math.pow(level - 1, 2) * 10; const nextLevelXP = Math.pow(level, 2) * 10; const xpProgress = ((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100; 
-
-            // Update traditional profile level display if still exists
+            
+            // Progress Calculation for Profile UI
+            const currentLevelXP = Math.pow(level - 1, 2) * 10;
+            const nextLevelXP = Math.pow(level, 2) * 10;
+            const xpProgress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+            
             const profileLevelDisplay = document.getElementById('profileLevelDisplay');
             if(profileLevelDisplay) { profileLevelDisplay.innerHTML = `<div style="font-size: 1.5em; font-weight: 800; color: var(--secondary-color); margin-bottom: 8px;">Lv. ${level}</div><div style="background: var(--border-color); border-radius: 10px; height: 12px; width: 85%; margin: 0 auto 8px auto; overflow: hidden; position: relative;"><div style="background: var(--secondary-color); width: ${xpProgress}%; height: 100%; border-radius: 10px; transition: 1s ease-out;"></div></div><div style="font-size: 0.9em; font-weight: bold; color: var(--text-muted); margin-bottom: 20px;">XP: ${xp} / ${nextLevelXP}</div>`; }
             
@@ -2101,11 +2151,11 @@
 
             let targetYear = resProf.targetYear; let baseYear = getBaseAcadYear(); let offset = targetYear - baseYear - 1;
             let gradeStr = (targetYear === 0 || offset < 0) ? "已畢業" : (offset === 0 ? "高三" : offset === 1 ? "高二" : offset === 2 ? "高一" : offset === 3 ? "國三" : offset === 4 ? "國二" : offset === 5 ? "國一" : "小學或以下");
-            const profCurrentGrade = document.getElementById('profCurrentGrade'); if(profCurrentGrade) profCurrentGrade.textContent = (targetYear === 0) ? `已畢業 (不參與排行)` : `${gradeStr} (目標：${targetYear} 學測)`;
+            const profCurrentGrade = document.getElementById('profCurrentGrade'); if(profCurrentGrade) profCurrentGrade.textContent = (targetYear === 0) ? `已畢業(不設定)` : `${gradeStr} (目標 ${targetYear} 學測)`;
 
             const quotaInfoBox = document.getElementById('quotaInfoBox');
             if(quotaInfoBox && resProf.hasApiKey !== undefined) {
-                if (resProf.hasApiKey) { quotaInfoBox.innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">✅ 您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${resProf.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${resProf.essayUsed} / 1 篇`; } 
+                if (resProf.hasApiKey) { quotaInfoBox.innerHTML = '<div style="color:var(--secondary-color); font-weight:bold; text-align:center; padding:15px;">您已綁定專屬 API Key，解鎖無限次數！</div>'; } else { document.getElementById('qTutor').textContent = `今日已用: ${resProf.tutorUsed} / 2 次`; document.getElementById('qEssay').textContent = `今日已用: ${resProf.essayUsed} / 1 篇`; } 
             }
 
             const noTeamArea = document.getElementById('teamNoTeamArea');
@@ -2121,7 +2171,6 @@
                 if (!window.chatPollInterval) { window.chatPollInterval = setInterval(loadTeamChat, 8000); }
             } else {
                 noTeamArea.style.display = 'block'; dashboardArea.style.display = 'none';
-                AppState.sys.currentTeam = null;
                 if (window.chatPollInterval) { clearInterval(window.chatPollInterval); window.chatPollInterval = null; }
             }
 
@@ -2137,23 +2186,25 @@
                     localStorage.setItem('lastReviewPromptDate_' + AppState.auth.user, todayStr);
                     apiCall('getIncorrectQuestions', { username: AppState.auth.user }).then(res => {
                         if (res.success && res.questions && res.questions.length > 0) {
-                            const dueCount = res.questions.filter(q => q.isDue).length;
+                            // 每日提醒只針對昨天 (stage 0 或 1) 的錯題
+                            const dueCount = res.questions.filter(q => q.isDue && q.stage <= 1).length;
                             if (dueCount > 0) {
-                                Swal.fire({
-                                    title: '🌟 每日複習任務',
-                                    html: `我們已將您之前的錯題排入了智慧複習池！<br><br>今日共有 <b style="color:var(--danger-color); font-size:1.5em;">${dueCount}</b> 題待複習單字<br>是否立刻進行複習？`,
-                                    icon: 'info',
-                                    showCancelButton: true,
-                                    confirmButtonText: '馬上複習',
-                                    cancelButtonText: '稍後再說',
-                                    confirmButtonColor: '#10b981'
-                                }).then(result => {
-                                    if (result.isConfirmed) {
-                                        AppState.review.cards = res.questions;
-                                        showView('reviewPage');
-                                        setupReviewUI();
-                                    }
-                                });
+                                setTimeout(() => {
+                                    Swal.fire({
+                                        title: '🌟 每日複習任務',
+                                        html: `我們已將您<b>昨天</b>的錯題排入了智慧複習池！<br><br>今日共有 <b style="color:var(--danger-color); font-size:1.5em;">${dueCount}</b> 題待複習單字<br>是否立刻進行複習？`,
+                                        icon: 'info',
+                                        showCancelButton: true,
+                                        confirmButtonText: '馬上複習',
+                                        cancelButtonText: '稍後再說',
+                                        confirmButtonColor: '#10b981'
+                                    }).then(result => {
+                                        if (result.isConfirmed) {
+                                            showView('reviewPage');
+                                            loadIncorrectQuestions(); // 點擊馬上複習後會跳轉並主動載入
+                                        }
+                                    });
+                                }, 1500); // 稍微延遲避免跟其他彈窗撞在一起
                             }
                         }
                     });
@@ -3054,26 +3105,69 @@
             if (q && q.correctWord) { const cleanWord = getPureWord(q.correctWord); speakWord(cleanWord, isSlow ? 0.4 : 0.85); }
         }
 
-        function startGame(isReview = false) { 
-            let num = isReview ? 20 : parseInt(document.getElementById('numQuestionsInput').value);
+        function promptReviewOptions() {
+            let dueCount = document.getElementById('dueCountLabel').textContent || '0';
+            Swal.fire({
+                title: '⚙️ 複習測驗設定',
+                html: `
+                    <div style="text-align:left; font-size:1.1em;">
+                        <label style="font-weight:bold; margin-bottom:5px; display:block;">你要複習幾題？</label>
+                        <select id="reviewAmount" class="exam-text-input" style="margin-bottom:20px;">
+                            <option value="10">10 題 (暖身)</option>
+                            <option value="20" selected>20 題 (標準)</option>
+                            <option value="50">50 題 (挑戰)</option>
+                            <option value="100">100 題 (特訓)</option>
+                            <option value="9999">全部待複習 (${dueCount} 題)</option>
+                        </select>
+                        
+                        <label style="font-weight:bold; margin-bottom:5px; display:block;">題庫過濾 (針對階段)</label>
+                        <select id="reviewCategory" class="exam-text-input">
+                            <option value="all">📚 混合所有待複習錯題</option>
+                            <option value="1">⏰ 昨天的錯題 (1天階段)</option>
+                            <option value="2">📅 3天前的錯題 (3天階段)</option>
+                            <option value="3">📆 7天前的錯題 (7天階段)</option>
+                        </select>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '開始測驗',
+                cancelButtonText: '取消',
+                confirmButtonColor: '#3b82f6',
+                preConfirm: () => {
+                    return {
+                        amount: document.getElementById('reviewAmount').value,
+                        category: document.getElementById('reviewCategory').value
+                    }
+                }
+            }).then(res => {
+                if (res.isConfirmed) {
+                    startGame(true, res.value.amount, res.value.category);
+                }
+            });
+        }
+
+        function startGame(isReview = false, reviewAmount = 20, reviewCategory = 'all') { 
+            let num = isReview ? parseInt(reviewAmount) : parseInt(document.getElementById('numQuestionsInput').value);
             if (!QuotaManager.canTakeQuiz(num)) {
-                return QuotaManager.showUpgradePrompt('每日測驗額度', '基本方案每日限測驗 50 題，升級專業版以無限刷題！');
+                return QuotaManager.showUpgradePrompt('每日測驗額度', '基本版有每日測驗 50 題限制，升級專業版以解鎖無上限！');
             }
             AppState.quiz.isSubmitting = false; AppState.quiz.isReviewMode = isReview; const activeMode = isReview ? '1' : document.getElementById('quizModeSelect').value; 
             if (!navigator.onLine) {
                 if (AppState.quiz.isReviewMode) {
                     let cache = JSON.parse(localStorage.getItem('offlineIncorrect') || '[]');
-                    if(cache.length === 0) return Swal.fire('離線中', '無離線錯題庫可用，請先連線！', 'warning');
-                    processQuizData({ success: true, questions: cache.slice(0, 20), totalQuestions: Math.min(cache.length, 20) });
+                    if(cache.length === 0) return Swal.fire('離線', '無離線錯題庫可用，請連網同步', 'warning');
+                    processQuizData({ success: true, questions: cache.slice(0, num), totalQuestions: Math.min(cache.length, num) });
                 } else {
                     let cache = JSON.parse(localStorage.getItem('offlineVocab') || 'null');
-                    if(!cache) return Swal.fire('離線中', '尚未快取單字庫，請先連線一次！', 'warning');
-                    let num = parseInt(document.getElementById('numQuestionsInput').value); let qs = cache.questions; processQuizData({ success: true, questions: qs.slice(0, num), totalQuestions: num });
+                    if(!cache) return Swal.fire('離線', '尚未快取題庫，請連網測試一次。', 'warning');
+                    let numQ = parseInt(document.getElementById('numQuestionsInput').value); let qs = cache.questions; processQuizData({ success: true, questions: qs.slice(0, numQ), totalQuestions: numQ });
                 }
                 return;
             }
-            if (AppState.quiz.isReviewMode) { showLoading('生成記憶複習卷...'); apiCall('getReviewQuestions', { username: AppState.auth.user }).then(res => processQuizData(res)); } 
-            else { 
+            if (AppState.quiz.isReviewMode) { 
+                showLoading('載入記憶複習池...'); 
+                apiCall('getReviewQuestions', { username: AppState.auth.user, amount: reviewAmount, category: reviewCategory }).then(res => processQuizData(res)); 
+            } else { 
                 const num = parseInt(document.getElementById('numQuestionsInput').value); 
                 const diff = document.getElementById('difficultySelect').value; 
                 const rangeType = document.getElementById('customRangeSelect').value;
@@ -3133,7 +3227,14 @@
                 
                 let hasBonus = false; if (correctCount === AppState.quiz.total && AppState.quiz.total >= 10 && !AppState.quiz.isReviewMode) { hasBonus = true; } 
                 if (AppState.quiz.isReviewMode) {
-                    if (correctCount > 0) Swal.fire('記憶引擎啟動', `SM-2 已將 ${correctCount} 題推進至下一複習階段。`, 'success');
+                    if (correctCount > 0) {
+                        Swal.fire({
+                            title: '🧠 記憶引擎升級', 
+                            html: `SM-2 已將 <b>${correctCount}</b> 題單字推移至下個階段！<br><br><span style="font-size:0.9em; color:var(--text-muted);">👉 溫馨提醒：如果您剛剛完成的是「昨天」的錯題，請記得 <b>3 天後</b> 要再到「記憶引擎」完成鞏固測驗喔！過了 3 天階段後，還有最後的 <b>7 天階段</b>！</span>`,
+                            icon: 'success',
+                            confirmButtonText: '收到！'
+                        });
+                    }
                 } else if (AppState.auth.user !== '訪客' && AppState.quiz.total >= 5) {
                     let wrongCount = AppState.quiz.total - correctCount;
                     let msg = wrongCount > 0 ? `🎯 <b>今日目標已達成！</b><br><br>我們已為您將 <b style="color:#ef4444; font-size:1.2em;">${wrongCount}</b> 個易錯單字加入明天的「智慧複習池」。<br><br><span style="font-size:0.85em; color:var(--text-muted);">💡 記得綁定 LINE 推播提醒，明天準時回來複習！中斷打卡可是會很痛的喔！</span>` : `🎯 <b>今日目標已達成！</b><br><br>太完美了！您的單字全對！我們已記錄您的優秀表現。<br><br><span style="font-size:0.85em; color:var(--text-muted);">💡 記得綁定 LINE 推播提醒，明天準時回來！中斷打卡可是會很痛的喔！</span>`;
