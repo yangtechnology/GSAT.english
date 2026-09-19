@@ -1204,33 +1204,7 @@
                         });
                     } else {
                         const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://script.google.com/macros/s/AKfycbyyjXQY6TfvKy8BLp5N3kv328Om9yZav_eQADKHUfxrNl7KOatJP_RmgKzA94DJiogJ/exec&state=bind&scope=profile%20openid`;
-                        const authWindow = window.open(lineAuthUrl, 'LineBind', 'width=500,height=600');
-                        
-                        const bindListener = function(event) {
-                            try {
-                                const data = JSON.parse(event.data);
-                                if (data.type === 'LINE_LOGIN_RESULT') {
-                                    window.removeEventListener('message', bindListener);
-                                    if (data.lineUid) {
-                                        Swal.fire({title: '處理中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
-                                        apiCall('bindLine', { username: AppState.auth.user, lineUid: data.lineUid }).then(res => {
-                                            if (res.success) {
-                                                Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天都會收到專屬測驗與打卡提醒喔！', 'success');
-                                                btn.innerText = '✅ 已綁定 (點擊解除)';
-                                                btn.style.background = 'var(--card-bg)';
-                                                btn.style.color = 'var(--text-muted)';
-                                                btn.style.border = '1px solid var(--border-color)';
-                                                renderGlobalProfile({ ...AppState.profile.cache, isLineBound: true });
-                                            } else {
-                                                Swal.fire('失敗', res.message, 'error');
-                                            }
-                                        });
-                                        Swal.fire('錯誤', '無法取得 LINE 授權資訊。', 'error');
-                                    }
-                                }
-                            } catch (e) {}
-                        };
-                        window.addEventListener('message', bindListener);
+                        window.location.href = lineAuthUrl;
                     }
                 }
             </script>
@@ -1865,6 +1839,52 @@
             let savedUser = localStorage.getItem('user');
             if (savedUser && savedUser !== 'null') document.getElementById('loginUsername').value = savedUser;
 
+            // Handle LINE Login/Bind Callback
+            const urlParams = new URLSearchParams(window.location.search);
+            const lineAction = urlParams.get('line_action');
+            if (lineAction) {
+                // Clear URL to prevent re-triggering
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                if (lineAction === 'login_success') {
+                    const user = urlParams.get('user');
+                    const token = urlParams.get('token');
+                    AppState.auth.user = user;
+                    AppState.auth.token = token;
+                    localStorage.setItem('user', user);
+                    localStorage.setItem('token', token);
+                    localStorage.removeItem('currentUser');
+                    Swal.fire({title: 'LINE 認證成功', text: '歡迎回來！', icon: 'success', timer: 1500, showConfirmButton: false});
+                    savedUser = user; // allow flow to continue loading user profile
+                } else if (lineAction === 'login_failed') {
+                    AppState.auth.pendingLineUid = urlParams.get('uid');
+                    Swal.fire({
+                        title: '尚未註冊',
+                        html: '您的 LINE 尚未綁定帳號。<br><br>如果您是舊用戶，請直接輸入帳號密碼登入，系統將為您自動綁定；<br><br>如果您是新用戶，請點擊「建立新帳號」進行註冊！',
+                        icon: 'info',
+                        confirmButtonText: '我知道了'
+                    }).then(() => {
+                        showView('loginView'); // remain on login
+                    });
+                } else if (lineAction === 'bind_callback') {
+                    const uid = urlParams.get('uid');
+                    if (savedUser && AppState.auth.token) {
+                        showLoading('綁定中...');
+                        apiCall('bindLine', { username: savedUser, lineUid: uid }).then(res => {
+                            if (res.success) {
+                                Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天都會收到專屬測驗與打卡提醒喔！', 'success').then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire('綁定失敗', res.message, 'error');
+                            }
+                        });
+                    } else {
+                        Swal.fire('錯誤', '綁定失敗：無法確認您的目前登入狀態，請重新登入後再試。', 'error');
+                    }
+                }
+            }
+
             // 載入已看過的單字
             const userForSync = AppState.auth.user || savedUser || 'Guest';
             try {
@@ -2101,29 +2121,7 @@
                     btnLineBind.style.color = '#fff';
                     btnLineBind.onclick = () => {
                         const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://script.google.com/macros/s/AKfycbyyjXQY6TfvKy8BLp5N3kv328Om9yZav_eQADKHUfxrNl7KOatJP_RmgKzA94DJiogJ/exec&state=bind&scope=profile%20openid`;
-                        const authWindow = window.open(lineAuthUrl, 'lineBind', 'width=500,height=600');
-                        
-                        const bindListener = function(event) {
-                            try {
-                                const data = JSON.parse(event.data);
-                                if (data.type === 'LINE_LOGIN_RESULT') {
-                                    window.removeEventListener('message', bindListener);
-                                    if (data.lineUid) {
-                                        showLoading('綁定中...');
-                                        apiCall('bindLine', { username: AppState.auth.user, lineUid: data.lineUid }).then(res => {
-                                            if (res.success) {
-                                                Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天都會收到專屬測驗與打卡提醒喔！', 'success').then(() => {
-                                                    renderGlobalProfile({ ...AppState.profile.cache, isLineBound: true });
-                                                });
-                                            } else {
-                                                Swal.fire('綁定失敗', res.message, 'error');
-                                            }
-                                        });
-                                    }
-                                }
-                            } catch (e) {}
-                        };
-                        window.addEventListener('message', bindListener);
+                        window.location.href = lineAuthUrl;
                     };
                 }
             }
@@ -2970,73 +2968,20 @@
         function simulateLineLogin() {
             Swal.fire({
                 title: 'LINE 一鍵登入',
-                text: '即將前往 LINE 進行安全授權...',
+                text: '即將前往 LINE 進行安全認證...',
                 icon: 'info',
                 showCancelButton: true,
-                confirmButtonText: '前往授權',
+                confirmButtonText: '前往認證',
                 cancelButtonText: '取消',
                 confirmButtonColor: '#06C755'
             }).then((res) => {
                 if (res.isConfirmed) {
                     const clientId = '2011647494';
                     const redirectUri = encodeURIComponent('https://script.google.com/macros/s/AKfycbyyjXQY6TfvKy8BLp5N3kv328Om9yZav_eQADKHUfxrNl7KOatJP_RmgKzA94DJiogJ/exec');
-                    const state = 'login_request';
+                    const state = 'login';
                     
                     const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid`;
-                    
-                    // 打開彈出視窗進行登入
-                    const popup = window.open(lineAuthUrl, 'line_login', 'width=500,height=600');
-                    if (!popup) {
-                        Swal.fire('錯誤', '彈出視窗被瀏覽器封鎖了，請允許彈出視窗！', 'error');
-                        return;
-                    }
-                    
-                    // 監聽來自彈出視窗的訊息
-                    const messageListener = function(event) {
-                        try {
-                            let data;
-                            if (typeof event.data === 'string') {
-                                if (event.data.startsWith('LINE_LOGIN_RESULT:')) {
-                                    data = JSON.parse(event.data.replace('LINE_LOGIN_RESULT:', ''));
-                                } else {
-                                    try { data = JSON.parse(event.data); } catch(e) {}
-                                }
-                            } else if (typeof event.data === 'object') {
-                                data = event.data;
-                            }
-                            
-                            if (data && data.type === 'LINE_LOGIN_RESULT' || (data && data.hasOwnProperty('isNewLine'))) {
-                                window.removeEventListener('message', messageListener);
-                                
-                                if (data.success) {
-                                    Swal.fire({
-                                        title: 'LINE 驗證成功', 
-                                        text: '歡迎回來！', 
-                                        icon: 'success'
-                                    });
-                                    const executeLogin = () => {
-                                        localStorage.setItem('user', data.user);
-                                        localStorage.setItem('token', data.token);
-                                        localStorage.setItem('currentUser', data.user);
-                                        window.location.reload();
-                                    };
-                                    executeLogin();
-                                } else if (data.isNewLine) {
-                                    Swal.fire({
-                                        title: '尚未註冊',
-                                        text: '這是您第一次使用 LINE 登入，請完成註冊或登入以綁定您的帳號。',
-                                        icon: 'info'
-                                    }).then(() => {
-                                        AppState.auth.pendingLineUid = data.lineUid;
-                                        showView('registerView');
-                                    });
-                                }
-                            }
-                        } catch(e) {
-                            console.error('Login message parse error:', e);
-                        }
-                    };
-                    window.addEventListener('message', messageListener);
+                    window.location.href = lineAuthUrl;
                 }
             });
         }
