@@ -2025,7 +2025,7 @@
             window.myRadarChart = new Chart(ctx, { type: 'radar', data: { labels: ['字彙量', '聽力理解', '拼寫準確度', '文法概念', '閱讀邏輯'], datasets: [{ label: '學科能力雷達', data: [stats.vocab, stats.listen, stats.spell, stats.grammar, stats.reading], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgba(59, 130, 246, 1)', pointBackgroundColor: 'rgba(59, 130, 246, 1)', }] }, options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } } } });
         }
 
-        function renderGlobalProfile(resProf) {
+        async function renderGlobalProfile(resProf) {
             AppState.profile.cache = resProf;
             
             // 同步後端的單字進度到前端 Set
@@ -2056,43 +2056,6 @@
                 document.getElementById('streakDaysDisplay').textContent = resProf.checkInDays || 0;
             }
             
-            // 處理會員到期提醒
-            const plan = QuotaManager.getPlan();
-            if (plan !== 'Basic' && resProf.expiryDate) {
-                let d = new Date(resProf.expiryDate);
-                const now = new Date();
-                const diffMs = d.getTime() - now.getTime();
-                const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-                
-                const lastWarningDate = localStorage.getItem('expiryWarning_' + AppState.auth.user);
-                const todayStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
-                
-                if (diffDays <= 3 && lastWarningDate !== todayStr) {
-                    localStorage.setItem('expiryWarning_' + AppState.auth.user, todayStr);
-                    let msg = '';
-                    if (diffDays > 0) {
-                        msg = `您的 ${plan} 方案即將在 <b>${diffDays} 天後</b> 到期 (至 ${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})。<br><br>若未取消訂閱將會自動續約。<br><span style="color:var(--danger-color); font-size:0.9em;">如欲取消，請至少於到期前一天操作喔！</span>`;
-                    } else if (diffDays === 0 || diffDays === -1) {
-                        msg = `您的 ${plan} 方案已經到期！<br><br>今日為<b>最後的 1 天寬限期</b>，請盡快續約以免失去權限。`;
-                    }
-                    
-                    if (msg) {
-                        setTimeout(() => {
-                            Swal.fire({
-                                title: '👑 會員到期提醒',
-                                html: msg,
-                                icon: 'warning',
-                                confirmButtonText: '查看方案',
-                                showCancelButton: true,
-                                cancelButtonText: '我知道了'
-                            }).then(res => {
-                                if(res.isConfirmed) showView('pricingView');
-                            });
-                        }, 1000);
-                    }
-                }
-            }
-
             // Virtual Card Data
             const vcUsername = document.getElementById('vcUsernameDisplay');
             if(vcUsername) vcUsername.textContent = AppState.auth.user; 
@@ -2121,7 +2084,7 @@
                         }).then(r => {
                             if(r.isConfirmed) {
                                 showLoading('解除綁定中...');
-                                window.open('https://script.google.com/macros/s/AKfycbyi8dZ55h7T-3Hq8wG86lY-X3_b2v9Hl617k2eIeK7xM7442wI5O5aWq9r-k3pWnE__/exec?action=unbind', 'lineBind', 'width=500,height=600');
+                                window.open(API_URL + '?action=unbind', 'lineBind', 'width=500,height=600');
                             }
                         });
                     }
@@ -2130,7 +2093,7 @@
                     btnLineBind.style.background = '#06C755';
                     btnLineBind.style.color = '#fff';
                     btnLineBind.onclick = () => {
-                        window.open('https://script.google.com/macros/s/AKfycbyi8dZ55h7T-3Hq8wG86lY-X3_b2v9Hl617k2eIeK7xM7442wI5O5aWq9r-k3pWnE__/exec?action=bind', 'lineBind', 'width=500,height=600');
+                        window.open(API_URL + '?action=bind', 'lineBind', 'width=500,height=600');
                     };
                 }
             }
@@ -2174,40 +2137,77 @@
                 if (window.chatPollInterval) { clearInterval(window.chatPollInterval); window.chatPollInterval = null; }
             }
 
+            // --- 依序顯示彈跳視窗 (Queue) ---
+            let interruptedByPricing = false;
+
+            // 1. 處理會員到期提醒
+            const plan = QuotaManager.getPlan();
+            if (plan !== 'Basic' && resProf.expiryDate) {
+                let d = new Date(resProf.expiryDate);
+                const now = new Date();
+                const diffMs = d.getTime() - now.getTime();
+                const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                
+                const lastWarningDate = localStorage.getItem('expiryWarning_' + AppState.auth.user);
+                const todayStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
+                
+                if (diffDays <= 3 && lastWarningDate !== todayStr) {
+                    localStorage.setItem('expiryWarning_' + AppState.auth.user, todayStr);
+                    let msg = '';
+                    if (diffDays > 0) {
+                        msg = `您的 ${plan} 方案即將在 <b>${diffDays} 天後</b> 到期 (至 ${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})。<br><br>若未取消訂閱將會自動續約。<br><span style="color:var(--danger-color); font-size:0.9em;">如欲取消，請至少於到期前一天操作喔！</span>`;
+                    } else if (diffDays === 0 || diffDays === -1) {
+                        msg = `您的 ${plan} 方案已經到期！<br><br>今日為<b>最後的 1 天寬限期</b>，請盡快續約以免失去權限。`;
+                    }
+                    
+                    if (msg) {
+                        let res = await Swal.fire({
+                            title: '👑 會員到期提醒',
+                            html: msg,
+                            icon: 'warning',
+                            confirmButtonText: '查看方案',
+                            showCancelButton: true,
+                            cancelButtonText: '我知道了'
+                        });
+                        if(res.isConfirmed) {
+                            showView('pricingView');
+                            interruptedByPricing = true;
+                        }
+                    }
+                }
+            }
+
+            if (interruptedByPricing) return;
+
+            // 2. 年級更新提醒 or 每日登入任務
             if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + AppState.auth.user)) { 
                 showGradeUpdatePopup(); 
             } else {
-                // 檢查每日登入智慧複習提醒
                 const d = new Date();
                 const todayStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
                 const lastPromptDate = localStorage.getItem('lastReviewPromptDate_' + AppState.auth.user);
                 
                 if (todayStr !== lastPromptDate) {
                     localStorage.setItem('lastReviewPromptDate_' + AppState.auth.user, todayStr);
-                    apiCall('getIncorrectQuestions', { username: AppState.auth.user }).then(res => {
-                        if (res.success && res.questions && res.questions.length > 0) {
-                            // 每日提醒只針對昨天 (stage 0 或 1) 的錯題
-                            const dueCount = res.questions.filter(q => q.isDue && q.stage <= 1).length;
-                            if (dueCount > 0) {
-                                setTimeout(() => {
-                                    Swal.fire({
-                                        title: '🌟 每日複習任務',
-                                        html: `我們已將您<b>昨天</b>的錯題排入了智慧複習池！<br><br>今日共有 <b style="color:var(--danger-color); font-size:1.5em;">${dueCount}</b> 題待複習單字<br>是否立刻進行複習？`,
-                                        icon: 'info',
-                                        showCancelButton: true,
-                                        confirmButtonText: '馬上複習',
-                                        cancelButtonText: '稍後再說',
-                                        confirmButtonColor: '#10b981'
-                                    }).then(result => {
-                                        if (result.isConfirmed) {
-                                            showView('reviewPage');
-                                            loadIncorrectQuestions(); // 點擊馬上複習後會跳轉並主動載入
-                                        }
-                                    });
-                                }, 1500); // 稍微延遲避免跟其他彈窗撞在一起
+                    let res = await apiCall('getIncorrectQuestions', { username: AppState.auth.user });
+                    if (res && res.success && res.questions && res.questions.length > 0) {
+                        const dueCount = res.questions.filter(q => q.isDue && q.stage <= 1).length;
+                        if (dueCount > 0) {
+                            let swalRes = await Swal.fire({
+                                title: '🌟 每日複習任務',
+                                html: `我們已將您<b>昨天</b>的錯題排入了智慧複習池！<br><br>今日共有 <b style="color:var(--danger-color); font-size:1.5em;">${dueCount}</b> 題待複習單字<br>是否立刻進行複習？`,
+                                icon: 'info',
+                                showCancelButton: true,
+                                confirmButtonText: '馬上複習',
+                                cancelButtonText: '稍後再說',
+                                confirmButtonColor: '#10b981'
+                            });
+                            if (swalRes.isConfirmed) {
+                                showView('reviewPage');
+                                loadIncorrectQuestions();
                             }
                         }
-                    });
+                    }
                 }
             }
         }
