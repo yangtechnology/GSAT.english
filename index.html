@@ -1203,7 +1203,7 @@
                             }
                         });
                     } else {
-                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://script.google.com/macros/s/AKfycbyyjXQY6TfvKy8BLp5N3kv328Om9yZav_eQADKHUfxrNl7KOatJP_RmgKzA94DJiogJ/exec&state=bind&scope=profile%20openid`;
+                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://yangtechnology.github.io/GSAT.english/&state=bind&scope=profile%20openid`;
                         window.location.href = lineAuthUrl;
                     }
                 }
@@ -1839,49 +1839,50 @@
             let savedUser = localStorage.getItem('user');
             if (savedUser && savedUser !== 'null') document.getElementById('loginUsername').value = savedUser;
 
-            // Handle LINE Login/Bind Callback
+            // Handle direct LINE Auth Code callback (New Flow)
             const urlParams = new URLSearchParams(window.location.search);
-            const lineAction = urlParams.get('line_action');
-            if (lineAction) {
-                // Clear URL to prevent re-triggering
+            const lineCode = urlParams.get('code');
+            const lineState = urlParams.get('state');
+            
+            if (lineCode) {
+                // Clear URL parameters immediately
                 window.history.replaceState({}, document.title, window.location.pathname);
+                showLoading('LINE 授權驗證中...');
                 
-                if (lineAction === 'login_success') {
-                    const user = urlParams.get('user');
-                    const token = urlParams.get('token');
-                    AppState.auth.user = user;
-                    AppState.auth.token = token;
-                    localStorage.setItem('user', user);
-                    localStorage.setItem('token', token);
-                    localStorage.removeItem('currentUser');
-                    Swal.fire({title: 'LINE 認證成功', text: '歡迎回來！', icon: 'success', timer: 1500, showConfirmButton: false});
-                    savedUser = user; // allow flow to continue loading user profile
-                } else if (lineAction === 'login_failed') {
-                    AppState.auth.pendingLineUid = urlParams.get('uid');
-                    Swal.fire({
-                        title: '尚未註冊',
-                        html: '您的 LINE 尚未綁定帳號。<br><br>如果您是舊用戶，請直接輸入帳號密碼登入，系統將為您自動綁定；<br><br>如果您是新用戶，請點擊「建立新帳號」進行註冊！',
-                        icon: 'info',
-                        confirmButtonText: '我知道了'
-                    }).then(() => {
-                        showView('loginView'); // remain on login
-                    });
-                } else if (lineAction === 'bind_callback') {
-                    const uid = urlParams.get('uid');
-                    if (savedUser && AppState.auth.token) {
-                        showLoading('綁定中...');
-                        apiCall('bindLine', { username: savedUser, lineUid: uid }).then(res => {
-                            if (res.success) {
-                                Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天都會收到專屬測驗與打卡提醒喔！', 'success').then(() => {
-                                    window.location.reload();
-                                });
-                            } else {
-                                Swal.fire('綁定失敗', res.message, 'error');
-                            }
+                // Send code to backend for token exchange
+                try {
+                    const res = await apiCall('handleLineCallback', { code: lineCode, state: lineState || 'login', username: savedUser });
+                    if (res.success) {
+                        if (lineState === 'bind') {
+                            Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天都會收到專屬測驗與打卡提醒喔！', 'success').then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            // Login success
+                            AppState.auth.user = res.user;
+                            AppState.auth.token = res.token;
+                            localStorage.setItem('user', res.user);
+                            localStorage.setItem('token', res.token);
+                            localStorage.removeItem('currentUser');
+                            Swal.fire({title: 'LINE 認證成功', text: '歡迎回來！', icon: 'success', timer: 1500, showConfirmButton: false});
+                            savedUser = res.user; // continue profile load
+                        }
+                    } else if (res.isNewLine) {
+                        // User needs to register or bind
+                        AppState.auth.pendingLineUid = res.lineUid;
+                        Swal.fire({
+                            title: '尚未註冊',
+                            html: '您的 LINE 尚未綁定帳號。<br><br>如果您是舊用戶，請直接輸入帳號密碼登入，系統將為您自動綁定；<br><br>如果您是新用戶，請點擊「建立新帳號」進行註冊！',
+                            icon: 'info',
+                            confirmButtonText: '我知道了'
+                        }).then(() => {
+                            showView('loginView');
                         });
                     } else {
-                        Swal.fire('錯誤', '綁定失敗：無法確認您的目前登入狀態，請重新登入後再試。', 'error');
+                        Swal.fire('授權失敗', res.message || '發生未知錯誤', 'error');
                     }
+                } catch (e) {
+                    Swal.fire('錯誤', '網路連線異常，請稍後再試。', 'error');
                 }
             }
 
@@ -2120,7 +2121,7 @@
                     btnLineBind.style.background = '#06C755';
                     btnLineBind.style.color = '#fff';
                     btnLineBind.onclick = () => {
-                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://script.google.com/macros/s/AKfycbyyjXQY6TfvKy8BLp5N3kv328Om9yZav_eQADKHUfxrNl7KOatJP_RmgKzA94DJiogJ/exec&state=bind&scope=profile%20openid`;
+                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://yangtechnology.github.io/GSAT.english/&state=bind&scope=profile%20openid`;
                         window.location.href = lineAuthUrl;
                     };
                 }
@@ -2977,7 +2978,7 @@
             }).then((res) => {
                 if (res.isConfirmed) {
                     const clientId = '2011647494';
-                    const redirectUri = encodeURIComponent('https://script.google.com/macros/s/AKfycbyyjXQY6TfvKy8BLp5N3kv328Om9yZav_eQADKHUfxrNl7KOatJP_RmgKzA94DJiogJ/exec');
+                    const redirectUri = encodeURIComponent('https://yangtechnology.github.io/GSAT.english/');
                     const state = 'login';
                     
                     const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid`;
