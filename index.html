@@ -3903,7 +3903,7 @@
                                     </div>
                                     <div style="display:flex; gap:12px; margin-top:4px; margin-left:8px; font-size:0.8em; color:var(--text-muted); font-weight:bold;">
                                         <span style="font-weight:normal;">${new Date(c.timestamp).toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
-                                        <span style="cursor:pointer; transition:color 0.2s;" onclick="this.style.color = this.style.color === 'var(--primary-color)' ? '' : 'var(--primary-color)'" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">讚</span>
+                                        <span style="cursor:pointer; transition:color 0.2s; color:\${(c.likes || []).includes(AppState.auth.user) ? 'var(--primary-color)' : ''};" onclick="toggleCommentLike('\${p.id}', '\${cid}', this)" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">讚</span>
                                         <span style="cursor:pointer;" onclick="window._setReplyTo('${p.id}', '${parentIdForReply}', '${c.author}')" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">回覆</span>
                                     </div>
                                 </div>
@@ -3991,6 +3991,14 @@
             apiCall('likePost', { postId: postId, username: AppState.auth.user }).catch(e => console.error(e));
         };
 
+        
+        window.toggleCommentLike = function(postId, commentId, el) {
+            if (commentId === 'temp_id') return; // optimistic comment not yet saved
+            let isLiked = el.style.color === 'var(--primary-color)';
+            el.style.color = isLiked ? '' : 'var(--primary-color)';
+            apiCall('toggleCommentLike', { postId, commentId, username: AppState.auth.user });
+        };
+
         window.inlineComment = function(postId) {
             const input = document.getElementById('comment_input_' + postId);
             if(!input) return;
@@ -4027,7 +4035,7 @@
                     </div>
                     <div style="display:flex; gap:12px; margin-top:4px; margin-left:8px; font-size:0.8em; color:var(--text-muted); font-weight:bold;">
                         <span style="font-weight:normal;">${timeStr}</span>
-                        <span style="cursor:pointer; transition:color 0.2s;" onclick="this.style.color = this.style.color === 'var(--primary-color)' ? '' : 'var(--primary-color)'" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">讚</span>
+                        <span style="cursor:pointer; transition:color 0.2s;" onclick="toggleCommentLike('\${postId}', 'temp_id', this)" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">讚</span>
                         <span style="cursor:pointer;" onclick="let inp=document.getElementById('comment_input_${postId}'); inp.value='@${AppState.auth.user} '; inp.focus();" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">回覆</span>
                     </div>
                 </div>`;
@@ -4289,10 +4297,15 @@ window.sendDM = function() {
 
             list.innerHTML = html || '<div style="padding:20px; text-align:center; color:var(--text-muted);">目前沒有新通知</div>';
             
-            // 儲存原始字串以供精確比對
-            window._currentNotifHtml = html;
-            let savedHtml = localStorage.getItem('lastNotifHtml_' + AppState.auth.user) || '';
-            if(html && html !== savedHtml) {
+            // 使用狀態 Hash 來比對
+            let dmTime = (inboxRes && inboxRes.inbox && inboxRes.inbox.length > 0) ? new Date(inboxRes.inbox[0].time).getTime() : 'nodm';
+            let expState = (AppState.profile && AppState.profile.cache && AppState.profile.cache.justExpired) ? 'exp' : 'noexp';
+            window._currentNotifHash = dmTime + '_' + expState;
+            let savedHash = localStorage.getItem('lastNotifHash_' + AppState.auth.user) || '';
+            
+            list.innerHTML = html || '<div style="padding:20px; text-align:center; color:var(--text-muted);">目前沒有新通知</div>';
+            
+            if(html && window._currentNotifHash !== savedHash) {
                 badge.style.display = 'flex';
                 badge.innerText = '!';
             } else {
@@ -4305,7 +4318,7 @@ window.sendDM = function() {
             const bell = document.getElementById('notificationBell');
             if (panel && panel.style.display === 'flex' && !panel.contains(e.target) && !bell.contains(e.target)) {
                 panel.style.display = 'none';
-                if(window._currentNotifHtml) localStorage.setItem('lastNotifHtml_' + AppState.auth.user, window._currentNotifHtml);
+                if(window._currentNotifHash) localStorage.setItem('lastNotifHash_' + AppState.auth.user, window._currentNotifHash);
             }
         });
 
