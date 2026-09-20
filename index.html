@@ -2343,6 +2343,7 @@
 
             if (interruptedByPricing) return;
             populateNotifications();
+            setInterval(populateNotifications, 30000);
 
             // 2. 年級更新提醒 or 每日登入任務
             if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + AppState.auth.user)) { 
@@ -3867,22 +3868,36 @@
                         </div>
                     </div>`;
                     if(res.posts.length === 0) { html = '<p style="text-align:center; color:var(--text-muted); margin-top:30px; font-size:1.1em;">目前沒有任何貼文，成為第一個分享的人吧！</p>'; }
+                    window._setReplyTo = function(postId, replyToId, author) {
+                        window[`replyTarget_${postId}`] = replyToId;
+                        let inp = document.getElementById('comment_input_' + postId);
+                        inp.value = '@' + author + ' ';
+                        inp.focus();
+                    };
+
                     res.posts.forEach(p => {
                         const isLiked = p.likes.includes(AppState.auth.user);
                         let commentsHtml = '';
-                        p.comments.forEach(c => {
-                            let isReply = c.content.trim().startsWith('@');
-                            let marginLeft = isReply ? '45px' : '0px';
-                            let avatarSize = isReply ? 24 : 32;
+                        
+                        let cMap = {};
+                        p.comments.forEach(c => { c.replies = []; cMap[c.id || c.timestamp] = c; });
+                        p.comments.forEach(c => { if(c.replyTo && cMap[c.replyTo]) cMap[c.replyTo].replies.push(c); });
+                        
+                        let renderCommentNode = (c, isNested) => {
+                            let marginLeft = isNested ? '45px' : '0px';
+                            let avatarSize = isNested ? 24 : 32;
                             let cAvatar = getUserAvatarHTML(c.author, avatarSize, c.avatar);
                             
-                            // Style @username visually
                             let formattedContent = c.content;
-                            if (isReply) {
+                            if (isNested && formattedContent.trim().startsWith('@')) {
                                 formattedContent = formattedContent.replace(/^@([^\s]+)/, '<strong style="color:var(--primary-color); font-weight:bold;">$1</strong>');
                             }
+                            
+                            // fallback id if missing
+                            let cid = c.id || c.timestamp;
+                            let parentIdForReply = isNested ? c.replyTo : cid;
 
-                            commentsHtml += `
+                            return `
                             <div style="display:flex; gap:8px; margin-top:12px; margin-left:${marginLeft};">
                                 <div style="flex-shrink:0; margin-top:2px;">${cAvatar}</div>
                                 <div style="flex:1; min-width:0;">
@@ -3893,10 +3908,18 @@
                                     <div style="display:flex; gap:12px; margin-top:4px; margin-left:8px; font-size:0.8em; color:var(--text-muted); font-weight:bold;">
                                         <span style="font-weight:normal;">${new Date(c.timestamp).toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
                                         <span style="cursor:pointer; transition:color 0.2s;" onclick="this.style.color = this.style.color === 'var(--primary-color)' ? '' : 'var(--primary-color)'" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">讚</span>
-                                        <span style="cursor:pointer;" onclick="let inp=document.getElementById('comment_input_${p.id}'); inp.value='@${c.author} '; inp.focus();" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">回覆</span>
+                                        <span style="cursor:pointer;" onclick="window._setReplyTo('${p.id}', '${parentIdForReply}', '${c.author}')" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">回覆</span>
                                     </div>
                                 </div>
                             </div>`;
+                        };
+
+                        p.comments.forEach(c => {
+                            if(c.replyTo && cMap[c.replyTo]) return; // handled as a reply
+                            commentsHtml += renderCommentNode(c, false);
+                            c.replies.forEach(r => {
+                                commentsHtml += renderCommentNode(r, true);
+                            });
                         });
                         
                         let pAvatar = getUserAvatarHTML(p.author, 40, p.avatar);
@@ -4023,7 +4046,7 @@
                 countSpan.innerText = `留言 (${count})`;
             }
 
-            apiCall('commentPost', { postId: postId, username: AppState.auth.user, content: content }).then(res => {
+            apiCall('commentPost', { postId: postId, username: AppState.auth.user, content: content, replyToId: replyToId }).then(res => {
                 input.disabled = false;
                 if(!res.success) {
                     Swal.fire('錯誤', res.message, 'error');
@@ -4159,7 +4182,7 @@ window.openDM = function(targetUser) {
                     html += `
                     <div style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
                         <div style="display: flex; align-items: flex-end; gap: 8px; flex-direction: row-reverse;">
-                            <div style="flex-shrink:0;">${getUserAvatarHTML(AppState.auth.user, 28)}</div>
+                            
                             <div style="background: var(--primary-color); color: white; padding: 10px 15px; border-radius: 18px; border-bottom-right-radius: 4px; max-width: 75%; font-size: 0.95em; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-break: break-word;">
                                 ${m.content}
                             </div>
@@ -4280,6 +4303,15 @@ window.sendDM = function() {
                 badge.style.display = 'none';
             }
         };
+
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('notificationPanel');
+            const bell = document.getElementById('notificationBell');
+            if (panel && panel.style.display === 'flex' && !panel.contains(e.target) && !bell.contains(e.target)) {
+                panel.style.display = 'none';
+                if(window._currentNotifHtml) localStorage.setItem('lastNotifHtml_' + AppState.auth.user, window._currentNotifHtml);
+            }
+        });
 
         window.toggleNotifications = function() {
             const panel = document.getElementById('notificationPanel');
