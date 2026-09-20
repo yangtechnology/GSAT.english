@@ -643,16 +643,30 @@
     </nav>
 
     <main class="main-content">
-                <div id="socialFeedView" class="view-section view-container" style="max-width: 800px;">
+                <div id="socialFeedView" class="view-section view-container" style="max-width: 800px; position: relative;">
             <h2>💬 社群大廳</h2>
-            <div style="background: var(--card-bg); padding: 15px; border-radius: var(--radius-md); box-shadow: var(--shadow); margin-bottom: 20px;">
-                <textarea id="postContentInput" placeholder="想分享什麼學習心得呢？" style="width:100%; height:80px; padding:10px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main); margin-bottom:10px;"></textarea>
-                <div style="text-align: right;">
-                    <button class="btn btn-primary" style="margin:0; padding:8px 20px;" onclick="createPost()">發布貼文</button>
-                </div>
-            </div>
+            
             <div id="publicPostsContainer">
                 <p style="text-align:center; color:var(--text-muted);">載入中...</p>
+            </div>
+
+            <!-- Floating Action Button -->
+            <button onclick="togglePostInput()" style="position: fixed; bottom: 80px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: var(--primary-color); color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; transition: transform 0.2s;">
+                +
+            </button>
+        </div>
+
+        <!-- Create Post Modal -->
+        <div id="createPostModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 10001; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+            <div style="background: var(--card-bg); width: 90%; max-width: 500px; border-radius: var(--radius-lg); display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; animation: slideUp 0.3s ease-out;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color);">
+                    <div style="font-weight: 800; font-size: 1.2em; color: var(--primary-color);">✍️ 撰寫貼文</div>
+                    <button onclick="togglePostInput()" style="background: none; border: none; font-size: 2.2em; color: var(--text-main); cursor: pointer; line-height: 1;">&times;</button>
+                </div>
+                <div style="padding: 20px;">
+                    <textarea id="postContentInput" placeholder="想分享什麼學習心得呢？" style="width:100%; height:150px; padding:15px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main); margin-bottom:15px; resize: none; font-size: 1.1em;"></textarea>
+                    <button class="btn btn-primary" style="width: 100%; padding: 12px; margin: 0; font-size: 1.1em; border-radius: 25px;" onclick="createPost()">發布貼文</button>
+                </div>
             </div>
         </div>
 
@@ -2040,23 +2054,27 @@
                 if (!avatarDisplay.includes('<img')) avatarDisplay = `<span style="display:inline-block; width:32px; height:32px; text-align:center; line-height:32px; vertical-align:middle; margin-right:5px; border-radius:50%; background:var(--bg-color);">${d.avatar}</span>`;
                 else avatarDisplay = avatarDisplay.replace('<img ', '<img style="width:32px; height:32px; object-fit:cover; border-radius:50%; vertical-align:middle; display:inline-block; margin-right:5px;" ');
 
-                let actionBtns = '';
+                let actionBtns = '<div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; align-items: center;">';
                 if (!isMe) {
-                    actionBtns += `<button class="btn btn-primary" style="padding:4px 8px; font-size:0.8em; margin:0 2px;" onclick="openDM('${d.username}')">💬 私訊</button>`;
+                    actionBtns += `<button style="background:var(--primary-color); color:white; border:none; padding:4px 10px; border-radius:12px; font-size:0.8em; cursor:pointer; width:auto; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 4px rgba(0,0,0,0.1);" onclick="openDM('${d.username}')">💬 私訊</button>`;
                 }
 
                 if (isMyAdmin && !isMe) {
                     if (d.username !== admin1) {
                         let kickText = kickRequests[d.username] ? '同意踢除' : '踢除';
-                        actionBtns += `<button class="btn btn-outline" style="padding:4px 8px; font-size:0.8em; margin:0 2px; border-color:var(--danger-color); color:var(--danger-color);" onclick="kickUser('${d.username}')">${kickText}</button>`;
+                        actionBtns += `<button style="background:transparent; color:var(--danger-color); border:1px solid var(--danger-color); padding:3px 10px; border-radius:12px; font-size:0.8em; cursor:pointer; width:auto; display:inline-flex; align-items:center;" onclick="kickUser('${d.username}')">${kickText}</button>`;
                     }
                     if (AppState.auth.user === admin1 && d.username !== admin1) {
-                        if (d.username !== admin2) actionBtns += `<button class="btn btn-outline" style="padding:4px 8px; font-size:0.8em; margin:0 2px; border-color:var(--secondary-color); color:var(--secondary-color);" onclick="manageAdmin('${d.username}', 'promote')">升為副管</button>`;
-                        else actionBtns += `<button class="btn btn-outline" style="padding:4px 8px; font-size:0.8em; margin:0 2px; border-color:#f59e0b; color:#f59e0b;" onclick="manageAdmin('${d.username}', 'demote')">解除副管</button>`;
+                        if (d.username !== admin2) {
+                            actionBtns += `<button style="background:transparent; color:var(--secondary-color); border:1px solid var(--secondary-color); padding:3px 10px; border-radius:12px; font-size:0.8em; cursor:pointer; width:auto; display:inline-flex; align-items:center;" onclick="manageAdmin('${d.username}', 'promote')">升為副管</button>`;
+                        } else {
+                            actionBtns += `<button style="background:transparent; color:#f59e0b; border:1px solid #f59e0b; padding:3px 10px; border-radius:12px; font-size:0.8em; cursor:pointer; width:auto; display:inline-flex; align-items:center;" onclick="manageAdmin('${d.username}', 'demote')">解除副管</button>`;
+                        }
                     }
                 }
+                actionBtns += '</div>';
 
-                html += `<tr style="background-color: ${bgColor};"><td style="text-align:center; font-weight:700;">${i+1}</td><td style="text-align:left; font-weight:600; white-space:nowrap; vertical-align:middle;">${avatarDisplay} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td><td style="text-align:center; white-space:nowrap;">${actionBtns}</td></tr>`;
+                html += `<tr style="background-color: ${bgColor};"><td style="text-align:center; font-weight:700;">${i+1}</td><td style="text-align:left; font-weight:600; white-space:nowrap; vertical-align:middle;">${avatarDisplay} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td><td style="text-align:center; white-space:normal;">${actionBtns}</td></tr>`;
             });
             html += '</table>';
             container.innerHTML = html;
@@ -3830,6 +3848,17 @@
             });
         };
 
+        
+        window.togglePostInput = function() {
+            const modal = document.getElementById('createPostModalOverlay');
+            if (modal.style.display === 'none') {
+                modal.style.display = 'flex';
+                document.getElementById('postContentInput').focus();
+            } else {
+                modal.style.display = 'none';
+            }
+        };
+
         window.createPost = function() {
             const content = document.getElementById('postContentInput').value.trim();
             if(!content) return Swal.fire('提示', '請輸入貼文內容', 'warning');
@@ -3838,6 +3867,7 @@
                 if(res.success) {
                     Swal.fire({toast:true, position:'top-end', icon:'success', title:'發布成功', showConfirmButton:false, timer:1500});
                     document.getElementById('postContentInput').value = '';
+                    togglePostInput();
                     loadPublicPosts();
                 } else Swal.fire('錯誤', res.message, 'error');
             });
