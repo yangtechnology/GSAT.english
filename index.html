@@ -656,20 +656,30 @@
             </div>
         </div>
 
-        <div id="dmModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-            <div style="background: var(--card-bg); width: 90%; max-width: 500px; height: 80vh; border-radius: var(--radius-lg); display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border-color);">
-                    <h3 style="margin:0; color:var(--primary-color);">💬 與 <span id="dmTargetName"></span> 私訊</h3>
-                    <button onclick="closeDM()" style="background: none; border: none; font-size: 1.5em; color: var(--text-main); cursor: pointer;">&times;</button>
+        
+        <!-- 私訊全螢幕覆蓋層 (取代醜陋的彈窗) -->
+        <div id="dmModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 10001; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
+                <div style="font-weight: 800; font-size: 1.2em; color: var(--primary-color); display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1em;">👤</div>
+                    <span id="dmTargetName"></span>
                 </div>
-                <div id="dmMessagesArea" style="flex: 1; padding: 15px; overflow-y: auto; background: var(--bg-color); display:flex; flex-direction:column; gap:10px;">
+                <button onclick="closeDM()" style="background: none; border: none; font-size: 2.2em; color: var(--text-main); cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            
+            <div class="chat-container" style="flex: 1; border: none; border-radius: 0; box-shadow: none; height: auto; display: flex; flex-direction: column;">
+                <div id="dmMessagesArea" class="chat-box" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; background: var(--bg-color);">
+                    <!-- Messages will be injected here -->
                 </div>
-                <div style="padding: 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); display:flex; gap:10px; border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg);">
-                    <input type="text" id="dmInput" placeholder="輸入訊息..." style="flex:1; padding:10px; border-radius:20px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main);" onkeydown="if(event.key==='Enter') sendDM()">
-                    <button class="btn btn-primary" style="margin:0; padding:8px 20px; border-radius:20px;" onclick="sendDM()">傳送</button>
+                <div class="chat-input-area" style="padding: 12px 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); display: flex; align-items: center; gap: 10px; margin: 0; flex-shrink: 0; border-radius: 0;">
+                    <input type="text" id="dmInput" class="chat-input" placeholder="輸入私訊內容..." style="flex: 1; border: 1px solid var(--border-color); background: var(--bg-color);" onkeydown="if(event.key==='Enter') sendDM()">
+                    <button class="chat-send-btn" onclick="sendDM()" style="width: 42px; height: 42px; padding: 0;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
                 </div>
             </div>
         </div>
+
 
         <div id="loginView" class="view-section active view-container centered-view">
             <div style="font-size: 3.5em; margin-bottom: 10px;">🎓</div>
@@ -1054,7 +1064,7 @@
 
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                     <button class="btn btn-primary" style="flex: 1; margin: 0;" onclick="document.getElementById('teamStatsContainer').style.display='block';">📊 戰隊戰績</button>
-                    <button class="btn btn-secondary" style="flex: 1; margin: 0; background: var(--secondary-color); color: white; border: none;" onclick="openFullScreenChat()">💬 展開聊天室</button>
+                    <button class="btn btn-secondary" style="flex: 1; margin: 0; background: var(--secondary-color); color: white; border: none;" onclick="openChatInbox()">💬 展開聊天室</button>
                 </div>
 
                 <div id="teamStatsContainer" class="profile-card" style="margin-bottom: 0;">
@@ -1065,6 +1075,18 @@
         </div>
         
         <!-- 🚀 全螢幕聊天室覆蓋層 -->
+        
+        <!-- 聊天室收件匣列表 -->
+        <div id="chatInboxOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 9999; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
+                <div style="font-weight: 800; font-size: 1.2em; color: var(--primary-color);">💬 聊天室</div>
+                <button onclick="closeChatInbox()" style="background: none; border: none; font-size: 2.2em; color: var(--text-main); cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            <div id="chatInboxList" style="flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 5px;">
+                <!-- 列表由 JS 動態生成 -->
+            </div>
+        </div>
+
         <div id="fullScreenChatOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 10000; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
                 <div style="font-weight: 800; font-size: 1.2em; color: var(--primary-color);">💬 戰隊聊天室</div>
@@ -3835,36 +3857,59 @@
             });
         };
 
-                window.openInbox = function() {
-    showLoading('讀取中...');
-    apiCall('getMyInbox', { username: AppState.auth.user }).then(res => {
-        Swal.close();
-        if(res.success) {
-            if(res.inbox.length === 0) {
-                Swal.fire('私訊收件匣', '目前沒有任何私訊紀錄', 'info');
-                return;
-            }
-            let html = '<div style="display:flex; flex-direction:column; gap:10px; text-align:left;">';
-            res.inbox.forEach(item => {
-                html += '<div style="padding:10px; border-radius:10px; background:var(--bg-color); border:1px solid var(--border-color); cursor:pointer;" onclick="Swal.close(); openDM(\'' + item.user + '\')">';
-                html += '<div style="font-weight:bold; color:var(--primary-color);">' + item.user + '</div>';
-                html += '<div style="color:var(--text-main); font-size:0.9em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + item.lastMsg + '</div>';
-                html += '<div style="color:var(--text-muted); font-size:0.8em; text-align:right;">' + new Date(item.time).toLocaleString() + '</div></div>';
-            });
-            html += '</div>';
-            Swal.fire({
-                title: '📬 私訊紀錄',
-                html: html,
-                showConfirmButton: true,
-                confirmButtonText: '關閉'
-            });
-        } else {
-            Swal.fire('錯誤', res.message, 'error');
-        }
-    });
-};
+                
+        window.openChatInbox = function() {
+            document.getElementById('chatInboxOverlay').style.display = 'flex';
+            const list = document.getElementById('chatInboxList');
+            
+            // 預設先顯示戰隊群組
+            let teamName = AppState.sys.currentTeam || '我的戰隊';
+            let html = `
+                <div style="display: flex; align-items: center; padding: 15px; border-radius: 12px; background: var(--card-bg); cursor: pointer; transition: background 0.2s; border-bottom: 1px solid var(--border-color);" onclick="closeChatInbox(); openFullScreenChat();">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5em; flex-shrink: 0; margin-right: 15px;">
+                        👥
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: bold; font-size: 1.1em; color: var(--text-main); margin-bottom: 5px;">${teamName} (群組)</div>
+                        <div style="color: var(--text-muted); font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">點擊進入戰隊聊天室</div>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.8em; align-self: flex-start; margin-top: 5px;"></div>
+                </div>
+            `;
+            list.innerHTML = html + '<div style="text-align:center; padding:20px; color:var(--text-muted);">載入私訊紀錄中...</div>';
 
-        window.openDM = function(targetUser) {
+            apiCall('getMyInbox', { username: AppState.auth.user }).then(res => {
+                if(res.success) {
+                    if (res.inbox.length === 0) {
+                        list.innerHTML = html + '<div style="text-align:center; padding:20px; color:var(--text-muted);">目前沒有任何私訊紀錄</div>';
+                        return;
+                    }
+                    res.inbox.forEach(item => {
+                        let timeStr = new Date(item.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        html += `
+                            <div style="display: flex; align-items: center; padding: 15px; border-radius: 12px; background: var(--card-bg); cursor: pointer; transition: background 0.2s; border-bottom: 1px solid var(--border-color);" onclick="closeChatInbox(); openDM('${item.user}');">
+                                <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5em; flex-shrink: 0; margin-right: 15px;">
+                                    👤
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-weight: bold; font-size: 1.1em; color: var(--text-main); margin-bottom: 5px;">${item.user}</div>
+                                    <div style="color: var(--text-muted); font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.lastMsg}</div>
+                                </div>
+                                <div style="color: var(--text-muted); font-size: 0.8em; align-self: flex-start; margin-top: 5px;">${timeStr}</div>
+                            </div>
+                        `;
+                    });
+                    list.innerHTML = html;
+                } else {
+                    list.innerHTML = html + '<div style="text-align:center; padding:20px; color:var(--danger-color);">載入失敗</div>';
+                }
+            });
+        };
+        
+        window.closeChatInbox = function() {
+            document.getElementById('chatInboxOverlay').style.display = 'none';
+        };
+window.openDM = function(targetUser) {
             AppState.sys.dmTarget = targetUser;
             document.getElementById('dmTargetName').textContent = targetUser;
             document.getElementById('dmModalOverlay').style.display = 'flex';
@@ -3877,33 +3922,52 @@
         };
 
         window.loadDMs = function() {
-            if(!AppState.sys.dmTarget) return;
-            const container = document.getElementById('dmMessagesArea');
-            apiCall('getDMs', { username: AppState.auth.user, otherUser: AppState.sys.dmTarget }).then(res => {
-                if(res.success) {
-                    let html = '';
-                    res.messages.forEach(m => {
-                        const isMe = m.sender === AppState.auth.user;
-                        html += `<div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; background: ${isMe ? 'var(--primary-color)' : 'var(--card-bg)'}; color: ${isMe ? 'white' : 'var(--text-main)'}; padding: 10px 15px; border-radius: 20px; max-width: 80%; border: ${isMe ? 'none' : '1px solid var(--border-color)'}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                            ${m.content}
-                            <div style="font-size: 0.7em; color: ${isMe ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)'}; margin-top: 5px; text-align: ${isMe ? 'right' : 'left'};">${new Date(m.timestamp).toLocaleTimeString()}</div>
-                        </div>`;
-                    });
-                    if(res.messages.length === 0) html = '<p style="text-align:center; color:var(--text-muted); align-self:center;">還沒有對話，打個招呼吧！</p>';
-                    container.innerHTML = html;
-                    container.scrollTop = container.scrollHeight;
+    if(!AppState.sys.dmTarget) return;
+    const container = document.getElementById('dmMessagesArea');
+    apiCall('getDMs', { username: AppState.auth.user, otherUser: AppState.sys.dmTarget }).then(res => {
+        if(res.success) {
+            let html = '';
+            res.messages.forEach(m => {
+                const isMe = m.sender === AppState.auth.user;
+                const timeStr = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                if (isMe) {
+                    html += `
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
+                        <div style="display: flex; align-items: flex-end; gap: 8px; flex-direction: row-reverse;">
+                            <div style="background: var(--primary-color); color: white; padding: 10px 15px; border-radius: 18px; border-bottom-right-radius: 4px; max-width: 75%; font-size: 0.95em; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-break: break-word;">
+                                ${m.content}
+                            </div>
+                            <span style="font-size: 0.7em; color: var(--text-muted); margin-bottom: 2px;">${timeStr}</span>
+                        </div>
+                    </div>`;
+                } else {
+                    html += `
+                    <div style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 5px;">
+                        <div style="display: flex; align-items: flex-end; gap: 8px;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8em; flex-shrink: 0; margin-bottom: 2px;">👤</div>
+                            <div style="background: var(--card-bg); color: var(--text-main); padding: 10px 15px; border-radius: 18px; border-bottom-left-radius: 4px; max-width: 75%; font-size: 0.95em; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid var(--border-color); word-break: break-word;">
+                                ${m.content}
+                            </div>
+                            <span style="font-size: 0.7em; color: var(--text-muted); margin-bottom: 2px;">${timeStr}</span>
+                        </div>
+                    </div>`;
                 }
             });
-        };
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+        }
+    });
+};
 
-        window.sendDM = function() {
+window.sendDM = function() {
             const input = document.getElementById('dmInput');
             const content = input.value.trim();
             if(!content || !AppState.sys.dmTarget) return;
             
             // Optimistic UI
             const container = document.getElementById('dmMessagesArea');
-            container.innerHTML += `<div style="align-self: flex-end; background: var(--primary-color); color: white; padding: 10px 15px; border-radius: 20px; max-width: 80%; opacity: 0.7;">${content}</div>`;
+            container.innerHTML += `<div style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;"><div style="display: flex; align-items: flex-end; gap: 8px; flex-direction: row-reverse;"><div style="background: var(--primary-color); color: white; padding: 10px 15px; border-radius: 18px; border-bottom-right-radius: 4px; max-width: 75%; font-size: 0.95em; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-break: break-word; opacity: 0.7;">${content}</div></div></div>`;
             container.scrollTop = container.scrollHeight;
             input.value = '';
 
