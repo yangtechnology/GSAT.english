@@ -3835,6 +3835,35 @@
             });
         };
 
+                window.openInbox = function() {
+    showLoading('讀取中...');
+    apiCall('getMyInbox', { username: AppState.auth.user }).then(res => {
+        Swal.close();
+        if(res.success) {
+            if(res.inbox.length === 0) {
+                Swal.fire('私訊收件匣', '目前沒有任何私訊紀錄', 'info');
+                return;
+            }
+            let html = '<div style="display:flex; flex-direction:column; gap:10px; text-align:left;">';
+            res.inbox.forEach(item => {
+                html += '<div style="padding:10px; border-radius:10px; background:var(--bg-color); border:1px solid var(--border-color); cursor:pointer;" onclick="Swal.close(); openDM(\'' + item.user + '\')">';
+                html += '<div style="font-weight:bold; color:var(--primary-color);">' + item.user + '</div>';
+                html += '<div style="color:var(--text-main); font-size:0.9em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + item.lastMsg + '</div>';
+                html += '<div style="color:var(--text-muted); font-size:0.8em; text-align:right;">' + new Date(item.time).toLocaleString() + '</div></div>';
+            });
+            html += '</div>';
+            Swal.fire({
+                title: '📬 私訊紀錄',
+                html: html,
+                showConfirmButton: true,
+                confirmButtonText: '關閉'
+            });
+        } else {
+            Swal.fire('錯誤', res.message, 'error');
+        }
+    });
+};
+
         window.openDM = function(targetUser) {
             AppState.sys.dmTarget = targetUser;
             document.getElementById('dmTargetName').textContent = targetUser;
