@@ -37,7 +37,7 @@
             --card-bg: #ffffff;
             --text-main: #1e293b; --text-muted: #64748b;
             --border-color: #e2e8f0; --danger-color: #ef4444;
-            --radius-md: 12px;
+            --radius-md: 12px;\n            --radius-lg: 16px;
             --nav-bg: rgba(255, 255, 255, 0.98);
         }
 
@@ -570,7 +570,11 @@
             </div>
         </div>
 
-        <div class="nav-right-group" id="navToolsGroup">
+        <div class="nav-right-group" id="navToolsGroup" style="display:flex; align-items:center; gap:15px;">
+            <div id="notificationBell" style="position:relative; cursor:pointer;" onclick="toggleNotifications()">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-main);"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <div id="notifBadge" style="position:absolute; top:-5px; right:-5px; background:var(--danger-color); color:white; font-size:10px; font-weight:bold; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; display:none;"></div>
+            </div>
             <button class="premium-vip-btn" onclick="showView('pricingView')">💎 <span class="premium-vip-text">升級 VIP</span></button>
             <div class="nav-quick-info" id="navQuickInfo">
                 <span id="quickName" class="quick-item desktop-only"></span>
@@ -1563,7 +1567,62 @@
                                                 }, 1500);
                                             }
                                         <\/script>
-                                    </body>
+                                    
+    <!-- Notifications Panel -->
+    <div id="notificationPanel" style="display:none; position:fixed; top:60px; right:20px; width:300px; background:var(--card-bg); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(0,0,0,0.2); border:1px solid var(--border-color); z-index:10000; flex-direction:column; max-height:400px; animation: slideUp 0.2s ease-out;">
+        <div style="padding:15px; border-bottom:1px solid var(--border-color); font-weight:bold; font-size:1.1em; color:var(--text-main);">通知</div>
+        <div id="notificationList" style="overflow-y:auto; flex:1; max-height:350px;">
+        </div>
+    </div>
+    <script>
+        window.populateNotifications = function() {
+            const list = document.getElementById('notificationList');
+            const badge = document.getElementById('notifBadge');
+            if(!list || !badge) return;
+            let html = '';
+            let count = 0;
+            
+            const plan = QuotaManager.getPlan();
+            if(plan === 'Basic' && AppState.profile && AppState.profile.cache && AppState.profile.cache.justExpired) {
+                html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="showView('pricingView'); toggleNotifications();"><div style="color:var(--danger-color); font-weight:bold; margin-bottom:5px;">👑 會員已到期</div><div style="color:var(--text-muted); font-size:0.9em;">您之前訂閱的專業版方案已結束，點此查看續約優惠。</div></div>`;
+                count++;
+            } else if (plan !== 'Basic' && AppState.profile && AppState.profile.cache && AppState.profile.cache.expiryDate) {
+                let d = new Date(AppState.profile.cache.expiryDate);
+                let diff = Math.ceil((d.getTime() - new Date().getTime())/(1000*3600*24));
+                if (diff <= 3) {
+                    html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="showView('pricingView'); toggleNotifications();"><div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">⏳ 方案即將到期</div><div style="color:var(--text-muted); font-size:0.9em;">您的 ${plan} 方案將於 ${diff} 天後到期。</div></div>`;
+                    count++;
+                }
+            }
+            
+            html += `<div style="padding:15px; border-bottom:1px solid var(--border-color);"><div style="color:var(--secondary-color); font-weight:bold; margin-bottom:5px;">🎉 歡迎使用系統</div><div style="color:var(--text-muted); font-size:0.9em;">社群大廳全新升級，快去看看大家在討論什麼吧！</div></div>`;
+            count++;
+            
+            if(AppState.sys.currentTeam) {
+                html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="showView('teamView'); toggleNotifications();"><div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">🛡️ 戰隊動態</div><div style="color:var(--text-muted); font-size:0.9em;">別忘了到戰隊大廳查看最新任務與成員動態。</div></div>`;
+                count++;
+            }
+
+            list.innerHTML = html || '<div style="padding:20px; text-align:center; color:var(--text-muted);">目前沒有新通知</div>';
+            
+            if(count > 0) {
+                badge.style.display = 'flex';
+                badge.innerText = count;
+            } else {
+                badge.style.display = 'none';
+            }
+        };
+
+        window.toggleNotifications = function() {
+            const panel = document.getElementById('notificationPanel');
+            if(panel.style.display === 'none' || !panel.style.display) {
+                panel.style.display = 'flex';
+                document.getElementById('notifBadge').style.display = 'none';
+            } else {
+                panel.style.display = 'none';
+            }
+        };
+    </script></body>
                                     </html>
                                 `);
                             }
@@ -2336,7 +2395,7 @@
                 }
             }
 
-            if (interruptedByPricing) return;
+            if (interruptedByPricing) return;\n            populateNotifications();
 
             // 2. 年級更新提醒 or 每日登入任務
             if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + AppState.auth.user)) { 
@@ -3865,16 +3924,20 @@
                         const isLiked = p.likes.includes(AppState.auth.user);
                         let commentsHtml = '';
                         p.comments.forEach(c => {
-                            let cAvatar = getUserAvatarHTML(c.author, 28, c.avatar);
+                            let cAvatar = getUserAvatarHTML(c.author, 32, c.avatar);
                             commentsHtml += `
                             <div style="display:flex; gap:10px; margin-top:12px;">
-                                ${cAvatar}
-                                <div style="background:var(--bg-color); padding:8px 12px; border-radius:14px; font-size:0.95em; flex:1;">
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                                        <b style="color:var(--text-main);">${c.author}</b>
-                                        <span style="color:var(--text-muted); font-size:0.8em;">${new Date(c.timestamp).toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                                <div style="flex-shrink:0; margin-top:2px;">${cAvatar}</div>
+                                <div style="flex:1; min-width:0;">
+                                    <div style="background:var(--bg-color); padding:8px 12px; border-radius:18px; display:inline-block; max-width:100%;">
+                                        <b style="color:var(--text-main); font-size:0.95em; margin-right:8px;">${c.author}</b>
+                                        <div style="color:var(--text-main); line-height:1.4; word-break:break-word; font-size:0.95em; display:inline;">${c.content}</div>
                                     </div>
-                                    <div style="color:var(--text-main); line-height:1.4; word-break:break-word;">${c.content}</div>
+                                    <div style="display:flex; gap:12px; margin-top:4px; margin-left:8px; font-size:0.8em; color:var(--text-muted); font-weight:bold;">
+                                        <span style="font-weight:normal;">${new Date(c.timestamp).toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                                        <span style="cursor:pointer;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">讚</span>
+                                        <span style="cursor:pointer;" onclick="document.getElementById('comment_input_${p.id}').focus()" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">回覆</span>
+                                    </div>
                                 </div>
                             </div>`;
                         });
@@ -3909,7 +3972,9 @@
                                     ${getUserAvatarHTML(AppState.auth.user, 32)}
                                     <div style="flex:1; display:flex; background:var(--bg-color); border-radius:20px; padding:2px 4px; border:1px solid var(--border-color);">
                                         <input type="text" id="comment_input_${p.id}" placeholder="留言..." style="flex:1; border:none; background:transparent; padding:8px 12px; outline:none; color:var(--text-main);" onkeydown="if(event.key==='Enter') inlineComment('${p.id}')">
-                                        <button onclick="inlineComment('${p.id}')" style="background:transparent; border:none; color:var(--primary-color); font-weight:bold; padding:0 15px; cursor:pointer;">發佈</button>
+                                        <button onclick="inlineComment('${p.id}')" style="background:transparent; border:none; color:var(--text-muted); font-weight:bold; padding:0 15px; cursor:pointer; display:flex; align-items:center;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='var(--text-muted)'">
+                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -3969,13 +4034,17 @@
             newComment.style.gap = '10px';
             newComment.style.marginTop = '12px';
             newComment.innerHTML = `
-                ${myAvatar}
-                <div style="background:var(--bg-color); padding:8px 12px; border-radius:14px; font-size:0.95em; flex:1;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                        <b style="color:var(--text-main);">${AppState.auth.user}</b>
-                        <span style="color:var(--text-muted); font-size:0.8em;">${timeStr}</span>
+                <div style="flex-shrink:0; margin-top:2px;">${myAvatar}</div>
+                <div style="flex:1; min-width:0;">
+                    <div style="background:var(--bg-color); padding:8px 12px; border-radius:18px; display:inline-block; max-width:100%;">
+                        <b style="color:var(--text-main); font-size:0.95em; margin-right:8px;">${AppState.auth.user}</b>
+                        <div style="color:var(--text-main); line-height:1.4; word-break:break-word; font-size:0.95em; display:inline;">${content}</div>
                     </div>
-                    <div style="color:var(--text-main); line-height:1.4; word-break:break-word;">${content}</div>
+                    <div style="display:flex; gap:12px; margin-top:4px; margin-left:8px; font-size:0.8em; color:var(--text-muted); font-weight:bold;">
+                        <span style="font-weight:normal;">${timeStr}</span>
+                        <span style="cursor:pointer;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">讚</span>
+                        <span style="cursor:pointer;" onclick="document.getElementById('comment_input_${postId}').focus()" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">回覆</span>
+                    </div>
                 </div>`;
             
             container.appendChild(newComment);
