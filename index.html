@@ -611,6 +611,7 @@
                     <button class="nav-btn" id="navLeaderboardBtn" onclick="showView('leaderboardView'); loadLeaderboardData()">📊 排行榜</button>
                     <button class="nav-btn" id="navAnalyticsBtn" onclick="showView('analyticsView')">📈 學習分析</button>
                     <button class="nav-btn" id="navTeamBtn" onclick="showView('teamView'); loadTeamChat()">🛡️ 戰隊大廳</button>
+                    <button class="nav-btn" id="navSocialFeedBtn" onclick="showView('socialFeedView'); loadPublicPosts()">💬 社群大廳</button>
                 </div>
             </details>
 
@@ -642,6 +643,34 @@
     </nav>
 
     <main class="main-content">
+                <div id="socialFeedView" class="view-section view-container" style="max-width: 800px;">
+            <h2>💬 社群大廳</h2>
+            <div style="background: var(--card-bg); padding: 15px; border-radius: var(--radius-md); box-shadow: var(--shadow); margin-bottom: 20px;">
+                <textarea id="postContentInput" placeholder="想分享什麼學習心得呢？" style="width:100%; height:80px; padding:10px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main); margin-bottom:10px;"></textarea>
+                <div style="text-align: right;">
+                    <button class="btn btn-primary" style="margin:0; padding:8px 20px;" onclick="createPost()">發布貼文</button>
+                </div>
+            </div>
+            <div id="publicPostsContainer">
+                <p style="text-align:center; color:var(--text-muted);">載入中...</p>
+            </div>
+        </div>
+
+        <div id="dmModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+            <div style="background: var(--card-bg); width: 90%; max-width: 500px; height: 80vh; border-radius: var(--radius-lg); display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border-color);">
+                    <h3 style="margin:0; color:var(--primary-color);">💬 與 <span id="dmTargetName"></span> 私訊</h3>
+                    <button onclick="closeDM()" style="background: none; border: none; font-size: 1.5em; color: var(--text-main); cursor: pointer;">&times;</button>
+                </div>
+                <div id="dmMessagesArea" style="flex: 1; padding: 15px; overflow-y: auto; background: var(--bg-color); display:flex; flex-direction:column; gap:10px;">
+                </div>
+                <div style="padding: 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); display:flex; gap:10px; border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg);">
+                    <input type="text" id="dmInput" placeholder="輸入訊息..." style="flex:1; padding:10px; border-radius:20px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main);" onkeydown="if(event.key==='Enter') sendDM()">
+                    <button class="btn btn-primary" style="margin:0; padding:8px 20px; border-radius:20px;" onclick="sendDM()">傳送</button>
+                </div>
+            </div>
+        </div>
+
         <div id="loginView" class="view-section active view-container centered-view">
             <div style="font-size: 3.5em; margin-bottom: 10px;">🎓</div>
             <h2>登入您的帳號</h2>
@@ -1953,37 +1982,59 @@
             const container = document.getElementById('teamMembersList');
             if (!container) return;
             if (!AppState.sys.leaderboard || AppState.sys.leaderboard.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">載入中或尚無資料</p>';
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">載入中，尚無資料</p>';
                 return;
             }
             const members = AppState.sys.leaderboard.filter(p => p.teamName === AppState.sys.currentTeam);
             if (members.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">尚未有成員戰績記錄</p>';
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">尚未有戰隊戰績紀錄</p>';
                 return;
             }
             members.sort((a, b) => b.totalXP - a.totalXP);
-            let html = '<table class="data-table" style="margin-top: 0;"><tr><th>排名</th><th style="text-align:left;">成員</th><th>Level</th><th>XP</th></tr>';
+            
+            let teamMeta = AppState.sys.teamLeaderboard ? AppState.sys.teamLeaderboard.find(t => t.teamName === AppState.sys.currentTeam) : null;
+            let admin1 = teamMeta ? teamMeta.admin1 : '';
+            let admin2 = teamMeta ? teamMeta.admin2 : '';
+            let kickRequests = teamMeta && teamMeta.kickRequests ? teamMeta.kickRequests : {};
+            let isMyAdmin = AppState.auth.user === admin1 || AppState.auth.user === admin2;
+
+            let html = '<table class="data-table" style="margin-top: 0;"><tr><th>名次</th><th style="text-align:left;">組員</th><th>Level</th><th>XP</th><th>操作</th></tr>';
             members.forEach((d, i) => {
                 const isMe = String(d.username).trim().toLowerCase() === String(AppState.auth.user).trim().toLowerCase();
                 const bgColor = isMe ? (AppState.sys.isDarkMode ? 'rgba(16,185,129,0.1)' : '#d1fae5') : 'transparent';
-                const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你)</span>` : d.username;
-                const isUltra = (isMe && QuotaManager.getPlan() === 'Ultra') || (!isMe && (d.plan === 'Ultra' || d.level >= 20));
+                
+                let roleIcon = '';
+                if (d.username === admin1) roleIcon = '👑';
+                else if (d.username === admin2) roleIcon = '🛡️';
+
+                let pendingKickInfo = '';
+                if (kickRequests[d.username]) {
+                    pendingKickInfo = `<br><span style="font-size:0.8em; color:var(--danger-color);">(踢除審核中... 1/2)</span>`;
+                }
+
+                const nameDisplay = isMe ? `<span style="color:var(--secondary-color);">${d.username} (你) ${roleIcon}</span>${pendingKickInfo}` : `${d.username} ${roleIcon}${pendingKickInfo}`;
+                
                 let avatarDisplay = d.avatar;
-                if (isUltra) {
-                    if (d.avatar.includes('<img')) {
-                        avatarDisplay = d.avatar.replace('<img ', '<img class="ultra-avatar-border" style="width:32px; height:32px; object-fit:cover; border-radius:50%; vertical-align:middle; display:inline-block; margin-right:5px;" ');
-                    } else {
-                        avatarDisplay = `<span class="ultra-avatar-border" style="display:inline-block; width:32px; height:32px; text-align:center; line-height:32px; vertical-align:middle; border-radius:50%; margin-right:5px; background:var(--bg-color);">${d.avatar}</span>`;
+                if (!avatarDisplay.includes('<img')) avatarDisplay = `<span style="display:inline-block; width:32px; height:32px; text-align:center; line-height:32px; vertical-align:middle; margin-right:5px; border-radius:50%; background:var(--bg-color);">${d.avatar}</span>`;
+                else avatarDisplay = avatarDisplay.replace('<img ', '<img style="width:32px; height:32px; object-fit:cover; border-radius:50%; vertical-align:middle; display:inline-block; margin-right:5px;" ');
+
+                let actionBtns = '';
+                if (!isMe) {
+                    actionBtns += `<button class="btn btn-primary" style="padding:4px 8px; font-size:0.8em; margin:0 2px;" onclick="openDM('${d.username}')">💬 私訊</button>`;
+                }
+
+                if (isMyAdmin && !isMe) {
+                    if (d.username !== admin1) {
+                        let kickText = kickRequests[d.username] ? '同意踢除' : '踢除';
+                        actionBtns += `<button class="btn btn-outline" style="padding:4px 8px; font-size:0.8em; margin:0 2px; border-color:var(--danger-color); color:var(--danger-color);" onclick="kickUser('${d.username}')">${kickText}</button>`;
                     }
-                } else {
-                    if (d.avatar.includes('<img')) {
-                        avatarDisplay = d.avatar.replace('<img ', '<img style="width:32px; height:32px; object-fit:cover; border-radius:50%; vertical-align:middle; display:inline-block; margin-right:5px;" ');
-                    } else {
-                        avatarDisplay = `<span style="display:inline-block; width:32px; height:32px; text-align:center; line-height:32px; vertical-align:middle; margin-right:5px;">${d.avatar}</span>`;
+                    if (AppState.auth.user === admin1 && d.username !== admin1) {
+                        if (d.username !== admin2) actionBtns += `<button class="btn btn-outline" style="padding:4px 8px; font-size:0.8em; margin:0 2px; border-color:var(--secondary-color); color:var(--secondary-color);" onclick="manageAdmin('${d.username}', 'promote')">升為副管</button>`;
+                        else actionBtns += `<button class="btn btn-outline" style="padding:4px 8px; font-size:0.8em; margin:0 2px; border-color:#f59e0b; color:#f59e0b;" onclick="manageAdmin('${d.username}', 'demote')">解除副管</button>`;
                     }
                 }
 
-                html += `<tr style="background-color: ${bgColor};"><td style="text-align:center; font-weight:700;">${i+1}</td><td style="text-align:left; font-weight:600; white-space:nowrap; vertical-align:middle;">${avatarDisplay} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td></tr>`;
+                html += `<tr style="background-color: ${bgColor};"><td style="text-align:center; font-weight:700;">${i+1}</td><td style="text-align:left; font-weight:600; white-space:nowrap; vertical-align:middle;">${avatarDisplay} ${nameDisplay}</td><td style="color:var(--secondary-color); font-weight:800; text-align:center;">Lv.${d.level}</td><td style="color:var(--primary-color); font-weight:700; text-align:center;">${d.totalXP}</td><td style="text-align:center; white-space:nowrap;">${actionBtns}</td></tr>`;
             });
             html += '</table>';
             container.innerHTML = html;
@@ -3712,6 +3763,150 @@
                 }
             });
         }
+
+    
+        // ==========================================
+        // 社群與戰隊功能
+        // ==========================================
+        window.loadPublicPosts = function() {
+            const container = document.getElementById('publicPostsContainer');
+            container.innerHTML = '<div class="loading-box"><div class="spinner"></div><p style="margin-top:15px;">載入貼文中...</p></div>';
+            apiCall('getPosts').then(res => {
+                if(res.success) {
+                    let html = '';
+                    if(res.posts.length === 0) { html = '<p style="text-align:center; color:var(--text-muted);">目前沒有任何貼文，來搶頭香吧！</p>'; }
+                    res.posts.forEach(p => {
+                        const isLiked = p.likes.includes(AppState.auth.user);
+                        let commentsHtml = '';
+                        p.comments.forEach(c => {
+                            commentsHtml += `<div style="background:var(--bg-color); padding:10px; border-radius:10px; margin-top:8px; font-size:0.9em;"><b style="color:var(--secondary-color);">${c.author}</b> <span style="color:var(--text-muted); font-size:0.8em;">${new Date(c.timestamp).toLocaleString()}</span><br>${c.content}</div>`;
+                        });
+                        
+                        html += `<div style="background: var(--card-bg); padding: 15px; border-radius: var(--radius-md); box-shadow: var(--shadow); margin-bottom: 15px; text-align: left; border: 1px solid var(--border-color);">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <strong style="color:var(--primary-color); font-size:1.1em;">${p.author}</strong>
+                                <span style="color:var(--text-muted); font-size:0.85em;">${new Date(p.timestamp).toLocaleString()}</span>
+                            </div>
+                            <p style="margin: 0 0 15px 0; color:var(--text-main); white-space:pre-wrap;">${p.content}</p>
+                            <div style="display:flex; gap:10px; border-top:1px solid var(--border-color); padding-top:10px;">
+                                <button class="btn ${isLiked ? 'btn-primary' : 'btn-outline'}" style="margin:0; padding:4px 12px; font-size:0.9em;" onclick="likePost('${p.id}')">❤️ ${p.likes.length}</button>
+                                <button class="btn btn-secondary" style="margin:0; padding:4px 12px; font-size:0.9em;" onclick="document.getElementById('comment_div_${p.id}').style.display='block'">💬 留言 (${p.comments.length})</button>
+                            </div>
+                            <div id="comment_div_${p.id}" style="display:none; margin-top:15px;">
+                                <div style="display:flex; gap:10px;">
+                                    <input type="text" id="comment_inp_${p.id}" placeholder="寫下留言..." style="flex:1; padding:8px; border-radius:20px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-main);">
+                                    <button class="btn btn-secondary" style="margin:0; padding:4px 12px; border-radius:20px;" onclick="commentPost('${p.id}')">送出</button>
+                                </div>
+                                <div style="margin-top:10px;">${commentsHtml}</div>
+                            </div>
+                        </div>`;
+                    });
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p style="text-align:center; color:var(--danger-color);">載入失敗</p>';
+                }
+            });
+        };
+
+        window.createPost = function() {
+            const content = document.getElementById('postContentInput').value.trim();
+            if(!content) return Swal.fire('提示', '請輸入貼文內容', 'warning');
+            showLoading('發布中...');
+            apiCall('createPost', { username: AppState.auth.user, content: content }).then(res => {
+                if(res.success) {
+                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'發布成功', showConfirmButton:false, timer:1500});
+                    document.getElementById('postContentInput').value = '';
+                    loadPublicPosts();
+                } else Swal.fire('錯誤', res.message, 'error');
+            });
+        };
+
+        window.likePost = function(postId) {
+            apiCall('likePost', { postId: postId, username: AppState.auth.user }).then(res => {
+                if(res.success) loadPublicPosts();
+            });
+        };
+
+        window.commentPost = function(postId) {
+            const content = document.getElementById('comment_inp_' + postId).value.trim();
+            if(!content) return;
+            apiCall('commentPost', { postId: postId, username: AppState.auth.user, content: content }).then(res => {
+                if(res.success) loadPublicPosts();
+            });
+        };
+
+        window.openDM = function(targetUser) {
+            AppState.sys.dmTarget = targetUser;
+            document.getElementById('dmTargetName').textContent = targetUser;
+            document.getElementById('dmModalOverlay').style.display = 'flex';
+            loadDMs();
+        };
+        
+        window.closeDM = function() {
+            document.getElementById('dmModalOverlay').style.display = 'none';
+            AppState.sys.dmTarget = null;
+        };
+
+        window.loadDMs = function() {
+            if(!AppState.sys.dmTarget) return;
+            const container = document.getElementById('dmMessagesArea');
+            apiCall('getDMs', { username: AppState.auth.user, otherUser: AppState.sys.dmTarget }).then(res => {
+                if(res.success) {
+                    let html = '';
+                    res.messages.forEach(m => {
+                        const isMe = m.sender === AppState.auth.user;
+                        html += `<div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; background: ${isMe ? 'var(--primary-color)' : 'var(--card-bg)'}; color: ${isMe ? 'white' : 'var(--text-main)'}; padding: 10px 15px; border-radius: 20px; max-width: 80%; border: ${isMe ? 'none' : '1px solid var(--border-color)'}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            ${m.content}
+                            <div style="font-size: 0.7em; color: ${isMe ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)'}; margin-top: 5px; text-align: ${isMe ? 'right' : 'left'};">${new Date(m.timestamp).toLocaleTimeString()}</div>
+                        </div>`;
+                    });
+                    if(res.messages.length === 0) html = '<p style="text-align:center; color:var(--text-muted); align-self:center;">還沒有對話，打個招呼吧！</p>';
+                    container.innerHTML = html;
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
+        };
+
+        window.sendDM = function() {
+            const input = document.getElementById('dmInput');
+            const content = input.value.trim();
+            if(!content || !AppState.sys.dmTarget) return;
+            
+            // Optimistic UI
+            const container = document.getElementById('dmMessagesArea');
+            container.innerHTML += `<div style="align-self: flex-end; background: var(--primary-color); color: white; padding: 10px 15px; border-radius: 20px; max-width: 80%; opacity: 0.7;">${content}</div>`;
+            container.scrollTop = container.scrollHeight;
+            input.value = '';
+
+            apiCall('sendDM', { username: AppState.auth.user, otherUser: AppState.sys.dmTarget, content: content }).then(res => {
+                if(!res.success) Swal.fire('錯誤', res.message, 'error');
+                loadDMs();
+            });
+        };
+
+        window.manageAdmin = function(targetUser, action) {
+            Swal.fire({title: action==='promote'?'確定升為副管理員？':'確定解除副管理員？', icon:'warning', showCancelButton:true}).then(r => {
+                if(r.isConfirmed) {
+                    showLoading('處理中...');
+                    apiCall('manageTeamAdmin', { teamName: AppState.sys.currentTeam, username: AppState.auth.user, targetUser: targetUser, adminAction: action }).then(res => {
+                        if(res.success) { Swal.fire('成功', res.message, 'success'); apiCall('getLeaderboardData').then(res2 => { if(res2.success) { AppState.sys.leaderboard = res2.data; AppState.sys.teamLeaderboard = res2.teamData||[]; window.renderTeamMembersStats(); } }); }
+                        else Swal.fire('錯誤', res.message, 'error');
+                    });
+                }
+            });
+        };
+
+        window.kickUser = function(targetUser) {
+            Swal.fire({title: '確定要踢除該成員？', text: '此操作不可復原，若有多位管理員需共同同意。', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(r => {
+                if(r.isConfirmed) {
+                    showLoading('處理中...');
+                    apiCall('kickTeamMember', { teamName: AppState.sys.currentTeam, username: AppState.auth.user, targetUser: targetUser }).then(res => {
+                        if(res.success) { Swal.fire('成功', res.message, 'success'); apiCall('getLeaderboardData').then(res2 => { if(res2.success) { AppState.sys.leaderboard = res2.data; AppState.sys.teamLeaderboard = res2.teamData||[]; window.renderTeamMembersStats(); } }); }
+                        else Swal.fire('錯誤', res.message, 'error');
+                    });
+                }
+            });
+        };
 
     </script>
 </body>
