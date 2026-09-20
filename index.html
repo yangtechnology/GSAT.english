@@ -3888,15 +3888,15 @@
                             <div style="display:flex; gap:15px; border-top:1px solid var(--border-color); padding-top:12px; margin-bottom:12px;">
                                 <div onclick="inlineLike('${p.id}', this)" data-liked="${isLiked ? 'true' : 'false'}" data-count="${p.likes.length}" style="cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:6px; color:${isLiked ? 'var(--danger-color)' : 'var(--text-muted)'}; font-weight:bold; padding:8px; border-radius:8px; transition:background 0.2s; font-size:1em; background:var(--bg-color);">
                                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="${isLiked ? 'currentColor' : 'none'}" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                    讚 (${p.likes.length})
+                                    <span class="like-count">讚 (${p.likes.length})</span>
                                 </div>
-                                <div onclick="document.getElementById('comment_input_${p.id}').focus()" style="cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--text-muted); font-weight:bold; padding:8px; border-radius:8px; transition:background 0.2s; font-size:1em; background:var(--bg-color);">
+                                <div onclick="toggleComments('${p.id}')" style="cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--text-muted); font-weight:bold; padding:8px; border-radius:8px; transition:background 0.2s; font-size:1em; background:var(--bg-color);">
                                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                    留言 (${p.comments.length})
+                                    <span id="comment_count_${p.id}" data-count="${p.comments.length}">留言 (${p.comments.length})</span>
                                 </div>
                             </div>
                             
-                            <div style="border-top:1px solid var(--border-color); padding-top:10px;">
+                            <div id="comments_section_${p.id}" style="display:none; border-top:1px solid var(--border-color); padding-top:10px;">
                                 <div id="comments_container_${p.id}">${commentsHtml}</div>
                                 <div style="display:flex; gap:10px; margin-top:12px; align-items:center;">
                                     ${getUserAvatarHTML(AppState.auth.user, 32)}
@@ -3911,6 +3911,17 @@
                     container.innerHTML = html;
                 } else container.innerHTML = '<p style="text-align:center; color:var(--danger-color);">載入失敗</p>';
             });
+        };
+
+        window.toggleComments = function(postId) {
+            const sec = document.getElementById('comments_section_' + postId);
+            if(sec.style.display === 'none') {
+                sec.style.display = 'block';
+                const input = document.getElementById('comment_input_' + postId);
+                if(input) input.focus();
+            } else {
+                sec.style.display = 'none';
+            }
         };
 
         window.inlineLike = function(postId, btnEl) {
