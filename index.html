@@ -1234,7 +1234,7 @@
                     <button class="btn btn-outline" style="flex:1; border-color: #3b82f6; color: #3b82f6; padding: 10px 5px;" id="themeBtnDark" onclick="setThemeMode('dark')">🌙 夜間</button>
                     <button class="btn btn-outline" style="flex:1; border-color: var(--text-main); color: var(--text-main); padding: 10px 5px;" id="themeBtnSystem" onclick="setThemeMode('system')">💻 依系統</button>
                 </div>
-            </div>\n\n            <div class="profile-card">\n                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">💬 LINE 推播與通知綁定</h3>
+            </div><div class="profile-card"><h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">💬 LINE 推播與通知綁定</h3>
                 <div style="background: rgba(6, 199, 85, 0.05); border: 1px solid rgba(6, 199, 85, 0.3); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <div style="background: #06C755; color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5em; font-weight: bold;">L</div>
@@ -3886,7 +3886,7 @@
                             <p style="margin: 0 0 15px 0; color:var(--text-main); white-space:pre-wrap; line-height:1.5; font-size:1.05em; word-break:break-word;">${p.content}</p>
                             
                             <div style="display:flex; gap:15px; border-top:1px solid var(--border-color); padding-top:12px; margin-bottom:12px;">
-                                <div onclick="inlineLike('${p.id}')" style="cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:6px; color:${isLiked ? 'var(--danger-color)' : 'var(--text-muted)'}; font-weight:bold; padding:8px; border-radius:8px; transition:background 0.2s; font-size:1em; background:var(--bg-color);">
+                                <div onclick="inlineLike('${p.id}', this)" data-liked="${isLiked ? 'true' : 'false'}" data-count="${p.likes.length}" style="cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:6px; color:${isLiked ? 'var(--danger-color)' : 'var(--text-muted)'}; font-weight:bold; padding:8px; border-radius:8px; transition:background 0.2s; font-size:1em; background:var(--bg-color);">
                                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="${isLiked ? 'currentColor' : 'none'}" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                                     讚 (${p.likes.length})
                                 </div>
@@ -3913,11 +3913,23 @@
             });
         };
 
-        window.inlineLike = function(postId) {
-            // Optimistic UI for like can be added here if needed, but simple reload is safe
-            apiCall('likePost', { postId: postId, username: AppState.auth.user }).then(() => {
-                loadPublicPosts(); // refresh silently
-            });
+        window.inlineLike = function(postId, btnEl) {
+            let isLiked = btnEl.getAttribute('data-liked') === 'true';
+            let count = parseInt(btnEl.getAttribute('data-count'));
+            
+            isLiked = !isLiked;
+            count = isLiked ? count + 1 : count - 1;
+            
+            btnEl.setAttribute('data-liked', isLiked ? 'true' : 'false');
+            btnEl.setAttribute('data-count', count);
+            
+            btnEl.style.color = isLiked ? 'var(--danger-color)' : 'var(--text-muted)';
+            const svg = btnEl.querySelector('svg');
+            if (svg) svg.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+            const span = btnEl.querySelector('.like-count');
+            if (span) span.innerText = `讚 (${count})`;
+            
+            apiCall('likePost', { postId: postId, username: AppState.auth.user }).catch(e => console.error(e));
         };
 
         window.inlineComment = function(postId) {
@@ -3926,14 +3938,47 @@
             const content = input.value.trim();
             if(!content) return;
             
+            input.value = '';
             input.disabled = true;
+            
+            const container = document.getElementById('comments_container_' + postId);
+            const myAvatar = getUserAvatarHTML(AppState.auth.user, 28);
+            const now = new Date();
+            const timeStr = now.toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+            
+            const newComment = document.createElement('div');
+            newComment.style.display = 'flex';
+            newComment.style.gap = '10px';
+            newComment.style.marginTop = '12px';
+            newComment.innerHTML = `
+                ${myAvatar}
+                <div style="background:var(--bg-color); padding:8px 12px; border-radius:14px; font-size:0.95em; flex:1;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <b style="color:var(--text-main);">${AppState.auth.user}</b>
+                        <span style="color:var(--text-muted); font-size:0.8em;">${timeStr}</span>
+                    </div>
+                    <div style="color:var(--text-main); line-height:1.4; word-break:break-word;">${content}</div>
+                </div>`;
+            
+            container.appendChild(newComment);
+            
+            const countSpan = document.getElementById('comment_count_' + postId);
+            if(countSpan) {
+                let count = parseInt(countSpan.getAttribute('data-count') || 0);
+                count++;
+                countSpan.setAttribute('data-count', count);
+                countSpan.innerText = `留言 (${count})`;
+            }
+
             apiCall('commentPost', { postId: postId, username: AppState.auth.user, content: content }).then(res => {
-                if(res.success) {
-                    loadPublicPosts(); // refresh silently
-                } else {
-                    input.disabled = false;
+                input.disabled = false;
+                if(!res.success) {
                     Swal.fire('錯誤', res.message, 'error');
+                    newComment.remove();
                 }
+            }).catch(e => {
+                input.disabled = false;
+                newComment.remove();
             });
         };
 
