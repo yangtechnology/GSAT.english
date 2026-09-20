@@ -1226,8 +1226,15 @@
                 <div class="input-group" style="text-align: left;"><label>更換大頭貼</label><input type="file" id="avatarFileInput" accept="image/*" style="padding: 10px; background: var(--card-bg);" onchange="handleAvatarFile(event)"><p class="input-desc">上傳您專屬大頭貼，這將顯示在您的虛擬會員卡上。</p></div>
             </div>
             
-            <div class="profile-card">
-                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">💬 LINE 推播與通知綁定</h3>
+            
+            <div class="profile-card" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <h3 style="margin-top: 0; margin-bottom: 5px; color: var(--primary-color);">外觀主題設定</h3>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-outline" style="flex:1; border-color: #f59e0b; color: #f59e0b; padding: 10px 5px;" id="themeBtnLight" onclick="setThemeMode('light')">☀️ 日間</button>
+                    <button class="btn btn-outline" style="flex:1; border-color: #3b82f6; color: #3b82f6; padding: 10px 5px;" id="themeBtnDark" onclick="setThemeMode('dark')">🌙 夜間</button>
+                    <button class="btn btn-outline" style="flex:1; border-color: var(--text-main); color: var(--text-main); padding: 10px 5px;" id="themeBtnSystem" onclick="setThemeMode('system')">💻 依系統</button>
+                </div>
+            </div>\n\n            <div class="profile-card">\n                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">💬 LINE 推播與通知綁定</h3>
                 <div style="background: rgba(6, 199, 85, 0.05); border: 1px solid rgba(6, 199, 85, 0.3); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <div style="background: #06C755; color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5em; font-weight: bold;">L</div>
@@ -3873,26 +3880,60 @@
                                 ${pAvatar}
                                 <div style="flex:1;">
                                     <strong style="color:var(--text-main); font-size:1.05em; display:block;">${p.author}</strong>
-                                    <span style="color:var(--text-muted); font-size:0.8em;">${new Date(p.timestamp).toLocaleString()}</span>
+                                    <span style="color:var(--text-muted); font-size:0.8em;">${new Date(p.timestamp).toLocaleString([], {year:'numeric', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
                                 </div>
                             </div>
                             <p style="margin: 0 0 15px 0; color:var(--text-main); white-space:pre-wrap; line-height:1.5; font-size:1.05em; word-break:break-word;">${p.content}</p>
                             
-                            <div style="display:flex; gap:15px; border-top:1px solid var(--border-color); padding-top:12px;">
-                                <div onclick="likePost('${p.id}')" style="cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:6px; color:${isLiked ? 'var(--danger-color)' : 'var(--text-muted)'}; font-weight:bold; padding:6px; border-radius:8px; transition:background 0.2s; font-size:1em;" onmouseover="this.style.background='var(--bg-color)'" onmouseout="this.style.background='transparent'">
+                            <div style="display:flex; gap:15px; border-top:1px solid var(--border-color); padding-top:12px; margin-bottom:12px;">
+                                <div onclick="inlineLike('${p.id}')" style="cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:6px; color:${isLiked ? 'var(--danger-color)' : 'var(--text-muted)'}; font-weight:bold; padding:8px; border-radius:8px; transition:background 0.2s; font-size:1em; background:var(--bg-color);">
                                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="${isLiked ? 'currentColor' : 'none'}" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                    ${p.likes.length}
+                                    讚 (${p.likes.length})
                                 </div>
-                                <div onclick="let c=prompt('留言內容:'); if(c) commentPost('${p.id}', c);" style="cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--text-muted); font-weight:bold; padding:6px; border-radius:8px; transition:background 0.2s; font-size:1em;" onmouseover="this.style.background='var(--bg-color)'" onmouseout="this.style.background='transparent'">
+                                <div onclick="document.getElementById('comment_input_${p.id}').focus()" style="cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--text-muted); font-weight:bold; padding:8px; border-radius:8px; transition:background 0.2s; font-size:1em; background:var(--bg-color);">
                                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                    ${p.comments.length}
+                                    留言 (${p.comments.length})
                                 </div>
                             </div>
-                            <div style="margin-top:10px;">${commentsHtml}</div>
+                            
+                            <div style="border-top:1px solid var(--border-color); padding-top:10px;">
+                                <div id="comments_container_${p.id}">${commentsHtml}</div>
+                                <div style="display:flex; gap:10px; margin-top:12px; align-items:center;">
+                                    ${getUserAvatarHTML(AppState.auth.user, 32)}
+                                    <div style="flex:1; display:flex; background:var(--bg-color); border-radius:20px; padding:2px 4px; border:1px solid var(--border-color);">
+                                        <input type="text" id="comment_input_${p.id}" placeholder="留言..." style="flex:1; border:none; background:transparent; padding:8px 12px; outline:none; color:var(--text-main);" onkeydown="if(event.key==='Enter') inlineComment('${p.id}')">
+                                        <button onclick="inlineComment('${p.id}')" style="background:transparent; border:none; color:var(--primary-color); font-weight:bold; padding:0 15px; cursor:pointer;">發佈</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>`;
                     });
                     container.innerHTML = html;
                 } else container.innerHTML = '<p style="text-align:center; color:var(--danger-color);">載入失敗</p>';
+            });
+        };
+
+        window.inlineLike = function(postId) {
+            // Optimistic UI for like can be added here if needed, but simple reload is safe
+            apiCall('likePost', { postId: postId, username: AppState.auth.user }).then(() => {
+                loadPublicPosts(); // refresh silently
+            });
+        };
+
+        window.inlineComment = function(postId) {
+            const input = document.getElementById('comment_input_' + postId);
+            if(!input) return;
+            const content = input.value.trim();
+            if(!content) return;
+            
+            input.disabled = true;
+            apiCall('commentPost', { postId: postId, username: AppState.auth.user, content: content }).then(res => {
+                if(res.success) {
+                    loadPublicPosts(); // refresh silently
+                } else {
+                    input.disabled = false;
+                    Swal.fire('錯誤', res.message, 'error');
+                }
             });
         };
 
@@ -3953,8 +3994,8 @@
             let teamName = AppState.sys.currentTeam || '我的戰隊';
             let html = `
                 <div style="display: flex; align-items: center; padding: 15px; border-radius: 12px; background: var(--card-bg); cursor: pointer; transition: background 0.2s; border-bottom: 1px solid var(--border-color);" onclick="closeChatInbox(); openFullScreenChat();">
-                    <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5em; flex-shrink: 0; margin-right: 15px;">
-                        👥
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 24px; font-weight: 800;">
+                        ${teamName.charAt(0)}
                     </div>
                     <div style="flex: 1; min-width: 0;">
                         <div style="font-weight: bold; font-size: 1.1em; color: var(--text-main); margin-bottom: 5px;">${teamName} (群組)</div>
