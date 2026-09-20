@@ -663,7 +663,7 @@
 
         <!-- Create Post Modal -->
         <div id="createPostModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 10001; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-            <div style="background: var(--card-bg); width: 90%; max-width: 500px; border-radius: var(--radius-lg); display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; animation: slideUp 0.3s ease-out;">
+            <div style="background: var(--card-bg); width: 90%; max-width: 500px; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; animation: slideUp 0.3s ease-out;">
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color);">
                     <div style="font-weight: 800; font-size: 1.2em; color: var(--primary-color);">✍️ 撰寫貼文</div>
                     <button onclick="togglePostInput()" style="background: none; border: none; font-size: 2.2em; color: var(--text-main); cursor: pointer; line-height: 1;">&times;</button>
@@ -3860,7 +3860,7 @@
                 if(res.success) {
                     let myAvatarFeed = getUserAvatarHTML(AppState.auth.user, 40);
                     let html = `
-                    <div style="background: var(--card-bg); padding: 15px; border-radius: var(--radius-lg); box-shadow: var(--shadow); margin-bottom: 25px; border: 1px solid var(--border-color); display:flex; gap:12px; align-items:center;">
+                    <div style="background: var(--card-bg); padding: 15px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 25px; border: 1px solid var(--border-color); display:flex; gap:12px; align-items:center;">
                         ${myAvatarFeed}
                         <div style="flex:1; background:var(--bg-color); padding:12px 18px; border-radius:25px; color:var(--text-muted); cursor:pointer; font-size:1.05em; border:1px solid var(--border-color); transition:background 0.2s;" onclick="togglePostInput()" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background='var(--bg-color)'">
                             在想些什麼呢，${AppState.auth.user}？
@@ -3871,14 +3871,24 @@
                         const isLiked = p.likes.includes(AppState.auth.user);
                         let commentsHtml = '';
                         p.comments.forEach(c => {
-                            let cAvatar = getUserAvatarHTML(c.author, 32, c.avatar);
+                            let isReply = c.content.trim().startsWith('@');
+                            let marginLeft = isReply ? '45px' : '0px';
+                            let avatarSize = isReply ? 24 : 32;
+                            let cAvatar = getUserAvatarHTML(c.author, avatarSize, c.avatar);
+                            
+                            // Style @username visually
+                            let formattedContent = c.content;
+                            if (isReply) {
+                                formattedContent = formattedContent.replace(/^@([^\s]+)/, '<strong style="color:var(--primary-color); font-weight:bold;">$1</strong>');
+                            }
+
                             commentsHtml += `
-                            <div style="display:flex; gap:10px; margin-top:12px;">
+                            <div style="display:flex; gap:8px; margin-top:12px; margin-left:${marginLeft};">
                                 <div style="flex-shrink:0; margin-top:2px;">${cAvatar}</div>
                                 <div style="flex:1; min-width:0;">
                                     <div style="background:var(--bg-color); padding:8px 12px; border-radius:18px; display:inline-block; max-width:100%;">
                                         <b style="color:var(--text-main); font-size:0.95em; display:block; margin-bottom:2px;">${c.author}</b>
-                                        <div style="color:var(--text-main); line-height:1.4; word-break:break-word; font-size:0.95em;">${c.content}</div>
+                                        <div style="color:var(--text-main); line-height:1.4; word-break:break-word; font-size:0.95em;">${formattedContent}</div>
                                     </div>
                                     <div style="display:flex; gap:12px; margin-top:4px; margin-left:8px; font-size:0.8em; color:var(--text-muted); font-weight:bold;">
                                         <span style="font-weight:normal;">${new Date(c.timestamp).toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
@@ -3892,7 +3902,7 @@
                         let pAvatar = getUserAvatarHTML(p.author, 40, p.avatar);
                         
                         html += `
-                        <div style="background: var(--card-bg); padding: 15px; border-radius: var(--radius-lg); box-shadow: var(--shadow); margin-bottom: 20px; text-align: left; border: 1px solid var(--border-color);">
+                        <div style="background: var(--card-bg); padding: 15px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 20px; text-align: left; border: 1px solid var(--border-color);">
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
                                 ${pAvatar}
                                 <div style="flex:1;">
@@ -3972,20 +3982,29 @@
             input.disabled = true;
             
             const container = document.getElementById('comments_container_' + postId);
-            const myAvatar = getUserAvatarHTML(AppState.auth.user, 28);
+            const isReply = content.trim().startsWith('@');
+            const marginLeft = isReply ? '45px' : '0px';
+            const avatarSize = isReply ? 24 : 32;
+            const myAvatar = getUserAvatarHTML(AppState.auth.user, avatarSize);
             const now = new Date();
             const timeStr = now.toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
             
+            let formattedContent = content;
+            if (isReply) {
+                formattedContent = formattedContent.replace(/^@([^\s]+)/, '<strong style="color:var(--primary-color); font-weight:bold;">$1</strong>');
+            }
+
             const newComment = document.createElement('div');
             newComment.style.display = 'flex';
-            newComment.style.gap = '10px';
+            newComment.style.gap = '8px';
             newComment.style.marginTop = '12px';
+            newComment.style.marginLeft = marginLeft;
             newComment.innerHTML = `
                 <div style="flex-shrink:0; margin-top:2px;">${myAvatar}</div>
                 <div style="flex:1; min-width:0;">
                     <div style="background:var(--bg-color); padding:8px 12px; border-radius:18px; display:inline-block; max-width:100%;">
                         <b style="color:var(--text-main); font-size:0.95em; display:block; margin-bottom:2px;">${AppState.auth.user}</b>
-                        <div style="color:var(--text-main); line-height:1.4; word-break:break-word; font-size:0.95em;">${content}</div>
+                        <div style="color:var(--text-main); line-height:1.4; word-break:break-word; font-size:0.95em;">${formattedContent}</div>
                     </div>
                     <div style="display:flex; gap:12px; margin-top:4px; margin-left:8px; font-size:0.8em; color:var(--text-muted); font-weight:bold;">
                         <span style="font-weight:normal;">${timeStr}</span>
@@ -4210,7 +4229,7 @@ window.sendDM = function() {
     </script>
 
     <!-- Notifications Panel -->
-    <div id="notificationPanel" style="display:none; position:fixed; top:60px; right:20px; width:300px; background:var(--card-bg); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(0,0,0,0.2); border:1px solid var(--border-color); z-index:10000; flex-direction:column; max-height:400px; animation: slideUp 0.2s ease-out;">
+    <div id="notificationPanel" style="display:none; position:fixed; top:60px; right:20px; width:300px; background:var(--card-bg); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.2); border:1px solid var(--border-color); z-index:10000; flex-direction:column; max-height:400px; animation: slideUp 0.2s ease-out;">
         <div style="padding:15px; border-bottom:1px solid var(--border-color); font-weight:bold; font-size:1.1em; color:var(--text-main);">通知</div>
         <div id="notificationList" style="overflow-y:auto; flex:1; max-height:350px;">
         </div>
@@ -4226,7 +4245,9 @@ window.sendDM = function() {
                 let inboxRes = await apiCall('getMyInbox', { username: AppState.auth.user });
                 if(inboxRes.success && inboxRes.inbox && inboxRes.inbox.length > 0) {
                     let latestDM = inboxRes.inbox[0];
-                    html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="toggleNotifications(); openDM('${latestDM.user}');"><div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">💬 來自 ${latestDM.user} 的新私訊</div><div style="color:var(--text-muted); font-size:0.9em;">${latestDM.lastMsg}</div></div>`;
+                    if (latestDM.lastSender !== AppState.auth.user) {
+                        html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="toggleNotifications(); openDM('${latestDM.user}');"><div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">💬 來自 ${latestDM.user} 的新私訊</div><div style="color:var(--text-muted); font-size:0.9em;">${latestDM.lastMsg}</div></div>`;
+                    }
                 }
             } catch(e) {}
             
