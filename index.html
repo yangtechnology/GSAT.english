@@ -1567,62 +1567,7 @@
                                                 }, 1500);
                                             }
                                         <\/script>
-                                    
-    <!-- Notifications Panel -->
-    <div id="notificationPanel" style="display:none; position:fixed; top:60px; right:20px; width:300px; background:var(--card-bg); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(0,0,0,0.2); border:1px solid var(--border-color); z-index:10000; flex-direction:column; max-height:400px; animation: slideUp 0.2s ease-out;">
-        <div style="padding:15px; border-bottom:1px solid var(--border-color); font-weight:bold; font-size:1.1em; color:var(--text-main);">通知</div>
-        <div id="notificationList" style="overflow-y:auto; flex:1; max-height:350px;">
-        </div>
-    </div>
-    <script>
-        window.populateNotifications = function() {
-            const list = document.getElementById('notificationList');
-            const badge = document.getElementById('notifBadge');
-            if(!list || !badge) return;
-            let html = '';
-            let count = 0;
-            
-            const plan = QuotaManager.getPlan();
-            if(plan === 'Basic' && AppState.profile && AppState.profile.cache && AppState.profile.cache.justExpired) {
-                html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="showView('pricingView'); toggleNotifications();"><div style="color:var(--danger-color); font-weight:bold; margin-bottom:5px;">👑 會員已到期</div><div style="color:var(--text-muted); font-size:0.9em;">您之前訂閱的專業版方案已結束，點此查看續約優惠。</div></div>`;
-                count++;
-            } else if (plan !== 'Basic' && AppState.profile && AppState.profile.cache && AppState.profile.cache.expiryDate) {
-                let d = new Date(AppState.profile.cache.expiryDate);
-                let diff = Math.ceil((d.getTime() - new Date().getTime())/(1000*3600*24));
-                if (diff <= 3) {
-                    html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="showView('pricingView'); toggleNotifications();"><div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">⏳ 方案即將到期</div><div style="color:var(--text-muted); font-size:0.9em;">您的 ${plan} 方案將於 ${diff} 天後到期。</div></div>`;
-                    count++;
-                }
-            }
-            
-            html += `<div style="padding:15px; border-bottom:1px solid var(--border-color);"><div style="color:var(--secondary-color); font-weight:bold; margin-bottom:5px;">🎉 歡迎使用系統</div><div style="color:var(--text-muted); font-size:0.9em;">社群大廳全新升級，快去看看大家在討論什麼吧！</div></div>`;
-            count++;
-            
-            if(AppState.sys.currentTeam) {
-                html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="showView('teamView'); toggleNotifications();"><div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">🛡️ 戰隊動態</div><div style="color:var(--text-muted); font-size:0.9em;">別忘了到戰隊大廳查看最新任務與成員動態。</div></div>`;
-                count++;
-            }
-
-            list.innerHTML = html || '<div style="padding:20px; text-align:center; color:var(--text-muted);">目前沒有新通知</div>';
-            
-            if(count > 0) {
-                badge.style.display = 'flex';
-                badge.innerText = count;
-            } else {
-                badge.style.display = 'none';
-            }
-        };
-
-        window.toggleNotifications = function() {
-            const panel = document.getElementById('notificationPanel');
-            if(panel.style.display === 'none' || !panel.style.display) {
-                panel.style.display = 'flex';
-                document.getElementById('notifBadge').style.display = 'none';
-            } else {
-                panel.style.display = 'none';
-            }
-        };
-    </script></body>
+                                    </body>
                                     </html>
                                 `);
                             }
@@ -2395,7 +2340,8 @@
                 }
             }
 
-            if (interruptedByPricing) return;\n            populateNotifications();
+            if (interruptedByPricing) return;
+            populateNotifications();
 
             // 2. 年級更新提醒 or 每日登入任務
             if (resProf.needsGradeUpdate && !localStorage.getItem('gradeUpdated_' + AppState.auth.user)) { 
@@ -4261,5 +4207,60 @@ window.sendDM = function() {
         };
 
     </script>
-</body>
+
+    <!-- Notifications Panel -->
+    <div id="notificationPanel" style="display:none; position:fixed; top:60px; right:20px; width:300px; background:var(--card-bg); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(0,0,0,0.2); border:1px solid var(--border-color); z-index:10000; flex-direction:column; max-height:400px; animation: slideUp 0.2s ease-out;">
+        <div style="padding:15px; border-bottom:1px solid var(--border-color); font-weight:bold; font-size:1.1em; color:var(--text-main);">通知</div>
+        <div id="notificationList" style="overflow-y:auto; flex:1; max-height:350px;">
+        </div>
+    </div>
+    <script>
+        window.populateNotifications = function() {
+            const list = document.getElementById('notificationList');
+            const badge = document.getElementById('notifBadge');
+            if(!list || !badge) return;
+            let html = '';
+            let count = 0;
+            
+            const plan = QuotaManager.getPlan();
+            if(plan === 'Basic' && AppState.profile && AppState.profile.cache && AppState.profile.cache.justExpired) {
+                html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="showView('pricingView'); toggleNotifications();"><div style="color:var(--danger-color); font-weight:bold; margin-bottom:5px;">👑 會員已到期</div><div style="color:var(--text-muted); font-size:0.9em;">您之前訂閱的專業版方案已結束，點此查看續約優惠。</div></div>`;
+                count++;
+            } else if (plan !== 'Basic' && AppState.profile && AppState.profile.cache && AppState.profile.cache.expiryDate) {
+                let d = new Date(AppState.profile.cache.expiryDate);
+                let diff = Math.ceil((d.getTime() - new Date().getTime())/(1000*3600*24));
+                if (diff <= 3) {
+                    html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="showView('pricingView'); toggleNotifications();"><div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">⏳ 方案即將到期</div><div style="color:var(--text-muted); font-size:0.9em;">您的 ${plan} 方案將於 ${diff} 天後到期。</div></div>`;
+                    count++;
+                }
+            }
+            
+            html += `<div style="padding:15px; border-bottom:1px solid var(--border-color);"><div style="color:var(--secondary-color); font-weight:bold; margin-bottom:5px;">🎉 歡迎使用系統</div><div style="color:var(--text-muted); font-size:0.9em;">社群大廳全新升級，快去看看大家在討論什麼吧！</div></div>`;
+            count++;
+            
+            if(AppState.sys.currentTeam) {
+                html += `<div style="padding:15px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--nav-bg)'" onmouseout="this.style.background=''" onclick="showView('teamView'); toggleNotifications();"><div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">🛡️ 戰隊動態</div><div style="color:var(--text-muted); font-size:0.9em;">別忘了到戰隊大廳查看最新任務與成員動態。</div></div>`;
+                count++;
+            }
+
+            list.innerHTML = html || '<div style="padding:20px; text-align:center; color:var(--text-muted);">目前沒有新通知</div>';
+            
+            if(count > 0) {
+                badge.style.display = 'flex';
+                badge.innerText = count;
+            } else {
+                badge.style.display = 'none';
+            }
+        };
+
+        window.toggleNotifications = function() {
+            const panel = document.getElementById('notificationPanel');
+            if(panel.style.display === 'none' || !panel.style.display) {
+                panel.style.display = 'flex';
+                document.getElementById('notifBadge').style.display = 'none';
+            } else {
+                panel.style.display = 'none';
+            }
+        };
+    </script></body>
 </html>
