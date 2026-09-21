@@ -4189,7 +4189,16 @@
             document.getElementById('chatInboxOverlay').style.display = 'none';
         };
 
-        window.getChatHistory = function() { return AppState.chat.activeContext === 'dm' ? (AppState.dm ? AppState.dm.history : []) : getChatHistory(); };
+        window.getChatHistory = function() { 
+    if (AppState.chat.activeContext === 'dm') { 
+        if (!AppState.dm) AppState.dm = {}; 
+        if (!AppState.dm.history) AppState.dm.history = []; 
+        return AppState.dm.history; 
+    } else { 
+        if (!AppState.chat.history) AppState.chat.history = []; 
+        return AppState.chat.history; 
+    } 
+};
         window.setChatHistory = function(history) { 
             if(AppState.chat.activeContext === 'dm') { if(!AppState.dm) AppState.dm = {}; AppState.dm.history = history; }
             else { AppState.chat.history = history; }
