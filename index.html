@@ -3918,9 +3918,11 @@
                         p.comments.forEach(c => {
                             if(c.replyTo && cMap[c.replyTo]) return; // handled as a reply
                             commentsHtml += renderCommentNode(c, false);
-                            c.replies.forEach(r => {
-                                commentsHtml += renderCommentNode(r, true);
-                            });
+                            if (c.replies && c.replies.length > 0) {
+                                c.replies.reverse().forEach(r => {
+                                    commentsHtml += renderCommentNode(r, true);
+                                });
+                            }
                         });
                         
                         let pAvatar = getUserAvatarHTML(p.author, 40, p.avatar);
