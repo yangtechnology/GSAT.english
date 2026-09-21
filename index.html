@@ -683,30 +683,6 @@
         </div>
 
         
-        <!-- 私訊全螢幕覆蓋層 (取代醜陋的彈窗) -->
-        <div id="dmModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 10001; flex-direction: column;">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
-                <div style="font-weight: 800; font-size: 1.2em; color: var(--primary-color); display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1em;">👤</div>
-                    <span id="dmTargetName"></span>
-                </div>
-                <button onclick="closeDM()" style="background: none; border: none; font-size: 2.2em; color: var(--text-main); cursor: pointer; line-height: 1;">&times;</button>
-            </div>
-            
-            <div class="chat-container" style="flex: 1; border: none; border-radius: 0; box-shadow: none; height: auto; display: flex; flex-direction: column;">
-                <div id="dmMessagesArea" class="chat-box" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; background: var(--bg-color);">
-                    <!-- Messages will be injected here -->
-                </div>
-                <div class="chat-input-area" style="padding: 12px 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); display: flex; align-items: center; gap: 10px; margin: 0; flex-shrink: 0; border-radius: 0;">
-                    <input type="text" id="dmInput" class="chat-input" placeholder="輸入私訊內容..." style="flex: 1; border: 1px solid var(--border-color); background: var(--bg-color);" onkeydown="if(event.key==='Enter') sendDM()">
-                    <button class="chat-send-btn" onclick="sendDM()" style="width: 42px; height: 42px; padding: 0;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-
         <div id="loginView" class="view-section active view-container centered-view">
             <div style="font-size: 3.5em; margin-bottom: 10px;">🎓</div>
             <h2>登入您的帳號</h2>
@@ -1111,9 +1087,31 @@
             </div>
         </div>
 
+        
+        <!-- DMs Overlay -->
+        <div id="dmOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 10001; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
+                <div style="font-weight: 800; font-size: 1.2em; color: var(--primary-color); display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1em;">👤</div>
+                    <span id="dmTargetName"></span>
+                </div>
+                <button onclick="closeDM()" style="background: none; border: none; font-size: 2.2em; color: var(--text-main); cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            
+            <div class="chat-container" style="flex: 1; border: none; border-radius: 0; box-shadow: none; height: auto; display: flex; flex-direction: column;">
+                <div id="dmMessagesArea" class="chat-box" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; background: var(--bg-color);">
+                </div>
+                <div class="chat-input-area" style="padding: 12px 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); display: flex; align-items: center; gap: 10px; margin: 0; flex-shrink: 0; border-radius: 0;">
+                    <input type="text" id="dmInput" class="chat-input" placeholder="輸入私訊內容..." style="flex: 1; border: 1px solid var(--border-color); background: var(--bg-color);" onkeydown="if(event.key==='Enter') sendDM()">
+                    <button class="chat-send-btn" onclick="sendDM()" style="width: 42px; height: 42px; padding: 0;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
         <div id="fullScreenChatOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 10000; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
-                <div style="font-weight: 800; font-size: 1.2em; color: var(--primary-color);">💬 戰隊聊天室</div>
+                <div id="fullScreenChatTitle" style="font-weight: 800; font-size: 1.2em; color: var(--primary-color);">💬 戰隊聊天室</div>
                 <button onclick="closeFullScreenChat()" style="background: none; border: none; font-size: 2.2em; color: var(--text-main); cursor: pointer; line-height: 1;">&times;</button>
             </div>
             
@@ -1917,6 +1915,7 @@
         };
 
         window.closeFullScreenChat = function() {
+            AppState.chat.activeContext = 'team';
             document.getElementById('fullScreenChatOverlay').style.display = 'none';
         };
 
@@ -2514,7 +2513,7 @@
             const isMe = row.dataset.sender === AppState.auth.user;
             
             let isExpired = false;
-            const msg = AppState.chat.history.find(m => m.id === row.dataset.id);
+            const msg = getChatHistory().find(m => m.id === row.dataset.id);
             if (msg) {
                 document.getElementById('cmenu-time').innerText = msg.time;
                 const msgTime = new Date(msg.rawTime).getTime();
@@ -2581,7 +2580,7 @@
         // 🚀 選單按鈕功能 (包含直接翻譯 API 與釘選橫幅)
         window.copyMsgFromMenu = function() {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
-            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            const msg = getChatHistory().find(m => m.id === AppState.chat.contextMsgId);
             if(msg && navigator.clipboard) {
                 let txt = msg.text;
                 navigator.clipboard.writeText(txt).then(() => Swal.fire({toast:true, position:'top-end', icon:'success', title:'已複製到剪貼簿', showConfirmButton:false, timer:1500}));
@@ -2590,7 +2589,7 @@
 
         window.translateMsgFromMenu = async function() {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
-            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            const msg = getChatHistory().find(m => m.id === AppState.chat.contextMsgId);
             if(msg) {
                 let txt = msg.text;
                 Swal.fire({ title: '翻譯中...', allowOutsideClick: false, background: 'var(--card-bg)', color: 'var(--text-main)', didOpen: () => { Swal.showLoading(); }});
@@ -2608,28 +2607,28 @@
 
         window.pinMsgFromMenu = function() {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
-            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            const msg = getChatHistory().find(m => m.id === AppState.chat.contextMsgId);
             if(msg) {
                 msg.isPinned = Date.now(); // 寫入釘選時間戳，觸發同步
                 AppState.chat.isSyncing = true;
-                apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
+                doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
                     setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 5000);
                 });
-                syncChatUI(AppState.chat.history);
+                syncChatUI(getChatHistory());
                 Swal.fire({toast:true, position:'top-end', icon:'success', title:'已新增至全頻公告', showConfirmButton:false, timer:1500});
             }
         };
 
         window.unpinMessage = function(msgId, event) {
             if(event) event.stopPropagation();
-            const msg = AppState.chat.history.find(m => m.id === msgId);
+            const msg = getChatHistory().find(m => m.id === msgId);
             if(msg) {
                 delete msg.isPinned;
                 AppState.chat.isSyncing = true;
-                apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
+                doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
                     setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 5000);
                 });
-                syncChatUI(AppState.chat.history);
+                syncChatUI(getChatHistory());
             }
         };
 
@@ -2685,7 +2684,7 @@
         function triggerReplyFromMenu() {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             if (!AppState.chat.contextMsgId) return;
-            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            const msg = getChatHistory().find(m => m.id === AppState.chat.contextMsgId);
             if (msg) triggerReply(msg.id, msg.sender, msg.text);
         }
 
@@ -2694,7 +2693,7 @@
         function triggerEditFromMenu() {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             if (!AppState.chat.contextMsgId) return;
-            const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            const msg = getChatHistory().find(m => m.id === AppState.chat.contextMsgId);
             if (!msg) return;
             
             let rawText = msg.text;
@@ -2713,10 +2712,10 @@
                 if (r.isConfirmed && r.value) {
                     msg.text = r.value;
                     msg.isEdited = true; 
-                    syncChatUI(AppState.chat.history);
+                    syncChatUI(getChatHistory());
                     
                     AppState.chat.isSyncing = true;
-                    apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
+                    doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
                         setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 5000);
                     });
                 }
@@ -2728,13 +2727,13 @@
             if (!AppState.chat.contextMsgId) return;
             Swal.fire({ title:'收回訊息？', text:'(兩小時內的訊息才能收回)', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444', background: 'var(--card-bg)', color: 'var(--text-main)' }).then(r => {
                 if(r.isConfirmed) {
-                    const msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+                    const msg = getChatHistory().find(m => m.id === AppState.chat.contextMsgId);
                     if(msg) {
                         msg.text = "此訊息已收回"; msg.reactions = {}; msg.isEdited = false;
-                        syncChatUI(AppState.chat.history);
+                        syncChatUI(getChatHistory());
                         
                         AppState.chat.isSyncing = true;
-                        apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'unsend', payload: { id: AppState.chat.contextMsgId } }).then(res => { 
+                        doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'unsend', payload: { id: AppState.chat.contextMsgId } }).then(res => { 
                             if(!res.success) Swal.fire('收回失敗', res.message, 'error'); 
                         }).finally(() => {
                             setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 5000);
@@ -2747,16 +2746,16 @@
         function sendReaction(emoji) {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
             if (!AppState.chat.contextMsgId || !AppState.sys.currentTeam || !navigator.onLine) return;
-            let msg = AppState.chat.history.find(m => m.id === AppState.chat.contextMsgId);
+            let msg = getChatHistory().find(m => m.id === AppState.chat.contextMsgId);
             if (!msg) return;
             if (!msg.reactions) msg.reactions = {};
             if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
             const uIdx = msg.reactions[emoji].indexOf(AppState.auth.user);
             if (uIdx > -1) msg.reactions[emoji].splice(uIdx, 1); else msg.reactions[emoji].push(AppState.auth.user);
-            syncChatUI(AppState.chat.history);
+            syncChatUI(getChatHistory());
             
             AppState.chat.isSyncing = true;
-            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
+            doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
                 setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 5000);
             });
         }
@@ -2785,7 +2784,7 @@
         }
 
         window.showReactionDetails = function(msgId) {
-            const msg = AppState.chat.history.find(m => m.id === msgId);
+            const msg = getChatHistory().find(m => m.id === msgId);
             if (!msg || !msg.reactions) return;
 
             let html = '<div style="text-align:left; max-height:250px; overflow-y:auto; padding-right:5px;">';
@@ -2815,15 +2814,15 @@
         }
 
         window.removeMyReaction = function(msgId, emoji) {
-            let msg = AppState.chat.history.find(m => m.id === msgId);
+            let msg = getChatHistory().find(m => m.id === msgId);
             if (!msg || !msg.reactions || !msg.reactions[emoji]) return;
             const uIdx = msg.reactions[emoji].indexOf(AppState.auth.user);
             if (uIdx > -1) {
                 msg.reactions[emoji].splice(uIdx, 1);
-                syncChatUI(AppState.chat.history);
+                syncChatUI(getChatHistory());
                 
                 AppState.chat.isSyncing = true;
-                apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
+                doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'replace', payload: msg }).finally(() => {
                     setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 5000);
                 });
                 Swal.close();
@@ -2964,14 +2963,24 @@
         }
 
         function loadTeamChat() {
-            if (!AppState.sys.currentTeam || !navigator.onLine || AppState.chat.isSyncing) return;
-            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'get' }).then(res => {
+            if ((AppState.chat.activeContext === 'team' && !AppState.sys.currentTeam) || 
+                (AppState.chat.activeContext === 'dm' && !AppState.chat.dmTarget) || 
+                !navigator.onLine || AppState.chat.isSyncing) return;
+            
+            const reqContext = AppState.chat.activeContext;
+            const reqTarget = reqContext === 'dm' ? AppState.chat.dmTarget : AppState.sys.currentTeam;
+
+            doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'get' }).then(res => {
+                if (AppState.chat.activeContext !== reqContext) return;
+                if (reqContext === 'dm' && AppState.chat.dmTarget !== reqTarget) return;
+                if (reqContext === 'team' && AppState.sys.currentTeam !== reqTarget) return;
+
                 if (res.success) { 
                     const newStr = JSON.stringify(res.messages);
-                    const oldStr = JSON.stringify(AppState.chat.history);
+                    const oldStr = JSON.stringify(getChatHistory());
                     if (newStr !== oldStr) {
-                        AppState.chat.history = res.messages; 
-                        syncChatUI(AppState.chat.history); 
+                        setChatHistory(res.messages); 
+                        syncChatUI(getChatHistory()); 
                     }
                 }
             });
@@ -2979,7 +2988,9 @@
 
         function sendChatMessage() {
             const input = document.getElementById('chatInputBox'); const msgText = input.value.trim();
-            if (!msgText || !AppState.sys.currentTeam || !navigator.onLine) return;
+            if (!msgText || !navigator.onLine) return;
+            if (AppState.chat.activeContext === 'team' && !AppState.sys.currentTeam) return;
+            if (AppState.chat.activeContext === 'dm' && !AppState.chat.dmTarget) return;
             input.value = ''; 
             
             const newMsg = { 
@@ -2993,10 +3004,10 @@
             
             if (AppState.chat.replyingTo) { newMsg.replyTo = AppState.chat.replyingTo; cancelReply(); }
             
-            AppState.chat.history.push(newMsg); syncChatUI(AppState.chat.history); chatBoxElem.scrollTop = chatBoxElem.scrollHeight;
+            getChatHistory().push(newMsg); syncChatUI(getChatHistory()); chatBoxElem.scrollTop = chatBoxElem.scrollHeight;
             
             AppState.chat.isSyncing = true;
-            apiCall('syncChat', { username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'send', payload: newMsg }).finally(() => { 
+            doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'send', payload: newMsg }).finally(() => { 
                 setTimeout(() => { AppState.chat.isSyncing = false; loadTeamChat(); }, 5000); 
             });
         }
@@ -3929,9 +3940,11 @@
                         p.comments.forEach(c => {
                             if(c.replyTo && cMap[c.replyTo]) return; // handled as a reply
                             commentsHtml += renderCommentNode(c, false);
-                            c.replies.forEach(r => {
-                                commentsHtml += renderCommentNode(r, true);
-                            });
+                            if (c.replies && c.replies.length > 0) {
+                                c.replies.reverse().forEach(r => {
+                                    commentsHtml += renderCommentNode(r, true);
+                                });
+                            }
                         });
                         
                         let pAvatar = getUserAvatarHTML(p.author, 40, p.avatar);
@@ -4199,17 +4212,144 @@
         window.closeChatInbox = function() {
             document.getElementById('chatInboxOverlay').style.display = 'none';
         };
-window.openDM = function(targetUser) {
-            AppState.sys.dmTarget = targetUser;
-            document.getElementById('dmTargetName').textContent = targetUser;
-            document.getElementById('dmModalOverlay').style.display = 'flex';
-            loadDMs();
+
+        window.getChatHistory = function() { 
+    if (AppState.chat.activeContext === 'dm') { 
+        if (!AppState.dm) AppState.dm = {}; 
+        if (!AppState.dm.history) AppState.dm.history = []; 
+        return AppState.dm.history; 
+    } else { 
+        if (!AppState.chat.history) AppState.chat.history = []; 
+        return AppState.chat.history; 
+    } 
+};
+        window.setChatHistory = function(history) { 
+            if(AppState.chat.activeContext === 'dm') { if(!AppState.dm) AppState.dm = {}; AppState.dm.history = history; }
+            else { AppState.chat.history = history; }
+        };
+        window.doSyncChat = function(args) {
+            if (AppState.chat.activeContext === 'dm') {
+                return apiCall('syncDM', { username: args.username, otherUser: AppState.chat.dmTarget, type: args.type, payload: args.payload });
+            } else {
+                return apiCall('syncChat', args);
+            }
+        };
+
+        window.openDM = function(targetUser) {
+            document.getElementById('chatInboxOverlay').style.display = 'none';
+            const panel = document.getElementById('notificationPanel');
+            if(panel) panel.style.display = 'none';
+            
+            AppState.chat.dmTarget = targetUser;
+            document.getElementById('dmTargetName').innerText = targetUser;
+            document.getElementById('dmOverlay').style.display = 'flex';
+            document.getElementById('dmMessagesArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p>載入私訊中...</p></div>';
+            
+            if (!window.dmPollInterval) {
+                window.dmPollInterval = setInterval(() => {
+                    if (document.getElementById('dmOverlay').style.display === 'flex' && AppState.chat.dmTarget) {
+                        loadDM(AppState.chat.dmTarget);
+                    }
+                }, 8000);
+            }
+            loadDM(targetUser);
+        };
+
+        window.closeDM = function() {
+            document.getElementById('dmOverlay').style.display = 'none';
+            AppState.chat.dmTarget = null;
+        };
+
+        window.loadDM = function(targetUser) {
+            apiCall('syncDM', { username: AppState.auth.user, otherUser: targetUser, type: 'get' }).then(res => {
+                if (res.success && document.getElementById('dmOverlay').style.display === 'flex' && AppState.chat.dmTarget === targetUser) {
+                    renderDM(res.messages);
+                }
+            });
+        };
+
+        window.sendDM = function() {
+            const input = document.getElementById('dmInput');
+            const content = input.value.trim();
+            if (!content || !AppState.chat.dmTarget) return;
+            
+            input.value = '';
+            const msgObj = {
+                id: 'msg_' + Date.now(),
+                sender: AppState.auth.user,
+                text: content,
+                time: new Date().toLocaleTimeString('zh-TW', {hour12:false, hour:'2-digit', minute:'2-digit'}),
+                rawTime: new Date().toISOString()
+            };
+            
+            // 樂觀更新 UI
+            const area = document.getElementById('dmMessagesArea');
+            if (area.innerHTML.includes('載入私訊中') || area.innerHTML.includes('尚無對話')) area.innerHTML = '';
+            
+            let html = '<div class="msg-bubble me">' +
+                       '<div class="msg-header">我 <span class="msg-time">' + msgObj.time + '</span></div>' +
+                       '<div class="msg-text">' + msgObj.text + '</div></div>';
+            area.innerHTML += html;
+            area.scrollTop = area.scrollHeight;
+            
+            // 寫入後端 (注意 payload 的 key 要和 backend 相對應)
+            apiCall('syncDM', { username: AppState.auth.user, otherUser: AppState.chat.dmTarget, type: 'send', payload: msgObj });
+        };
+
+        window.renderDM = function(messages) {
+            const area = document.getElementById('dmMessagesArea');
+            if (!messages || messages.length === 0) {
+                area.innerHTML = '<div style="text-align:center; color:var(--text-muted); margin-top:20px;">尚無對話紀錄，開始聊天吧！</div>';
+                return;
+            }
+            
+            const isAtBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
+            let html = '';
+            let lastDateStr = '';
+            
+            messages.forEach(m => {
+                const dateObj = new Date(m.rawTime || new Date());
+                const msgDateStr = dateObj.toLocaleDateString('zh-TW', {month:'short', day:'numeric'});
+                if (msgDateStr !== lastDateStr) {
+                    html += '<div class="chat-date-sep">' + msgDateStr + '</div>';
+                    lastDateStr = msgDateStr;
+                }
+                
+                const isMe = m.sender === AppState.auth.user;
+                const alignClass = isMe ? 'me' : 'other';
+                const avatar = m.avatar || '👤';
+                
+                if (isMe) {
+                    html += '<div class="msg-bubble me">' +
+                            '<div class="msg-header">我 <span class="msg-time">' + m.time + '</span></div>' +
+                            '<div class="msg-text">' + m.text + '</div></div>';
+                } else {
+                    html += '<div class="msg-bubble other">' +
+                            '<div class="msg-avatar">' + avatar + '</div>' +
+                            '<div class="msg-content">' +
+                            '<div class="msg-header">' + m.sender + ' <span class="msg-time">' + m.time + '</span></div>' +
+                            '<div class="msg-text">' + m.text + '</div></div></div>';
+                }
+            });
+            
+            area.innerHTML = html;
+            if (isAtBottom) area.scrollTop = area.scrollHeight;
+        };
+
+        window.openFullScreenChat = function() {
+            AppState.chat.activeContext = 'team';
+            document.getElementById('fullScreenChatTitle').innerHTML = '💬 戰隊聊天室';
+            document.getElementById('fullScreenChatOverlay').style.display = 'flex';
+            setChatHistory([]);
+            syncChatUI([]);
+            loadTeamChat();
         };
         
         window.closeDM = function() {
-            document.getElementById('dmModalOverlay').style.display = 'none';
-            AppState.sys.dmTarget = null;
+            document.getElementById('fullScreenChatOverlay').style.display = 'none';
+            AppState.chat.activeContext = 'team';
         };
+
 
         window.loadDMs = function() {
     if(!AppState.sys.dmTarget) return;
