@@ -2944,7 +2944,15 @@
             if ((AppState.chat.activeContext === 'team' && !AppState.sys.currentTeam) || 
                 (AppState.chat.activeContext === 'dm' && !AppState.chat.dmTarget) || 
                 !navigator.onLine || AppState.chat.isSyncing) return;
+            
+            const reqContext = AppState.chat.activeContext;
+            const reqTarget = reqContext === 'dm' ? AppState.chat.dmTarget : AppState.sys.currentTeam;
+
             doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'get' }).then(res => {
+                if (AppState.chat.activeContext !== reqContext) return;
+                if (reqContext === 'dm' && AppState.chat.dmTarget !== reqTarget) return;
+                if (reqContext === 'team' && AppState.sys.currentTeam !== reqTarget) return;
+
                 if (res.success) { 
                     const newStr = JSON.stringify(res.messages);
                     const oldStr = JSON.stringify(getChatHistory());
