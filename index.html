@@ -2956,7 +2956,7 @@
             if ((AppState.chat.activeContext === 'team' && !AppState.sys.currentTeam) || 
                 (AppState.chat.activeContext === 'dm' && !AppState.chat.dmTarget) || 
                 !navigator.onLine || AppState.chat.isSyncing) return;
-            apiCall('syncChat'{ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'get' }).then(res => {
+            doSyncChat({ username: AppState.auth.user, teamName: AppState.sys.currentTeam, type: 'get' }).then(res => {
                 if (res.success) { 
                     const newStr = JSON.stringify(res.messages);
                     const oldStr = JSON.stringify(getChatHistory());
