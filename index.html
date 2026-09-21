@@ -4286,53 +4286,90 @@
             const area = document.getElementById('dmMessagesArea');
             if (area.innerHTML.includes('載入私訊中') || area.innerHTML.includes('尚無對話')) area.innerHTML = '';
             
-            let html = '<div class="msg-bubble me">' +
-                       '<div class="msg-header">我 <span class="msg-time">' + msgObj.time + '</span></div>' +
-                       '<div class="msg-text">' + msgObj.text + '</div></div>';
-            area.innerHTML += html;
+            let htmlStr = `
+                <div class="chat-row me" data-id="${msgObj.id}" data-sender="${msgObj.sender}">
+                    <div class="chat-content">
+                        <div class="chat-meta-row"></div>
+                        <div class="chat-bubble-wrapper">
+                            <div class="chat-bubble">
+                                <div class="msg-text">${msgObj.text}</div>
+                            </div>
+                            <div class="chat-time-col"><span class="chat-time">${msgObj.time}</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            area.innerHTML += htmlStr;
             area.scrollTop = area.scrollHeight;
             
-            // 寫入後端 (注意 payload 的 key 要和 backend 相對應)
-            apiCall('syncDM', { username: AppState.auth.user, otherUser: AppState.chat.dmTarget, type: 'send', payload: msgObj });
+            // 寫入後端
+            apiCall('syncDM', { username: AppState.auth.user, otherUser: AppState.chat.dmTarget, type: 'send', payload: msgObj }).catch(e => console.error(e));
         };
 
         window.renderDM = function(messages) {
             const area = document.getElementById('dmMessagesArea');
             if (!messages || messages.length === 0) {
-                area.innerHTML = '<div style="text-align:center; color:var(--text-muted); margin-top:20px;">尚無對話紀錄，開始聊天吧！</div>';
+                area.innerHTML = '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-weight:bold;">尚無對話紀錄，開始聊天吧！</div>';
                 return;
             }
             
             const isAtBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
-            let html = '';
-            let lastDateStr = '';
+            let htmlStr = ''; let lastDateStr = ''; let lastSender = null;
             
             messages.forEach(m => {
                 const dateObj = new Date(m.rawTime || new Date());
                 const msgDateStr = dateObj.toLocaleDateString('zh-TW', {month:'short', day:'numeric'});
-                if (msgDateStr !== lastDateStr) {
-                    html += '<div class="chat-date-sep">' + msgDateStr + '</div>';
-                    lastDateStr = msgDateStr;
+                if (msgDateStr !== lastDateStr) { 
+                    htmlStr += `<div class="chat-date-sep">${msgDateStr}</div>`; 
+                    lastDateStr = msgDateStr; 
+                    lastSender = null; 
                 }
                 
-                const isMe = m.sender === AppState.auth.user;
-                const alignClass = isMe ? 'me' : 'other';
-                const avatar = m.avatar || '👤';
-                
-                if (isMe) {
-                    html += '<div class="msg-bubble me">' +
-                            '<div class="msg-header">我 <span class="msg-time">' + m.time + '</span></div>' +
-                            '<div class="msg-text">' + m.text + '</div></div>';
+                if (m.sender === 'System') {
+                    htmlStr += `<div class="msg-bubble system">${m.text}</div>`;
+                    lastSender = null;
                 } else {
-                    html += '<div class="msg-bubble other">' +
-                            '<div class="msg-avatar">' + avatar + '</div>' +
-                            '<div class="msg-content">' +
-                            '<div class="msg-header">' + m.sender + ' <span class="msg-time">' + m.time + '</span></div>' +
-                            '<div class="msg-text">' + m.text + '</div></div></div>';
+                    const isMe = m.sender === AppState.auth.user;
+                    const isUnsent = m.text === '此訊息已收回';
+                    const isConsecutive = (m.sender === lastSender && !m.replyTo);
+                    lastSender = m.sender;
+
+                    let displayMsgText = m.text;
+                    let isEdited = m.isEdited === true;
+                    if (displayMsgText.endsWith(" (已編輯)")) {
+                        displayMsgText = displayMsgText.replace(" (已編輯)", "");
+                        isEdited = true;
+                    }
+                    
+                    const alignClass = isMe ? 'me' : 'other';
+
+                    htmlStr += `
+                        <div class="chat-row ${alignClass}" data-id="${m.id}" data-sender="${m.sender}">
+                            ${!isMe ? `
+                                <div class="chat-avatar-container">
+                                    ${!isConsecutive ? (m.avatar && m.avatar.includes('http') ? `<img src="${m.avatar}" class="chat-avatar ${(m.plan==='Ultra' || m.level>=20) ? 'ultra-avatar-border' : ''}">` : `<div class="chat-avatar ${(m.plan==='Ultra' || m.level>=20) ? 'ultra-avatar-border' : ''}">${m.avatar || '😀'}</div>`) : ''}
+                                </div>
+                            ` : ''}
+                            
+                            <div class="chat-content">
+                                <div class="chat-meta-row">
+                                    ${!isMe && !isConsecutive && !isUnsent ? `<span class="chat-name">${m.sender}</span>` : ''}
+                                    ${isEdited && !isUnsent ? `<span class="chat-edited">已編輯</span>` : ''}
+                                </div>
+                                
+                                <div class="chat-bubble-wrapper">
+                                    <div class="chat-bubble ${isUnsent ? 'unsent' : ''}">
+                                        <div class="msg-text">${displayMsgText}</div>
+                                    </div>
+                                    <div class="chat-time-col"><span class="chat-time">${m.time}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 }
             });
             
-            area.innerHTML = html;
+            area.innerHTML = htmlStr;
             if (isAtBottom) area.scrollTop = area.scrollHeight;
         };
 
