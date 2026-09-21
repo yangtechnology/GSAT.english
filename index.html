@@ -1087,28 +1087,6 @@
             </div>
         </div>
 
-        
-        <!-- DMs Overlay -->
-        <div id="dmOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 10001; flex-direction: column;">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
-                <div style="font-weight: 800; font-size: 1.2em; color: var(--primary-color); display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1em;">👤</div>
-                    <span id="dmTargetName"></span>
-                </div>
-                <button onclick="closeDM()" style="background: none; border: none; font-size: 2.2em; color: var(--text-main); cursor: pointer; line-height: 1;">&times;</button>
-            </div>
-            
-            <div class="chat-container" style="flex: 1; border: none; border-radius: 0; box-shadow: none; height: auto; display: flex; flex-direction: column;">
-                <div id="dmMessagesArea" class="chat-box" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; background: var(--bg-color);">
-                </div>
-                <div class="chat-input-area" style="padding: 12px 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); display: flex; align-items: center; gap: 10px; margin: 0; flex-shrink: 0; border-radius: 0;">
-                    <input type="text" id="dmInput" class="chat-input" placeholder="輸入私訊內容..." style="flex: 1; border: 1px solid var(--border-color); background: var(--bg-color);" onkeydown="if(event.key==='Enter') sendDM()">
-                    <button class="chat-send-btn" onclick="sendDM()" style="width: 42px; height: 42px; padding: 0;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
         <div id="fullScreenChatOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 10000; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
                 <div id="fullScreenChatTitle" style="font-weight: 800; font-size: 1.2em; color: var(--primary-color);">💬 戰隊聊天室</div>
@@ -2745,7 +2723,9 @@
 
         function sendReaction(emoji) {
             document.getElementById('chatContextMenuWrapper').style.display = 'none';
-            if (!AppState.chat.contextMsgId || !AppState.sys.currentTeam || !navigator.onLine) return;
+            if (!AppState.chat.contextMsgId || !navigator.onLine) return;
+            if (AppState.chat.activeContext === 'team' && !AppState.sys.currentTeam) return;
+            if (AppState.chat.activeContext === 'dm' && !AppState.chat.dmTarget) return;
             let msg = getChatHistory().find(m => m.id === AppState.chat.contextMsgId);
             if (!msg) return;
             if (!msg.reactions) msg.reactions = {};
@@ -3940,11 +3920,9 @@
                         p.comments.forEach(c => {
                             if(c.replyTo && cMap[c.replyTo]) return; // handled as a reply
                             commentsHtml += renderCommentNode(c, false);
-                            if (c.replies && c.replies.length > 0) {
-                                c.replies.reverse().forEach(r => {
-                                    commentsHtml += renderCommentNode(r, true);
-                                });
-                            }
+                            c.replies.forEach(r => {
+                                commentsHtml += renderCommentNode(r, true);
+                            });
                         });
                         
                         let pAvatar = getUserAvatarHTML(p.author, 40, p.avatar);
@@ -4236,141 +4214,18 @@
         };
 
         window.openDM = function(targetUser) {
+            if(!AppState.dm) AppState.dm = { history: [] };
             document.getElementById('chatInboxOverlay').style.display = 'none';
+            AppState.chat.activeContext = 'dm';
+            AppState.chat.dmTarget = targetUser;
+            document.getElementById('fullScreenChatTitle').innerHTML = '💬 私訊：' + targetUser;
+            document.getElementById('fullScreenChatOverlay').style.display = 'flex';
+            setChatHistory([]);
+            syncChatUI([]);
+            loadTeamChat();
+            
             const panel = document.getElementById('notificationPanel');
             if(panel) panel.style.display = 'none';
-            
-            AppState.chat.dmTarget = targetUser;
-            document.getElementById('dmTargetName').innerText = targetUser;
-            document.getElementById('dmOverlay').style.display = 'flex';
-            document.getElementById('dmMessagesArea').innerHTML = '<div class="loading-box"><div class="spinner"></div><p>載入私訊中...</p></div>';
-            
-            if (!window.dmPollInterval) {
-                window.dmPollInterval = setInterval(() => {
-                    if (document.getElementById('dmOverlay').style.display === 'flex' && AppState.chat.dmTarget) {
-                        loadDM(AppState.chat.dmTarget);
-                    }
-                }, 8000);
-            }
-            loadDM(targetUser);
-        };
-
-        window.closeDM = function() {
-            document.getElementById('dmOverlay').style.display = 'none';
-            AppState.chat.dmTarget = null;
-        };
-
-        window.loadDM = function(targetUser) {
-            apiCall('syncDM', { username: AppState.auth.user, otherUser: targetUser, type: 'get' }).then(res => {
-                if (res.success && document.getElementById('dmOverlay').style.display === 'flex' && AppState.chat.dmTarget === targetUser) {
-                    renderDM(res.messages);
-                }
-            });
-        };
-
-        window.sendDM = function() {
-            const input = document.getElementById('dmInput');
-            const content = input.value.trim();
-            if (!content || !AppState.chat.dmTarget) return;
-            
-            input.value = '';
-            const msgObj = {
-                id: 'msg_' + Date.now(),
-                sender: AppState.auth.user,
-                text: content,
-                time: new Date().toLocaleTimeString('zh-TW', {hour12:false, hour:'2-digit', minute:'2-digit'}),
-                rawTime: new Date().toISOString()
-            };
-            
-            // 樂觀更新 UI
-            const area = document.getElementById('dmMessagesArea');
-            if (area.innerHTML.includes('載入私訊中') || area.innerHTML.includes('尚無對話')) area.innerHTML = '';
-            
-            let htmlStr = `
-                <div class="chat-row me" data-id="${msgObj.id}" data-sender="${msgObj.sender}">
-                    <div class="chat-content">
-                        <div class="chat-meta-row"></div>
-                        <div class="chat-bubble-wrapper">
-                            <div class="chat-bubble">
-                                <div class="msg-text">${msgObj.text}</div>
-                            </div>
-                            <div class="chat-time-col"><span class="chat-time">${msgObj.time}</span></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            area.innerHTML += htmlStr;
-            area.scrollTop = area.scrollHeight;
-            
-            // 寫入後端
-            apiCall('syncDM', { username: AppState.auth.user, otherUser: AppState.chat.dmTarget, type: 'send', payload: msgObj }).catch(e => console.error(e));
-        };
-
-        window.renderDM = function(messages) {
-            const area = document.getElementById('dmMessagesArea');
-            if (!messages || messages.length === 0) {
-                area.innerHTML = '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-weight:bold;">尚無對話紀錄，開始聊天吧！</div>';
-                return;
-            }
-            
-            const isAtBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 50;
-            let htmlStr = ''; let lastDateStr = ''; let lastSender = null;
-            
-            messages.forEach(m => {
-                const dateObj = new Date(m.rawTime || new Date());
-                const msgDateStr = dateObj.toLocaleDateString('zh-TW', {month:'short', day:'numeric'});
-                if (msgDateStr !== lastDateStr) { 
-                    htmlStr += `<div class="chat-date-sep">${msgDateStr}</div>`; 
-                    lastDateStr = msgDateStr; 
-                    lastSender = null; 
-                }
-                
-                if (m.sender === 'System') {
-                    htmlStr += `<div class="msg-bubble system">${m.text}</div>`;
-                    lastSender = null;
-                } else {
-                    const isMe = m.sender === AppState.auth.user;
-                    const isUnsent = m.text === '此訊息已收回';
-                    const isConsecutive = (m.sender === lastSender && !m.replyTo);
-                    lastSender = m.sender;
-
-                    let displayMsgText = m.text;
-                    let isEdited = m.isEdited === true;
-                    if (displayMsgText.endsWith(" (已編輯)")) {
-                        displayMsgText = displayMsgText.replace(" (已編輯)", "");
-                        isEdited = true;
-                    }
-                    
-                    const alignClass = isMe ? 'me' : 'other';
-
-                    htmlStr += `
-                        <div class="chat-row ${alignClass}" data-id="${m.id}" data-sender="${m.sender}">
-                            ${!isMe ? `
-                                <div class="chat-avatar-container">
-                                    ${!isConsecutive ? (m.avatar && m.avatar.includes('http') ? `<img src="${m.avatar}" class="chat-avatar ${(m.plan==='Ultra' || m.level>=20) ? 'ultra-avatar-border' : ''}">` : `<div class="chat-avatar ${(m.plan==='Ultra' || m.level>=20) ? 'ultra-avatar-border' : ''}">${m.avatar || '😀'}</div>`) : ''}
-                                </div>
-                            ` : ''}
-                            
-                            <div class="chat-content">
-                                <div class="chat-meta-row">
-                                    ${!isMe && !isConsecutive && !isUnsent ? `<span class="chat-name">${m.sender}</span>` : ''}
-                                    ${isEdited && !isUnsent ? `<span class="chat-edited">已編輯</span>` : ''}
-                                </div>
-                                
-                                <div class="chat-bubble-wrapper">
-                                    <div class="chat-bubble ${isUnsent ? 'unsent' : ''}">
-                                        <div class="msg-text">${displayMsgText}</div>
-                                    </div>
-                                    <div class="chat-time-col"><span class="chat-time">${m.time}</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-            
-            area.innerHTML = htmlStr;
-            if (isAtBottom) area.scrollTop = area.scrollHeight;
         };
 
         window.openFullScreenChat = function() {
