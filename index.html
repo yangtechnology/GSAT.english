@@ -3895,7 +3895,7 @@
                             let parentIdForReply = isNested ? c.replyTo : cid;
 
                             return `
-                            <div style="display:flex; gap:8px; margin-top:12px; margin-left:${marginLeft};">
+                            <div id="comment_node_${cid}" style="display:flex; gap:8px; margin-top:12px; margin-left:${marginLeft};">
                                 <div style="flex-shrink:0; margin-top:2px;">${cAvatar}</div>
                                 <div style="flex:1; min-width:0;">
                                     <div style="background:var(--bg-color); padding:8px 12px; border-radius:18px; display:inline-block; max-width:100%;">
@@ -4006,8 +4006,7 @@
             const content = input.value.trim();
             if(!content) return;
             
-            input.value = '';
-            input.disabled = true;
+            input.value = ''; // 讓使用者可以馬上繼續打字
             
             const container = document.getElementById('comments_container_' + postId);
             const isReply = content.trim().startsWith('@');
@@ -4023,10 +4022,16 @@
             }
 
             const newComment = document.createElement('div');
+            newComment.id = 'comment_node_temp_id_' + Date.now();
             newComment.style.display = 'flex';
             newComment.style.gap = '8px';
             newComment.style.marginTop = '12px';
             newComment.style.marginLeft = marginLeft;
+            
+            let replyToId = window['replyTarget_' + postId] || null;
+            window['replyTarget_' + postId] = null;
+            let parentIdForReply = isReply ? (replyToId || 'temp') : 'temp';
+
             newComment.innerHTML = `
                 <div style="flex-shrink:0; margin-top:2px;">${myAvatar}</div>
                 <div style="flex:1; min-width:0;">
@@ -4036,12 +4041,21 @@
                     </div>
                     <div style="display:flex; gap:12px; margin-top:4px; margin-left:8px; font-size:0.8em; color:var(--text-muted); font-weight:bold;">
                         <span style="font-weight:normal;">${timeStr}</span>
-                        <span style="cursor:pointer; transition:color 0.2s;" onclick="toggleCommentLike('\${postId}', 'temp_id', this)" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">讚</span>
-                        <span style="cursor:pointer;" onclick="let inp=document.getElementById('comment_input_${postId}'); inp.value='@${AppState.auth.user} '; inp.focus();" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">回覆</span>
+                        <span class="opt-like-btn" style="cursor:pointer; transition:color 0.2s;" onclick="toggleCommentLike('${postId}', 'temp_id', this)" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">讚</span>
+                        <span class="opt-reply-btn" style="cursor:pointer;" onclick="window._setReplyTo('${postId}', '${parentIdForReply}', '${AppState.auth.user}')" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">回覆</span>
                     </div>
                 </div>`;
             
-            container.appendChild(newComment);
+            if (replyToId) {
+                let pNode = document.getElementById('comment_node_' + replyToId);
+                if (pNode && pNode.parentNode === container) {
+                    pNode.insertAdjacentElement('afterend', newComment);
+                } else {
+                    container.appendChild(newComment);
+                }
+            } else {
+                container.appendChild(newComment);
+            }
             
             const countSpan = document.getElementById('comment_count_' + postId);
             if(countSpan) {
@@ -4051,16 +4065,19 @@
                 countSpan.innerText = `留言 (${count})`;
             }
 
-            let replyToId = window['replyTarget_' + postId] || null;
-            window['replyTarget_' + postId] = null;
-            apiCall('commentPost', { postId: postId, username: AppState.auth.user, content: content, replyToId: replyToId, replyToId: replyToId }).then(res => {
-                input.disabled = false;
+            apiCall('commentPost', { postId: postId, username: AppState.auth.user, content: content, replyToId: replyToId }).then(res => {
                 if(!res.success) {
                     Swal.fire('錯誤', res.message, 'error');
                     newComment.remove();
+                } else {
+                    newComment.id = 'comment_node_' + res.commentId;
+                    let realParentForReply = isReply ? (replyToId || res.commentId) : res.commentId;
+                    let likeBtn = newComment.querySelector('.opt-like-btn');
+                    if(likeBtn) likeBtn.setAttribute('onclick', `toggleCommentLike('${postId}', '${res.commentId}', this)`);
+                    let replyBtn = newComment.querySelector('.opt-reply-btn');
+                    if(replyBtn) replyBtn.setAttribute('onclick', `window._setReplyTo('${postId}', '${realParentForReply}', '${AppState.auth.user}')`);
                 }
             }).catch(e => {
-                input.disabled = false;
                 newComment.remove();
             });
         };
