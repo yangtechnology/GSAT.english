@@ -787,8 +787,8 @@
                         document.getElementById('proPrice').innerHTML = '<div style="line-height: 1.2;">NT$ 150 <span style="font-size: 0.4em; color: var(--text-muted);">/月</span></div>';
                         document.getElementById('ultraPrice').innerHTML = '<div style="line-height: 1.2;">NT$ 299 <span style="font-size: 0.4em; color: var(--text-muted);">/月</span></div>';
                     } else if (cycle === 'gsat') {
-                        document.getElementById('proPrice').innerHTML = '<div style="font-size: 0.45em; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px; font-weight: normal;">原價 NT$ 600</div><div style="line-height: 1;">NT$ 499 <span style="font-size: 0.4em; color: var(--text-muted);">/方案</span></div><div style="font-size: 0.45em; color: #f59e0b; margin-top: 8px; font-weight: 700; background: rgba(245, 158, 11, 0.1); display: inline-block; padding: 4px 12px; border-radius: 20px;">🎓 直達考前，平均每天只要 $4.1</div>';
-                        document.getElementById('ultraPrice').innerHTML = '<div style="font-size: 0.45em; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px; font-weight: normal;">原價 NT$ 1,196</div><div style="line-height: 1;">NT$ 990 <span style="font-size: 0.4em; color: var(--text-muted);">/方案</span></div><div style="font-size: 0.45em; color: #f59e0b; margin-top: 8px; font-weight: 700; background: rgba(245, 158, 11, 0.1); display: inline-block; padding: 4px 12px; border-radius: 20px;">🎓 直達考前，平均每天只要 $8.2</div>';
+                        document.getElementById('proPrice').innerHTML = '<div style="font-size: 0.45em; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px; font-weight: normal;">原價 NT$ 600</div><div style="line-height: 1;">NT$ 499 <span style="font-size: 0.4em; color: var(--text-muted);">/方案</span></div><div style="font-size: 0.45em; color: #f59e0b; margin-top: 8px; font-weight: 700; background: rgba(245, 158, 11, 0.1); display: inline-block; padding: 4px 12px; border-radius: 20px;">平均每天只要 $4.0</div>';
+                        document.getElementById('ultraPrice').innerHTML = '<div style="font-size: 0.45em; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px; font-weight: normal;">原價 NT$ 1,196</div><div style="line-height: 1;">NT$ 990 <span style="font-size: 0.4em; color: var(--text-muted);">/方案</span></div><div style="font-size: 0.45em; color: #f59e0b; margin-top: 8px; font-weight: 700; background: rgba(245, 158, 11, 0.1); display: inline-block; padding: 4px 12px; border-radius: 20px;">平均每天只要 $7.9</div>';
                     } else {
                         document.getElementById('proPrice').innerHTML = '<div style="font-size: 0.45em; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px; font-weight: normal;">原價 NT$ 1,800</div><div style="line-height: 1;">NT$ 1,650 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span></div><div style="font-size: 0.45em; color: #10b981; margin-top: 8px; font-weight: 700; background: rgba(16, 185, 129, 0.1); display: inline-block; padding: 4px 12px; border-radius: 20px;">🔥 特價立省 1 個月</div>';
                         document.getElementById('ultraPrice').innerHTML = '<div style="font-size: 0.45em; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px; font-weight: normal;">原價 NT$ 3,588</div><div style="line-height: 1;">NT$ 2,990 <span style="font-size: 0.4em; color: var(--text-muted);">/年</span></div><div style="font-size: 0.45em; color: #10b981; margin-top: 8px; font-weight: 700; background: rgba(16, 185, 129, 0.1); display: inline-block; padding: 4px 12px; border-radius: 20px;">🔥 特價立省 2 個月</div>';
@@ -4064,7 +4064,11 @@
             if (replyToId) {
                 let pNode = document.getElementById('comment_node_' + replyToId);
                 if (pNode && pNode.parentNode === container) {
-                    pNode.insertAdjacentElement('afterend', newComment);
+                    let target = pNode;
+                    while (target.nextElementSibling && target.nextElementSibling.style.marginLeft === '45px') {
+                        target = target.nextElementSibling;
+                    }
+                    target.insertAdjacentElement('afterend', newComment);
                 } else {
                     container.appendChild(newComment);
                 }
