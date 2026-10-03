@@ -4382,69 +4382,6 @@
             loadTeamChat();
         };
         
-        window.closeDM = function() {
-            document.getElementById('fullScreenChatOverlay').style.display = 'none';
-            AppState.chat.activeContext = 'team';
-        };
-
-
-        window.loadDMs = function() {
-    if(!AppState.sys.dmTarget) return;
-    const container = document.getElementById('dmMessagesArea');
-    apiCall('getDMs', { username: AppState.auth.user, otherUser: AppState.sys.dmTarget }).then(res => {
-        if(res.success) {
-            let html = '';
-            res.messages.forEach(m => {
-                const isMe = m.sender === AppState.auth.user;
-                const timeStr = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                if (isMe) {
-                    html += `
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
-                        <div style="display: flex; align-items: flex-end; gap: 8px; flex-direction: row-reverse;">
-                            
-                            <div style="background: var(--primary-color); color: white; padding: 10px 15px; border-radius: 18px; border-bottom-right-radius: 4px; max-width: 75%; font-size: 0.95em; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-break: break-word;">
-                                ${m.content}
-                            </div>
-                            <span style="font-size: 0.7em; color: var(--text-muted); margin-bottom: 2px;">${timeStr}</span>
-                        </div>
-                    </div>`;
-                } else {
-                    html += `
-                    <div style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 5px;">
-                        <div style="display: flex; align-items: flex-end; gap: 8px;">
-                            <div style="flex-shrink:0;">${getUserAvatarHTML(m.sender, 28)}</div>
-                            <div style="background: var(--card-bg); color: var(--text-main); padding: 10px 15px; border-radius: 18px; border-bottom-left-radius: 4px; max-width: 75%; font-size: 0.95em; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid var(--border-color); word-break: break-word;">
-                                ${m.content}
-                            </div>
-                            <span style="font-size: 0.7em; color: var(--text-muted); margin-bottom: 2px;">${timeStr}</span>
-                        </div>
-                    </div>`;
-                }
-            });
-            container.innerHTML = html;
-            container.scrollTop = container.scrollHeight;
-        }
-    });
-};
-
-window.sendDM = function() {
-            const input = document.getElementById('dmInput');
-            const content = input.value.trim();
-            if(!content || !AppState.sys.dmTarget) return;
-            
-            // Optimistic UI
-            const container = document.getElementById('dmMessagesArea');
-            container.innerHTML += `<div style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;"><div style="display: flex; align-items: flex-end; gap: 8px; flex-direction: row-reverse;"><div style="background: var(--primary-color); color: white; padding: 10px 15px; border-radius: 18px; border-bottom-right-radius: 4px; max-width: 75%; font-size: 0.95em; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-break: break-word; opacity: 0.7;">${content}</div></div></div>`;
-            container.scrollTop = container.scrollHeight;
-            input.value = '';
-
-            apiCall('sendDM', { username: AppState.auth.user, otherUser: AppState.sys.dmTarget, content: content }).then(res => {
-                if(!res.success) Swal.fire('錯誤', res.message, 'error');
-                loadDMs();
-            });
-        };
-
         window.manageAdmin = function(targetUser, action) {
             Swal.fire({title: action==='promote'?'確定升為副管理員？':'確定解除副管理員？', icon:'warning', showCancelButton:true}).then(r => {
                 if(r.isConfirmed) {
