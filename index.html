@@ -1994,9 +1994,14 @@
                     const res = await apiCall('handleLineCallback', { code: lineCode, state: lineState || 'login', username: savedUser });
                     if (res.success) {
                         if (lineState === 'bind') {
-                            Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天都會收到專屬測驗與打卡提醒喔！', 'success').then(() => {
-                                window.location.reload();
-                            });
+                            const bindRes = await apiCall('bindLine', { username: savedUser, lineUid: res.lineUid });
+                            if (bindRes.success) {
+                                Swal.fire('🎉 綁定成功', '您已成功綁定 LINE！未來每天都會收到專屬測驗與打卡提醒喔！', 'success').then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire('綁定失敗', bindRes.message, 'error').then(() => window.location.reload());
+                            }
                         } else {
                             // Login success
                             AppState.auth.user = res.user;
