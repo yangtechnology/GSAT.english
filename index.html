@@ -4,14 +4,21 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VocabMaster 專業版 | 學測英文</title>
+    <title>Vocab Nexus | 學測英文單字神器 - Yang Technology</title>
+    <meta name="description" content="Vocab Nexus 是由 Yang Technology 團隊為台灣高中生量身打造的學測英文單字系統。首創戰隊對戰、AI 導師解惑、智慧複習機制，讓背單字變成一場熱血的遊戲，輕鬆衝刺 GSAT 學測英文滿級分！">
+    <meta name="keywords" content="Vocab Nexus, VocabNexus, Yang Technology, 學測英文, 高中英文, 單字App, 背單字, 英文單字, 戰隊學習, AI導師, 英文滿級分, 升學, GSAT">
+    
+    <meta property="og:title" content="Vocab Nexus | 學測英文單字神器 - Yang Technology">
+    <meta property="og:description" content="首創戰隊對戰與 AI 智能導師，專為台灣高中生打造的學測單字系統，輕鬆衝刺滿級分！">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Vocab Nexus">
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="VocabMaster">
+    <meta name="apple-mobile-web-app-title" content="Vocab Nexus">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -557,7 +564,7 @@
 
     <div id="splashScreen">
         <div class="splash-content">
-            <div class="splash-logo">VocabMaster</div>
+            <div class="splash-logo">Vocab Nexus</div>
             <div class="splash-subtitle">Premium Edition ✨</div>
             <div class="splash-laser-line"></div>
         </div>
@@ -570,7 +577,7 @@
     
 
     <nav class="navbar" id="topNavbar" style="display: none;">
-        <div class="nav-brand">VocabMaster</div>
+        <div class="nav-brand">Vocab Nexus</div>
         
         <div class="season-nav-container" id="navSeasonGroup">
             <div id="gsatCountdown" class="season-nav-banner" style="display:none;">
@@ -1204,7 +1211,7 @@
                 <div class="vc-pattern"></div>
                 <div class="vc-content">
                     <div class="vc-header">
-                        <div class="vc-logo">📖 VocabMaster</div>
+                        <div class="vc-logo">📖 Vocab Nexus</div>
                         <div class="vc-tier" id="vcTierDisplay">BASIC</div>
                     </div>
                     <div class="vc-chip"></div>
@@ -1336,7 +1343,7 @@
     <script>
         (function initPWA() {
             const appIconUrl = "https://cdn-icons-png.flaticon.com/512/3135/3135679.png"; 
-            const manifestJSON = { "name": "VocabMaster Premium", "short_name": "VocabMaster", "start_url": window.location.href.split('?')[0], "display": "standalone", "orientation": "any", "theme_color": "#6366f1", "background_color": "#f8fafc", "icons": [ { "src": appIconUrl, "sizes": "192x192", "type": "image/png" }, { "src": appIconUrl, "sizes": "512x512", "type": "image/png" } ] };
+            const manifestJSON = { "name": "Vocab Nexus", "short_name": "Vocab Nexus", "start_url": window.location.href.split('?')[0], "display": "standalone", "orientation": "any", "theme_color": "#6366f1", "background_color": "#f8fafc", "icons": [ { "src": appIconUrl, "sizes": "192x192", "type": "image/png" }, { "src": appIconUrl, "sizes": "512x512", "type": "image/png" } ] };
             const manifestUrl = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestJSON));
             
             // Remove existing static manifest link to prevent conflicts
@@ -2162,7 +2169,7 @@
         function showGradeUpdatePopup() {
             Swal.fire({
                 title: '🚀 系統大升級：賽季天梯啟動！',
-                html: `<div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">各位 VocabMaster 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴我們你<b>現在的年級</b>：</div><select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;"><option value="0">高三 (Senior 3)</option><option value="1">高二 (Senior 2)</option><option value="2">高一 (Senior 1)</option><option value="3">國三 (Junior 3)</option><option value="4">國二 (Junior 2)</option><option value="5">國一 (Junior 1)</option><option value="-1">已畢業 (隱藏排行榜)</option></select>`,
+                html: `<div style="text-align:left; margin-bottom:15px; font-size:0.95em; color:var(--text-muted); line-height:1.5;">各位 Vocab Nexus 的老玩家們！我們推出了全新的<b>「學測賽季制」</b>與<b>「同屆排行榜」</b>！<br><br>為了讓你有更公平的競爭環境，請告訴我們你<b>現在的年級</b>：</div><select id="swal-upgrade-grade" class="swal2-select" style="width: 100%; max-width: 100%; margin:0;"><option value="0">高三 (Senior 3)</option><option value="1">高二 (Senior 2)</option><option value="2">高一 (Senior 1)</option><option value="3">國三 (Junior 3)</option><option value="4">國二 (Junior 2)</option><option value="5">國一 (Junior 1)</option><option value="-1">已畢業 (隱藏排行榜)</option></select>`,
                 confirmButtonText: '進入新賽季！', allowOutsideClick: false, allowEscapeKey: false,
                 preConfirm: () => { const g = document.getElementById('swal-upgrade-grade').value; if (!g) Swal.showValidationMessage('請選擇年級！'); return g; }
             }).then((result) => {
