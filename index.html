@@ -1292,7 +1292,7 @@
                             }
                         });
                     } else {
-                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://yangtechnology.github.io/GSAT.english/&state=bind&scope=profile%20openid`;
+                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://vocab.yangtechnology.com/&state=bind&scope=profile%20openid`;
                         window.location.href = lineAuthUrl;
                     }
                 }
@@ -1383,7 +1383,7 @@
             quiz: { data: [], currentIndex: 0, answers: {}, total: 0, isReviewMode: false, timer: null, isSubmitting: false, spellTemplate: [] },
             exam: { data: null, timer: null, endTime: 0, answers: {} },
             review: { cards: [], currentIndex: 0, isFlashcardMode: true },
-            vocab: { level: 0, list: [], letterList: [], cardIndex: 0, favorites: new Set(), cache: [], viewed: new Set() },
+            vocab: { level: 0, list: [], letterList: [], cardIndex: 0, favorites: new Set(), cache: [], viewed: new Set(), viewedToday: new Set() },
             sys: { leaderboard: [], teamLeaderboard: [], isDarkMode: localStorage.getItem('darkMode') === 'true', currentTeam: null },
             chat: { history: [], replyingTo: null, contextMsgId: null, isSyncing: false }
         };
@@ -1395,13 +1395,17 @@
                 const userForSync = AppState.auth.user || localStorage.getItem('user') || 'Guest';
                 localStorage.setItem('vocab_viewed_' + userForSync, JSON.stringify({ date: new Date().toDateString(), words: [...AppState.vocab.viewed] }));
                 
-                if (userForSync !== 'Guest' && userForSync !== '訪客' && userForSync !== 'LINE_User') {
-                    if (window.vocabSyncTimer) clearTimeout(window.vocabSyncTimer);
-                    window.vocabSyncTimer = setTimeout(() => {
+                if (userForSync !== 'Guest' && userForSync !== '訪客' && userForSync !== '') {
+                    clearTimeout(window.syncProgressTimeout);
+                    window.syncProgressTimeout = setTimeout(() => {
                         apiCall('syncVocabProgress', { username: userForSync, viewedWords: [...AppState.vocab.viewed] });
                     }, 3000);
                 }
             }
+            // Always track for today's custom quiz
+            AppState.vocab.viewedToday.add(word);
+            const userForSyncToday = AppState.auth.user || localStorage.getItem('user') || 'Guest';
+            localStorage.setItem('vocab_viewed_today_' + userForSyncToday, JSON.stringify({ date: new Date().toDateString(), words: [...AppState.vocab.viewedToday] }));
         }
 
         const QuotaManager = {
@@ -2031,6 +2035,12 @@
                 } else {
                     localStorage.removeItem('vocab_viewed_' + userForSync);
                 }
+                const parsedTodayViewed = JSON.parse(localStorage.getItem('vocab_viewed_today_' + userForSync) || 'null');
+                if (parsedTodayViewed && parsedTodayViewed.date === new Date().toDateString()) {
+                    (parsedTodayViewed.words || []).forEach(w => AppState.vocab.viewedToday.add(w));
+                } else {
+                    localStorage.removeItem('vocab_viewed_today_' + userForSync);
+                }
             } catch(e) {}
 
             const promises = []; 
@@ -2287,7 +2297,7 @@
                     btnLineBind.style.background = '#06C755';
                     btnLineBind.style.color = '#fff';
                     btnLineBind.onclick = () => {
-                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://yangtechnology.github.io/GSAT.english/&state=bind&scope=profile%20openid`;
+                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011647494&redirect_uri=https://vocab.yangtechnology.com/&state=bind&scope=profile%20openid`;
                         window.location.href = lineAuthUrl;
                     };
                 }
@@ -3164,7 +3174,7 @@
             }).then((res) => {
                 if (res.isConfirmed) {
                     const clientId = '2011647494';
-                    const redirectUri = encodeURIComponent('https://yangtechnology.github.io/GSAT.english/');
+                    const redirectUri = encodeURIComponent('https://vocab.yangtechnology.com/');
                     const state = 'login';
                     
                     const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid`;
@@ -3340,7 +3350,7 @@
                 
                 // 若選擇「今日看過的單字」，且看過的數量小於選擇的題數，可以跳出提示
                 if (rangeType === 'today') {
-                    const parsedToday = JSON.parse(localStorage.getItem('vocab_viewed_' + AppState.auth.user) || 'null');
+                    const parsedToday = JSON.parse(localStorage.getItem('vocab_viewed_today_' + AppState.auth.user) || 'null');
                     const viewedToday = (parsedToday && parsedToday.date === new Date().toDateString()) ? (parsedToday.words || []) : [];
                     if (viewedToday.length === 0) {
                         return Swal.fire('沒有紀錄', '您今天還沒有看過任何單字喔！請先去單字書背單字。', 'warning');
@@ -3356,7 +3366,7 @@
                     customRange: rangeType,
                     rangeStart: rangeStart,
                     rangeEnd: rangeEnd,
-                    viewedWords: Array.from(AppState.vocab.viewed) // 傳送前端紀錄的已看過單字給後端
+                    viewedWords: Array.from(AppState.vocab.viewedToday) // 傳送前端今日看過的單字給後端
                 }).then(res => processQuizData(res)); 
             } 
         }
