@@ -1334,7 +1334,7 @@
                             }
                         });
                     } else {
-                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011878497&redirect_uri=https://yangtechnology.github.io/GSAT.english/&state=bind&scope=profile%20openid`;
+                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011878497&redirect_uri=https://vocab.yangtechnology.com/&state=bind&scope=profile%20openid`;
                         window.location.href = lineAuthUrl;
                     }
                 }
@@ -2330,7 +2330,7 @@
                     btnLineBind.style.background = '#06C755';
                     btnLineBind.style.color = '#fff';
                     btnLineBind.onclick = () => {
-                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011878497&redirect_uri=https://yangtechnology.github.io/GSAT.english/&state=bind&scope=profile%20openid`;
+                        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2011878497&redirect_uri=https://vocab.yangtechnology.com/&state=bind&scope=profile%20openid`;
                         window.location.href = lineAuthUrl;
                     };
                 }
@@ -3201,8 +3201,8 @@
                 confirmButtonColor: '#06C755'
             }).then((res) => {
                 if (res.isConfirmed) {
-                    const clientId = '2011647494';
-                    const redirectUri = encodeURIComponent('https://yangtechnology.github.io/GSAT.english/');
+                    const clientId = '2011878497';
+                    const redirectUri = encodeURIComponent('https://vocab.yangtechnology.com/');
                     const state = 'login';
                     
                     const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid`;
