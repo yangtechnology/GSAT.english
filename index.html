@@ -890,7 +890,7 @@
         <div id="setupView" class="view-section view-container">
             <div class="title-badge-wrapper"><h2>準備開始挑戰</h2></div>
             <p class="subtitle">模式越難，獲得的經驗值越豐富！</p>
-            <div class="input-group"><label>測驗模式 🕹️</label><select id="quizModeSelect"><option value="1">1. 經典模式 (英中互譯混出)</option><option value="2">2. 聽力模式 (+ 純聽發音混出)</option><option value="3">3. 魔王挑戰 (+ 拼寫輸入混出)</option></select></div>
+            <div class="input-group"><label>測驗模式 🕹️</label><select id="quizModeSelect" onchange="if(this.value==='3' && QuotaManager.getPlan()==='Basic'){ this.value='1'; QuotaManager.showUpgradePrompt('魔王挑戰 (拼寫輸入)', '透過英聽與填空，深度強化記憶！'); }"><option value="1">1. 經典模式 (英中互譯混出)</option><option value="2">2. 聽力模式 (+ 純聽發音混出)</option><option value="3" id="modeSpelling">3. 魔王挑戰 (+ 拼寫輸入混出)</option></select></div>
             
             <div class="input-group" style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px;">
                 <label style="display:flex; justify-content:space-between; align-items:center;">
@@ -1425,7 +1425,7 @@
             quiz: { data: [], currentIndex: 0, answers: {}, total: 0, isReviewMode: false, timer: null, isSubmitting: false, spellTemplate: [] },
             exam: { data: null, timer: null, endTime: 0, answers: {} },
             review: { cards: [], currentIndex: 0, isFlashcardMode: true },
-            vocab: { level: 0, list: [], letterList: [], cardIndex: 0, favorites: new Set(), cache: [], viewed: new Set() },
+            vocab: { level: 0, list: [], letterList: [], cardIndex: 0, favorites: new Set(), cache: [], viewed: new Set(), viewedToday: new Set() },
             sys: { leaderboard: [], teamLeaderboard: [], isDarkMode: localStorage.getItem('darkMode') === 'true', currentTeam: null },
             chat: { history: [], replyingTo: null, contextMsgId: null, isSyncing: false }
         };
@@ -1538,25 +1538,7 @@
                             }
                         });
                         
-                        const testCode = prompt("即將前往綠界付款。 如果您是開發者測試，請輸入測試代碼 (一般用戶請留白)：");
-                        if (testCode === "0712") {
-                            Swal.close();
-                            Swal.fire({title: '處理中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
-                            apiCall('updateUserPlan', { username: currentUser, plan: plan, cycle: targetCycle }).then(() => {
-                                Swal.close();
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: '【測試模式】升級成功！',
-                                    text: `已為您升級至 ${plan} ${targetCycle}，感謝您的支持！`,
-                                    confirmButtonColor: '#3b82f6'
-                                }).then(() => {
-                                    localStorage.setItem('userPlan', plan);
-                                    localStorage.setItem('userCycle', targetCycle);
-                                    window.location.reload();
-                                });
-                            });
-                            return;
-                        }
+                        
                         
                         // 這裡會觸發打去 code.gs，取得真實的 ECPay 參數
                         apiCall('createOrder', { 
@@ -1713,16 +1695,12 @@
             }
 
             // Quiz Setup View Limits (Spelling Mode)
-            let spellingRadio = document.getElementById('modeSpelling');
-            if(spellingRadio) {
+            let spellingOpt = document.getElementById('modeSpelling');
+            if(spellingOpt) {
                 if(isBasic) {
-                    spellingRadio.disabled = true;
-                    spellingRadio.parentElement.style.opacity = '0.6';
-                    spellingRadio.parentElement.onclick = (e) => { e.preventDefault(); QuotaManager.showUpgradePrompt('魔王挑戰 (拼寫輸入)', '透過英聽與填空，深度強化記憶！'); };
+                    spellingOpt.textContent = '🔒 3. 魔王挑戰 (+ 拼寫輸入混出)';
                 } else {
-                    spellingRadio.disabled = false;
-                    spellingRadio.parentElement.style.opacity = '1';
-                    spellingRadio.parentElement.onclick = null;
+                    spellingOpt.textContent = '3. 魔王挑戰 (+ 拼寫輸入混出)';
                 }
             }
 
@@ -1957,13 +1935,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.openFullScreenChat = function() {
-            document.getElementById('fullScreenChatOverlay').style.display = 'flex';
-            setTimeout(() => {
-                const board = document.getElementById('chatMessageBoard');
-                if(board) board.scrollTop = board.scrollHeight;
-            }, 50);
-        };
+        
 
         window.closeFullScreenChat = function() {
             AppState.chat.activeContext = 'team';
@@ -2429,9 +2401,8 @@
                 
                 if (todayStr !== lastPromptDate) {
                     localStorage.setItem('lastReviewPromptDate_' + AppState.auth.user, todayStr);
-                    let res = prefetchMissingPromise ? await prefetchMissingPromise : null;
-                    if (res && res.success && res.questions && res.questions.length > 0) {
-                        const dueCount = res.questions.filter(q => q.isDue && q.stage <= 1).length;
+                    if (AppState.review.cards && AppState.review.cards.length > 0) {
+                        const dueCount = AppState.review.cards.filter(q => q.isDue && q.stage <= 1).length;
                         if (dueCount > 0) {
                             let swalRes = await Swal.fire({
                                 title: '🌟 每日複習任務',
